@@ -626,7 +626,7 @@
         <option value="kalshi-yes">Kalshi YES</option>
         <option value="kalshi-no">Kalshi NO</option>
       </select>
-      <input class="sportsbook-input compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)">
+      <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)">
       <div class="odds-wrapper">
         <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
         <button class="sign-toggle" data-sign="+">+</button>
@@ -1049,7 +1049,7 @@
     function bindRow(el, isGhost = false) {
       const side = el.querySelector('.side');
       const typeSelect = el.querySelector('.type-select');
-      const sportsbook = el.querySelector('.sportsbook-input');
+      const sportsbook = el.querySelector('.sportsbook');
       const oddsInput = el.querySelector('.odds');
       const stake = el.querySelector('.stake');
       const payout = el.querySelector('.payout');
@@ -1215,7 +1215,7 @@
           // Copy values from current row
           const newSide = newRowEl.querySelector('.side');
           const newTypeSelect = newRowEl.querySelector('.type-select');
-          const newSportsbook = newRowEl.querySelector('.sportsbook-input');
+          const newSportsbook = newRowEl.querySelector('.sportsbook');
           const newOdds = newRowEl.querySelector('.odds');
           const newStake = newRowEl.querySelector('.stake');
           const newPayout = newRowEl.querySelector('.payout');
@@ -1649,7 +1649,7 @@
       rows.forEach(r => {
         const el = r.el;
         if (el) {
-          const bookInput = el.querySelector('.sportsbook-input');
+          const bookInput = el.querySelector('.sportsbook');
           const book = bookInput ? bookInput.value.trim() : '';
           if (book) books.add(book.toLowerCase());
         }
