@@ -137,3 +137,10 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Playwright test results
+test-results/
+playwright-report/
+
+# Package lock file
+package-lock.json
