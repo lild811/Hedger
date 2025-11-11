@@ -31,10 +31,10 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ -moz-appearance:textfield }
 
-    /* Wagers table - now includes sportsbook column */
+    /* Wagers table - now includes Type column (8 columns) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(44px,56px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px}
-    .row{grid-template-columns:minmax(44px,56px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px;margin:4px 0}
+    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px}
+    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px;margin:4px 0}
     
     /* Ghost row special layout */
     .ghost-row{ 
@@ -253,17 +253,26 @@
     .val{font-variant-numeric:tabular-nums}
     .copy,.add{ width:24px; height:24px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; background:#20242f; border:1px solid #2a2e37; color:#c7d0e0; cursor:pointer; font-size:12px; line-height:1 }
     
+    /* Type selector for per-row Kalshi/Normal */
+    .type-select{
+      width:100%;
+      padding:4px 6px;
+      font-size:11px;
+      background:#0f1116;
+      color:var(--ink);
+      border:1px solid var(--grid);
+      border-radius:6px;
+      cursor:pointer;
+    }
+    .type-select option{background:#0f1116;color:var(--ink)}
+    
     /* Settings and controls */
     .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
     .toggle-wrapper{display:flex;align-items:center;gap:6px}
-    .toggle{position:relative;width:36px;height:20px;background:#2a2e37;border-radius:10px;cursor:pointer;transition:background .2s}
-    .toggle.active{background:var(--accent)}
-    .toggle-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s}
-    .toggle.active .toggle-knob{left:18px}
     .tooltip{position:relative;cursor:help}
     .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:nowrap;border-radius:4px;margin-bottom:4px;z-index:100}
     
-    /* Preset buttons */
+    /* Preset buttons - text labels instead of emojis */
     .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin:8px 0}
     .preset-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
     .preset-btn:hover{background:#2a2e37;border-color:var(--accent)}
@@ -273,17 +282,11 @@
 <body>
   <div class="wrap">
     <section>
-      <!-- Settings Bar -->
+      <!-- Settings Bar - Removed Kalshi toggle, per-row now -->
       <div class="settings-bar">
-        <div class="toggle-wrapper">
-          <span class="small">Kalshi Mode</span>
-          <div class="toggle" id="kalshiToggle" data-tooltip="Enable YES/NO pricing with Kalshi fees (1% open + 2% settle)">
-            <div class="toggle-knob"></div>
-          </div>
-        </div>
-        <div style="flex:1"></div>
         <button class="btn secondary" id="undoBtn" disabled title="Undo (Ctrl+Z)">↶</button>
         <button class="btn secondary" id="redoBtn" disabled title="Redo (Ctrl+Y)">↷</button>
+        <div style="flex:1"></div>
         <button class="btn secondary" id="exportCSV">Export CSV</button>
         <button class="btn secondary" id="importCSV">Import CSV</button>
         <input type="file" id="csvFileInput" accept=".csv" style="display:none">
@@ -300,6 +303,7 @@
       <div class="card">
         <div class="rows-head small">
           <div>Side</div>
+          <div>Type</div>
           <div>Sportsbook</div>
           <div>Odds</div>
           <div>Stake</div>
@@ -381,16 +385,16 @@
       <div class="card">
         <h1 style="font-size:16px;margin:0 0 8px">Cover & Equalize</h1>
         
-        <!-- Presets -->
+        <!-- Presets - Text labels instead of emojis -->
         <div class="preset-grid">
           <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make both outcomes equal">
-            <div>⚖️ Equalize</div>
+            <div>Equalize</div>
           </button>
           <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A=0: Bet on A to break even if A wins">
-            <div>🛡️ Cover A</div>
+            <div>Cover A</div>
           </button>
           <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B=0: Bet on B to break even if B wins">
-            <div>🛡️ Cover B</div>
+            <div>Cover B</div>
           </button>
         </div>
         
@@ -431,6 +435,11 @@
   <template id="rowT">
     <div class="row" data-row>
       <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
+      <select class="type-select" title="Row type: Normal rejects Kalshi formats, Kalshi YES/NO uses Kalshi fees">
+        <option value="normal">Normal</option>
+        <option value="kalshi-yes">Kalshi YES</option>
+        <option value="kalshi-no">Kalshi NO</option>
+      </select>
       <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)">
       <div class="odds-wrapper">
         <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
@@ -457,6 +466,9 @@
       </div>
       <div class="row">
         <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
+        <select class="type-select" disabled>
+          <option value="normal">Normal</option>
+        </select>
         <input class="sportsbook compact" type="text" placeholder="Book" readonly>
         <div class="odds-wrapper">
           <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
@@ -466,7 +478,10 @@
         <input class="stake right" type="number" step="0.01" placeholder="0.00" readonly>
         <input class="payout right" type="number" step="0.01" placeholder="auto" readonly>
         <div class="profit">$0.00</div>
-        <button class="commit" title="Commit to wagers">+</button>
+        <div style="display:flex;gap:2px">
+          <button class="commit" title="Commit to wagers">✓</button>
+          <button class="dismiss" title="Dismiss" style="width:18px;height:18px;padding:0;background:#ff7d7d;border:1px solid#ff7d7d;color:#fff;border-radius:4px;cursor:pointer;font-size:10px">✕</button>
+        </div>
       </div>
       <div class="ghost-meta"></div>
     </div>
@@ -474,8 +489,7 @@
 
   <script>
   (function(){
-    // Application state
-    let kalshiMode = false; // Kalshi mode toggle (default OFF)
+    // Application state (removed kalshiMode - now per-row)
     let historyStack = [];
     let historyIndex = -1;
     const maxHistory = 50;
@@ -692,25 +706,25 @@
       return { american: result, isKalshi };
     }
 
-    // Error checking function
-    function getOddsError(raw, signToggleValue = "+") {
+    // Error checking function - now accepts rowType parameter
+    function getOddsError(raw, signToggleValue = "+", rowType = "normal") {
       if(!raw || raw.trim() === '') return null;
       
       const t = String(raw).trim().toLowerCase();
       
-      // Check for Kalshi format when Kalshi mode is OFF
-      if(!kalshiMode) {
+      // Check for Kalshi format when row type is Normal
+      if(rowType === "normal") {
         if(t.endsWith('c') || t.endsWith('k')) {
-          return "Kalshi format requires Kalshi mode ON";
+          return "Kalshi format not allowed for Normal rows";
         }
         if(t.includes('.') && parseFloat(t) < 1 && parseFloat(t) > 0) {
-          return "0.xx odds require Kalshi mode ON";
+          return "0.xx odds not allowed for Normal rows";
         }
         // Check for plain integers 1-99 (Kalshi cents)
         if(/^\d{1,2}$/.test(t)) {
           const num = parseInt(t);
           if(num >= 1 && num <= 99) {
-            return "Kalshi cents (1-99) require Kalshi mode ON";
+            return "Kalshi cents (1-99) not allowed for Normal rows";
           }
         }
       }
@@ -847,6 +861,7 @@
     // Bind row interactions
     function bindRow(el, isGhost = false) {
       const side = el.querySelector('.side');
+      const typeSelect = el.querySelector('.type-select');
       const sportsbook = el.querySelector('.sportsbook');
       const oddsInput = el.querySelector('.odds');
       const stake = el.querySelector('.stake');
@@ -856,6 +871,7 @@
       const errorText = el.querySelector('.error-text');
       const clearBtn = el.querySelector('.clear');
       const commitBtn = el.querySelector('.commit');
+      const dismissBtn = el.querySelector('.dismiss');
       const rowEl = el; // Store reference to row element
 
       // Sign toggle interaction
@@ -888,7 +904,8 @@
       // Handle odds input
       oddsInput.addEventListener('input', () => {
         const signValue = signToggle ? signToggle.dataset.sign : "+";
-        const error = getOddsError(oddsInput.value, signValue);
+        const rowType = typeSelect ? typeSelect.value : "normal";
+        const error = getOddsError(oddsInput.value, signValue, rowType);
         
         // Reset opacity if it was showing calculated odds
         if(oddsInput.style.opacity === '0.7') {
@@ -1006,6 +1023,33 @@
           saveCurrentState();
         });
       }
+      
+      if(dismissBtn && isGhost) {
+        dismissBtn.addEventListener('click', () => {
+          removeGhostRow();
+        });
+      }
+
+      // Type selector on change
+      if(typeSelect && !isGhost) {
+        typeSelect.addEventListener('change', () => {
+          // Re-validate odds with new type
+          const signValue = signToggle ? signToggle.dataset.sign : "+";
+          const error = getOddsError(oddsInput.value, signValue, typeSelect.value);
+          if(errorText) {
+            if(error) {
+              errorText.textContent = error;
+              errorText.classList.add('show');
+              oddsInput.classList.add('err');
+            } else {
+              errorText.classList.remove('show');
+              oddsInput.classList.remove('err');
+            }
+          }
+          recalcDebounced();
+          debouncedSave();
+        });
+      }
 
       // Update stake on change
       stake.addEventListener('input', () => {
@@ -1027,7 +1071,7 @@
       }
 
       // Store refs
-      el._refs = {side, sportsbook, odds: oddsInput, stake, payout, profit, signToggle};
+      el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle};
     }
 
     // Add regular row
@@ -1274,10 +1318,11 @@
     function readRows() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach((el, idx) => {
-        const {side, sportsbook, odds, stake, payout, profit, signToggle} = el._refs;
+        const {side, typeSelect, sportsbook, odds, stake, payout, profit, signToggle} = el._refs;
         const s = side.value === '2' ? 2 : 1;
         const signValue = signToggle ? signToggle.dataset.sign : "+";
         const book = sportsbook ? sportsbook.value : '';
+        const rowType = typeSelect ? typeSelect.value : 'normal';
         
         // Check if user manually entered odds
         const userEnteredOdds = odds.value.trim() !== '' && odds.style.opacity !== '0.7';
@@ -1291,8 +1336,10 @@
         
         if(od !== null && st > 0) {
           // Odds and stake entered
-          if(isKalshi && kalshiMode) {
-            // Use Kalshi payout engine only if Kalshi mode is ON
+          const useKalshiFees = (rowType === 'kalshi-yes' || rowType === 'kalshi-no') && isKalshi;
+          
+          if(useKalshiFees) {
+            // Use Kalshi payout engine for Kalshi rows with Kalshi format odds
             const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
             const {netPayout, profit: kalshiProfit} = kalshiLedger(st, price);
             pf = kalshiProfit;
@@ -1613,26 +1660,14 @@
       document.getElementById(id).addEventListener('input', recalcDebounced);
     });
 
-    // Kalshi Mode Toggle
-    document.getElementById('kalshiToggle').addEventListener('click', () => {
-      const toggle = document.getElementById('kalshiToggle');
-      kalshiMode = !kalshiMode;
-      toggle.classList.toggle('active', kalshiMode);
-      
-      // When Kalshi mode changes, recalculate all rows
-      recalc();
-      
-      // Save state
-      saveCurrentState();
-    });
-
     // Undo/Redo functionality
     function saveCurrentState() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, sportsbook, odds, stake, payout} = el._refs;
+        const {side, typeSelect, sportsbook, odds, stake, payout} = el._refs;
         rows.push({
           side: side.value,
+          type: typeSelect ? typeSelect.value : 'normal',
           sportsbook: sportsbook ? sportsbook.value : '',
           odds: odds.value,
           stake: stake.value,
@@ -1642,7 +1677,6 @@
       
       const state = {
         rows,
-        kalshiMode,
         lineA: document.getElementById('useA').value,
         lineB: document.getElementById('useB').value,
         labelA: document.getElementById('labelA').value,
@@ -1684,15 +1718,14 @@
       state.rows.forEach(rowData => {
         const r = addRow();
         r._refs.side.value = rowData.side;
-        if(r._refs.sportsbook) r._refs.sportsbook.value = rowData.sportsbook;
+        if(r._refs.typeSelect) r._refs.typeSelect.value = rowData.type || 'normal';
+        if(r._refs.sportsbook) r._refs.sportsbook.value = rowData.sportsbook || '';
         r._refs.odds.value = rowData.odds;
         r._refs.stake.value = rowData.stake;
         r._refs.payout.value = rowData.payout;
       });
       
       // Restore other fields
-      kalshiMode = state.kalshiMode || false;
-      document.getElementById('kalshiToggle').classList.toggle('active', kalshiMode);
       document.getElementById('useA').value = state.lineA || '';
       document.getElementById('useB').value = state.lineB || '';
       document.getElementById('labelA').value = state.labelA || '';
@@ -1723,10 +1756,11 @@
     document.getElementById('exportCSV').addEventListener('click', () => {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, sportsbook, odds, stake, payout} = el._refs;
+        const {side, typeSelect, sportsbook, odds, stake, payout} = el._refs;
         if(side.value) {
           rows.push({
             side: side.value,
+            type: typeSelect ? typeSelect.value : 'normal',
             sportsbook: sportsbook ? sportsbook.value : '',
             oddsType: 'american', // simplified
             oddsValue: odds.value,
@@ -1737,7 +1771,7 @@
         }
       });
       
-      const headers = ['side', 'sportsbook', 'oddsType', 'oddsValue', 'stake', 'payout', 'feeMarker'];
+      const headers = ['side', 'type', 'sportsbook', 'oddsType', 'oddsValue', 'stake', 'payout', 'feeMarker'];
       const csvRows = [headers.join(',')];
       rows.forEach(row => {
         const values = headers.map(h => `"${row[h] || ''}"`);
@@ -1778,13 +1812,14 @@
             const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
             const clean = values.map(v => v.replace(/^"|"$/g, '').trim());
             
-            if(clean.length >= 4) {
+            if(clean.length >= 5) {
               const r = addRow();
               r._refs.side.value = clean[0];
-              if(r._refs.sportsbook) r._refs.sportsbook.value = clean[1];
-              r._refs.odds.value = clean[3];
-              r._refs.stake.value = clean[4];
-              if(clean[5]) r._refs.payout.value = clean[5];
+              if(r._refs.typeSelect) r._refs.typeSelect.value = clean[1] || 'normal';
+              if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
+              r._refs.odds.value = clean[4]; // oddsValue
+              r._refs.stake.value = clean[5];
+              if(clean[6]) r._refs.payout.value = clean[6];
             }
           }
           

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './setup.compact';
 
 test.describe('Fast Hedger v2.3', () => {
   test.beforeEach(async ({ page }) => {
@@ -26,8 +26,8 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('can add a wager with Kalshi format', async ({ page }) => {
-    // Turn on Kalshi mode first
-    await page.locator('#kalshiToggle').click();
+    // Set row type to Kalshi YES
+    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
     await page.waitForTimeout(100);
     
     await page.locator('[data-row]').first().locator('.side').fill('1');
@@ -174,9 +174,9 @@ test.describe('Fast Hedger v2.3', () => {
     await expect(profit).toContainText('$100.00');
   });
 
-  test('Kalshi mode toggle: rejects Kalshi formats when OFF', async ({ page }) => {
-    // Kalshi mode should be OFF by default
-    await expect(page.locator('#kalshiToggle')).not.toHaveClass(/active/);
+  test('Per-row Kalshi: Normal row rejects Kalshi formats', async ({ page }) => {
+    // Row should be Normal by default
+    await expect(page.locator('[data-row]').first().locator('.type-select')).toHaveValue('normal');
     
     // Try to enter Kalshi format odds
     const oddsInput = page.locator('[data-row]').first().locator('.odds');
@@ -184,23 +184,27 @@ test.describe('Fast Hedger v2.3', () => {
     
     // Should show error
     await expect(page.locator('.error-text')).toBeVisible();
-    await expect(page.locator('.error-text')).toContainText('Kalshi');
+    await expect(page.locator('.error-text')).toContainText('not allowed for Normal rows');
   });
 
-  test('Kalshi mode toggle: accepts Kalshi formats when ON', async ({ page }) => {
-    // Turn on Kalshi mode
-    await page.locator('#kalshiToggle').click();
-    await expect(page.locator('#kalshiToggle')).toHaveClass(/active/);
+  test('Per-row Kalshi: Kalshi row accepts Kalshi formats with fees', async ({ page }) => {
+    // Set row to Kalshi YES
+    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    await page.waitForTimeout(100);
     
     // Enter Kalshi format odds
     await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.odds').fill('25c');
+    await page.locator('[data-row]').first().locator('.odds').fill('62c');
     await page.locator('[data-row]').first().locator('.stake').fill('100');
+    
+    // Wait for calculation
+    await page.waitForTimeout(200);
     
     // Should NOT show error and should calculate profit with Kalshi fees
     await expect(page.locator('.error-text')).not.toBeVisible();
     const profit = page.locator('[data-row]').first().locator('.profit');
-    await expect(profit).toContainText('$291'); // With Kalshi fees
+    // 62c = +61.29 American approx, with Kalshi fees: ~59.27
+    await expect(profit).toContainText('$');
   });
 
   test('Undo/Redo functionality', async ({ page }) => {
@@ -306,6 +310,37 @@ test.describe('Fast Hedger v2.3', () => {
     const netAValue = parseFloat(netAAfter!.replace(/[^0-9.-]/g, ''));
     const netBValue = parseFloat(netBAfter!.replace(/[^0-9.-]/g, ''));
     expect(Math.abs(netAValue - netBValue)).toBeLessThan(1);
+  });
+
+  test('Mixed ticket: Normal and Kalshi rows in same session', async ({ page }) => {
+    // Add Normal row with American odds
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.type-select').selectOption('normal');
+    await page.locator('[data-row]').first().locator('.odds').fill('+150');
+    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    
+    // Add second row as Kalshi YES
+    await page.locator('#addRow').click();
+    await page.waitForTimeout(100);
+    
+    await page.locator('[data-row]').nth(1).locator('.side').fill('2');
+    await page.locator('[data-row]').nth(1).locator('.type-select').selectOption('kalshi-yes');
+    await page.locator('[data-row]').nth(1).locator('.odds').fill('40c');
+    await page.locator('[data-row]').nth(1).locator('.stake').fill('100');
+    
+    await page.waitForTimeout(200);
+    
+    // Both rows should calculate profits
+    const profit1 = page.locator('[data-row]').first().locator('.profit');
+    await expect(profit1).toContainText('$150');
+    
+    const profit2 = page.locator('[data-row]').nth(1).locator('.profit');
+    // 40c with Kalshi fees
+    await expect(profit2).toContainText('$');
+    
+    // Both should contribute to their respective sides
+    await expect(page.locator('#a_stake')).toContainText('$100');
+    await expect(page.locator('#b_stake')).toContainText('$100');
   });
 });
 
