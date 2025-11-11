@@ -421,5 +421,188 @@ test.describe('Fast Hedger v2.3', () => {
     await expect(page.locator('#a_stake')).toContainText('$100');
     await expect(page.locator('#b_stake')).toContainText('$100');
   });
+
+  // ===== NEW TESTS BASED ON ISSUE REQUIREMENTS =====
+
+  test('Equalize Flow: enter A and B lines, click Equalize, commit ghost → nets equal', async ({ page }) => {
+    // Add a wager on side A with specific odds
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.odds').fill('+150');
+    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    
+    // Enter Line B odds manually to enable equalization
+    await page.locator('#useB').fill('+200');
+    await page.waitForTimeout(200);
+    
+    // Ghost row should appear with equalization suggestion
+    await expect(page.locator('.ghost-row')).toBeVisible();
+    
+    // Get the net values before committing ghost
+    const netABeforeText = await page.locator('#a_net').textContent();
+    const netBBeforeText = await page.locator('#b_net').textContent();
+    const netABefore = parseFloat(netABeforeText!.replace(/[^0-9.-]/g, ''));
+    const netBBefore = parseFloat(netBBeforeText!.replace(/[^0-9.-]/g, ''));
+    
+    // Nets should NOT be equal before commit
+    expect(Math.abs(netABefore - netBBefore)).toBeGreaterThan(1);
+    
+    // Click the Equalize preset button to trigger equalization
+    await page.locator('#presetEqualize').click();
+    await page.waitForTimeout(100);
+    
+    // Ghost row should still be visible
+    await expect(page.locator('.ghost-row')).toBeVisible();
+    
+    // Commit the ghost row
+    await page.locator('.ghost-row .commit').click();
+    await page.waitForTimeout(200);
+    
+    // Get the net values after committing ghost
+    const netAAfterText = await page.locator('#a_net').textContent();
+    const netBAfterText = await page.locator('#b_net').textContent();
+    const netAAfter = parseFloat(netAAfterText!.replace(/[^0-9.-]/g, ''));
+    const netBAfter = parseFloat(netBAfterText!.replace(/[^0-9.-]/g, ''));
+    
+    // Nets should now be approximately equal (within $1 tolerance)
+    expect(Math.abs(netAAfter - netBAfter)).toBeLessThan(1);
+    
+    // Should have 2 regular rows now
+    await expect(page.locator('[data-row]')).toHaveCount(2);
+  });
+
+  test('Kalshi YES@0.62 with 10 shares: verify net for both outcomes', async ({ page }) => {
+    // Set row to Kalshi YES
+    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    await page.waitForTimeout(100);
+    
+    // Enter Kalshi format odds: YES@0.62 means 62c or 0.62 price
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.odds').fill('0.62');
+    
+    // Calculate stake for 10 contracts: 10 * 0.62 = 6.2
+    // With Kalshi, N contracts = floor(stake / price), so for 10 contracts at 0.62, stake = 6.2
+    await page.locator('[data-row]').first().locator('.stake').fill('6.2');
+    
+    await page.waitForTimeout(200);
+    
+    // Verify profit is calculated with Kalshi fees
+    // 10 contracts at 0.62: cost = 6.20, open fee = 0.06 (1%), settle fee = 0.20 (2%)
+    // If YES wins: net payout = 10 - 0.20 = 9.80, profit = 9.80 - 6.20 - 0.06 = 3.54
+    const profit = page.locator('[data-row]').first().locator('.profit');
+    await expect(profit).toContainText('$3.54');
+    
+    // Verify Side A net (if A wins, profit A - stake B)
+    // Net A = 3.54 - 0 = 3.54 (positive, shown in green)
+    await expect(page.locator('#a_net')).toContainText('$3.54');
+    await expect(page.locator('#a_net')).toHaveClass(/good/);
+    
+    // Verify Side B net (if B wins, profit B - stake A)
+    // Net B = 0 - 6.2 = -6.2 (negative, but money() shows absolute value)
+    await expect(page.locator('#b_net')).toContainText('$6.20');
+    await expect(page.locator('#b_net')).toHaveClass(/bad/);
+  });
+
+  test('Kalshi Toggle: Normal mode rejects 0.xx odds format', async ({ page }) => {
+    // Row should be Normal by default
+    await expect(page.locator('[data-row]').first().locator('.type-select')).toHaveValue('normal');
+    
+    // Try to enter Kalshi price format 0.62
+    const oddsInput = page.locator('[data-row]').first().locator('.odds');
+    await oddsInput.fill('0.62');
+    
+    await page.waitForTimeout(100);
+    
+    // Should show error about 0.xx not allowed for Normal rows
+    await expect(page.locator('.error-text')).toBeVisible();
+    await expect(page.locator('.error-text')).toContainText('0.xx odds not allowed for Normal rows');
+    
+    // Now switch to Kalshi YES mode
+    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    await page.waitForTimeout(100);
+    
+    // Error should disappear and format should be accepted
+    await expect(page.locator('.error-text')).not.toBeVisible();
+    
+    // Can now enter stake and it should calculate
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.stake').fill('10');
+    await page.waitForTimeout(200);
+    
+    // Should calculate profit with Kalshi fees
+    const profit = page.locator('[data-row]').first().locator('.profit');
+    await expect(profit).toContainText('$');
+  });
+
+  test('Undo/Redo: add row, delete row, undo, redo; nets follow changes', async ({ page }) => {
+    // Start with initial state - add first wager
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.odds').fill('+100');
+    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    
+    // Wait for auto-save
+    await page.waitForTimeout(600);
+    
+    // Check initial net
+    await expect(page.locator('#a_net')).toContainText('$100.00');
+    
+    // Add a second row
+    await page.locator('#addRow').click();
+    await page.waitForTimeout(100);
+    
+    await page.locator('[data-row]').nth(1).locator('.side').fill('2');
+    await page.locator('[data-row]').nth(1).locator('.odds').fill('+100');
+    await page.locator('[data-row]').nth(1).locator('.stake').fill('100');
+    
+    // Wait for auto-save
+    await page.waitForTimeout(600);
+    
+    // Should have 2 rows now
+    await expect(page.locator('[data-row]')).toHaveCount(2);
+    
+    // Check nets are equalized
+    const netAText = await page.locator('#a_net').textContent();
+    const netBText = await page.locator('#b_net').textContent();
+    const netAValue = parseFloat(netAText!.replace(/[^0-9.-]/g, ''));
+    const netBValue = parseFloat(netBText!.replace(/[^0-9.-]/g, ''));
+    expect(Math.abs(netAValue - netBValue)).toBeLessThan(1);
+    
+    // Delete the second row (click clear button)
+    await page.locator('[data-row]').nth(1).locator('.clear').click();
+    await page.waitForTimeout(600);
+    
+    // Should have 1 row again
+    await expect(page.locator('[data-row]')).toHaveCount(1);
+    
+    // Net A should be positive (green)
+    await expect(page.locator('#a_net')).toContainText('$100');
+    await expect(page.locator('#a_net')).toHaveClass(/good/);
+    
+    // Net B should be negative (red/bad) - money() shows absolute value, check class
+    await expect(page.locator('#b_net')).toContainText('$100');
+    await expect(page.locator('#b_net')).toHaveClass(/bad/);
+    
+    // Now UNDO the deletion
+    await page.locator('#undoBtn').click();
+    await page.waitForTimeout(200);
+    
+    // Should have 2 rows again
+    await expect(page.locator('[data-row]')).toHaveCount(2);
+    
+    // Nets should be equalized again
+    const netAUndo = parseFloat((await page.locator('#a_net').textContent())!.replace(/[^0-9.-]/g, ''));
+    const netBUndo = parseFloat((await page.locator('#b_net').textContent())!.replace(/[^0-9.-]/g, ''));
+    expect(Math.abs(netAUndo - netBUndo)).toBeLessThan(1);
+    
+    // Now REDO to delete again
+    await page.locator('#redoBtn').click();
+    await page.waitForTimeout(200);
+    
+    // Should have 1 row again
+    await expect(page.locator('[data-row]')).toHaveCount(1);
+    
+    // Net A should be positive again
+    await expect(page.locator('#a_net')).toContainText('$100');
+    await expect(page.locator('#a_net')).toHaveClass(/good/);
+  });
 });
 
