@@ -309,6 +309,9 @@ describe('Unified Fee Adapters', () => {
       expect(result.feesBreakdown.total).toBe(15);
       expect(result.netProfit).toBe(85);
     });
+  });
+});
+
 describe('Exact case from issue #19: Kalshi YES at price 0.62, 1 share', () => {
   it('YES correct: grossProfit=0.38, settleFee=0.0076, openFee=0.0062, net=0.3662', () => {
     const price = 0.62;
