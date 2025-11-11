@@ -1,17 +1,18 @@
 import { describe, it, expect } from 'vitest';
 
-describe('ProphetX Fee Calculation', () => {
-  // Simulate the applyProphetXFee function
-  function applyProphetXFee(profit: number, sportsbook?: string): number {
-    if (!sportsbook) return profit;
-    const book = sportsbook.trim().toUpperCase();
-    if (book === 'PX!') {
-      // 1% fee on winnings (profit)
-      return profit > 0 ? profit * 0.99 : profit;
-    }
-    // PX or any other value = no fee
-    return profit;
+// Simulate the applyProphetXFee function
+function applyProphetXFee(profit: number, sportsbook?: string): number {
+  if (!sportsbook) return profit;
+  const book = sportsbook.trim().toUpperCase();
+  if (book === 'PX!') {
+    // 1% fee on winnings (profit)
+    return profit > 0 ? profit * 0.99 : profit;
   }
+  // PX or any other value = no fee
+  return profit;
+}
+
+describe('ProphetX Fee Calculation', () => {
 
   describe('PX! marker (1% fee)', () => {
     it('applies 1% fee on positive profits', () => {
@@ -89,5 +90,28 @@ describe('ProphetX Fee Calculation', () => {
         expect(delta).toBeCloseTo(profit * 0.01, 6);
       });
     });
+  });
+});
+
+describe('Exact case from issue #19: PX! vs PX with d=2.0, $200 stake', () => {
+  it('PX! with d=2.0 and $200 stake: profitBefore=200, fee=2, netProfit=198', () => {
+    const stake = 200;
+    const decimal = 2.0;
+    const profitBefore = stake * (decimal - 1); // 200 * 1 = 200
+    const fee = profitBefore * 0.01; // 1% of 200 = 2
+    const netProfit = applyProphetXFee(profitBefore, 'PX!');
+    
+    expect(profitBefore).toBe(200);
+    expect(fee).toBe(2);
+    expect(netProfit).toBe(198);
+  });
+  
+  it('PX with d=2.0 and $200 stake: fee=0, netProfit=200', () => {
+    const stake = 200;
+    const decimal = 2.0;
+    const profitBefore = stake * (decimal - 1); // 200 * 1 = 200
+    const netProfit = applyProphetXFee(profitBefore, 'PX');
+    
+    expect(netProfit).toBe(200);
   });
 });

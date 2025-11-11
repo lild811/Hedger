@@ -275,13 +275,71 @@
     .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
     .toggle-wrapper{display:flex;align-items:center;gap:6px}
     .tooltip{position:relative;cursor:help}
-    .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:nowrap;border-radius:4px;margin-bottom:4px;z-index:100}
+    .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:normal;max-width:250px;border-radius:4px;margin-bottom:4px;z-index:100}
+    
+    /* Enhanced tooltips for preset buttons with formulas */
+    .preset-btn{position:relative}
+    .preset-btn::after{
+      content:attr(data-tooltip);
+      position:absolute;
+      bottom:calc(100% + 8px);
+      left:50%;
+      transform:translateX(-50%);
+      padding:8px 10px;
+      background:#1a1d24;
+      border:1px solid var(--accent);
+      color:var(--ink);
+      font-size:10px;
+      line-height:1.4;
+      white-space:pre-line;
+      border-radius:6px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s;
+      z-index:200;
+      max-width:280px;
+      text-align:left;
+    }
+    .preset-btn:hover::after{
+      opacity:1;
+    }
     
     /* Preset buttons - text labels instead of emojis */
     .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin:8px 0}
     .preset-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
     .preset-btn:hover{background:#2a2e37;border-color:var(--accent)}
     .preset-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    
+    /* Custom fee inputs */
+    .custom-fees{
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      padding: 6px 8px;
+      background: rgba(167,171,180,0.05);
+      border-radius: 6px;
+      border: 1px solid var(--grid);
+    }
+    .custom-fee-inputs{
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .custom-fee-inputs label{
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .custom-fee-inputs input{
+      width: 60px;
+      padding: 3px 5px;
+      font-size: 11px;
+      background: #0f1116;
+      color: var(--ink);
+      border: 1px solid var(--grid);
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -310,7 +368,7 @@
           <div>Side</div>
           <div>Type</div>
           <div>Sportsbook</div>
-          <div>Odds</div>
+          <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
           <div>Stake</div>
           <div>Payout</div>
           <div>Profit</div>
@@ -392,13 +450,30 @@
         
         <!-- Presets - Text labels instead of emojis -->
         <div class="preset-grid">
-          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make both outcomes equal">
+          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make net profit equal for both outcomes.
+
+Formula:
+Δ = (Profit_opposing + Stake_opposing - Profit_current - Stake_current) / decimal_odds
+
+Shows ghost row with computed stake to add.">
             <div>Equalize</div>
           </button>
-          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A=0: Bet on A to break even if A wins">
+          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A = 0: Raise side A to break even if A wins; profit remains on side B.
+
+Formula:
+Stake_A = |Net_A| / profit_per_dollar
+where Net_A = Profit_A - Stake_B
+
+Adds real row when clicked.">
             <div>Cover A</div>
           </button>
-          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B=0: Bet on B to break even if B wins">
+          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B = 0: Raise side B to break even if B wins; profit remains on side A.
+
+Formula:
+Stake_B = |Net_B| / profit_per_dollar
+where Net_B = Profit_B - Stake_A
+
+Adds real row when clicked.">
             <div>Cover B</div>
           </button>
         </div>
@@ -440,10 +515,11 @@
   <template id="rowT">
     <div class="row" data-row>
       <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
-      <select class="type-select" title="Row type: Normal rejects Kalshi formats, Kalshi YES/NO uses Kalshi fees">
+      <select class="type-select" title="Row type: Normal rejects Kalshi formats, Kalshi YES/NO uses Kalshi fees, Custom allows setting fees">
         <option value="normal">Normal</option>
         <option value="kalshi-yes">Kalshi YES</option>
         <option value="kalshi-no">Kalshi NO</option>
+        <option value="custom">Custom...</option>
       </select>
       <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)">
       <div class="odds-wrapper">
@@ -457,6 +533,12 @@
       <div class="row-actions">
         <button class="clear-btn" title="Clear stake (keep book/odds)">C</button>
         <button class="delete-btn" title="Delete row">×</button>
+      </div>
+      <div class="custom-fees" style="display:none;">
+        <div class="custom-fee-inputs">
+          <label>Open %: <input class="open-fee-pct" type="number" step="0.01" min="0" max="100" placeholder="0.00" title="Fee % on stake at open"></label>
+          <label>Win %: <input class="win-fee-pct" type="number" step="0.01" min="0" max="100" placeholder="0.00" title="Fee % on winnings"></label>
+        </div>
       </div>
     </div>
   </template>
@@ -881,6 +963,9 @@
       const deleteBtn = el.querySelector('.delete-btn');
       const commitBtn = el.querySelector('.commit');
       const dismissBtn = el.querySelector('.dismiss');
+      const customFeesDiv = el.querySelector('.custom-fees');
+      const openFeePct = el.querySelector('.open-fee-pct');
+      const winFeePct = el.querySelector('.win-fee-pct');
       const rowEl = el; // Store reference to row element
 
       // Sign toggle interaction
@@ -1054,6 +1139,11 @@
       // Type selector on change
       if(typeSelect && !isGhost) {
         typeSelect.addEventListener('change', () => {
+          // Show/hide custom fee inputs
+          if(customFeesDiv) {
+            customFeesDiv.style.display = typeSelect.value === 'custom' ? 'block' : 'none';
+          }
+          
           // Re-validate odds with new type
           const signValue = signToggle ? signToggle.dataset.sign : "+";
           const error = getOddsError(oddsInput.value, signValue, typeSelect.value);
@@ -1067,6 +1157,21 @@
               oddsInput.classList.remove('err');
             }
           }
+          recalcDebounced();
+          debouncedSave();
+        });
+      }
+      
+      // Custom fee inputs
+      if(openFeePct && !isGhost) {
+        openFeePct.addEventListener('input', () => {
+          recalcDebounced();
+          debouncedSave();
+        });
+      }
+      
+      if(winFeePct && !isGhost) {
+        winFeePct.addEventListener('input', () => {
           recalcDebounced();
           debouncedSave();
         });
@@ -1092,7 +1197,7 @@
       }
 
       // Store refs
-      el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn};
+      el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn, openFeePct, winFeePct};
     }
 
     // Add regular row
@@ -1339,7 +1444,7 @@
     function readRows() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach((el, idx) => {
-        const {side, typeSelect, sportsbook, odds, stake, payout, profit, signToggle} = el._refs;
+        const {side, typeSelect, sportsbook, odds, stake, payout, profit, signToggle, openFeePct, winFeePct} = el._refs;
         const s = side.value === '2' ? 2 : 1;
         const signValue = signToggle ? signToggle.dataset.sign : "+";
         const book = sportsbook ? sportsbook.value : '';
@@ -1356,23 +1461,57 @@
         let effectiveOdds = od; // Store the effective odds (either entered or calculated)
         
         if(od !== null && st > 0) {
-          // Odds and stake entered
-          const useKalshiFees = (rowType === 'kalshi-yes' || rowType === 'kalshi-no') && isKalshi;
-          
-          if(useKalshiFees) {
-            // Use Kalshi payout engine for Kalshi rows with Kalshi format odds
-            const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
-            const {netPayout, profit: kalshiProfit} = kalshiLedger(st, price);
-            pf = kalshiProfit;
-            pay = netPayout; // Use net payout (after settle fee)
-          } else {
-            // Existing American / Decimal / % logic
-            const p = pPerDollar(od);
-            if(p !== null) {
-              pf = st * p;
-              // Apply ProphetX fee AFTER base profit calculation
-              pf = applyProphetXFee(pf, book);
-              pay = st + pf;
+          // Odds and stake entered - calculate profit using unified fee adapters
+          const p = pPerDollar(od);
+          if(p !== null) {
+            const profitBeforeFees = st * p;
+            
+            // Determine which fee adapter to use based on row type
+            let feeResult;
+            
+            if(rowType === 'kalshi-yes' && isKalshi) {
+              // Kalshi YES contract
+              const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
+              // Use inline Kalshi calculation (matching the unified adapter)
+              const N = Math.floor(st / price);
+              const cost = r2(N * price);
+              const openFee = r2(cost * 0.01);
+              const settleFee = r2(N * 0.02);
+              const netPayout = r2(N - settleFee);
+              pf = r2(netPayout - (cost + openFee));
+              pay = netPayout;
+            } else if(rowType === 'kalshi-no' && isKalshi) {
+              // Kalshi NO contract
+              const yesPrice = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
+              const noPrice = 1 - yesPrice;
+              const N = Math.floor(st / noPrice);
+              const cost = r2(N * noPrice);
+              const openFee = r2(cost * 0.01);
+              const grossProfit = r2(yesPrice * N);
+              const settleFee = r2(grossProfit * 0.02);
+              const netPayout = r2(grossProfit - settleFee);
+              pf = r2(netPayout - (cost + openFee));
+              pay = netPayout;
+            } else if(rowType === 'custom') {
+              // Custom fees
+              const openPct = openFeePct && openFeePct.value ? Number(openFeePct.value) / 100 : 0;
+              const winPct = winFeePct && winFeePct.value ? Number(winFeePct.value) / 100 : 0;
+              const openFee = r2(st * openPct);
+              const winFee = profitBeforeFees > 0 ? r2(profitBeforeFees * winPct) : 0;
+              pf = r2(profitBeforeFees - openFee - winFee);
+              pay = r2(st + pf);
+            } else {
+              // Normal or ProphetX
+              // Check for ProphetX fee (PX! marker in sportsbook field)
+              if(book && book.trim().toUpperCase() === 'PX!' && profitBeforeFees > 0) {
+                // 1% fee on winnings
+                const winFee = r2(profitBeforeFees * 0.01);
+                pf = r2(profitBeforeFees - winFee);
+              } else {
+                // No fees
+                pf = profitBeforeFees;
+              }
+              pay = r2(st + pf);
             }
           }
           
@@ -1685,14 +1824,16 @@
     function saveCurrentState() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, odds, stake, payout} = el._refs;
+        const {side, typeSelect, sportsbook, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         rows.push({
           side: side.value,
           type: typeSelect ? typeSelect.value : 'normal',
           sportsbook: sportsbook ? sportsbook.value : '',
           odds: odds.value,
           stake: stake.value,
-          payout: payout.value
+          payout: payout.value,
+          openFeePct: openFeePct ? openFeePct.value : '',
+          winFeePct: winFeePct ? winFeePct.value : ''
         });
       });
       
@@ -1739,11 +1880,20 @@
       state.rows.forEach(rowData => {
         const r = addRow();
         r._refs.side.value = rowData.side;
-        if(r._refs.typeSelect) r._refs.typeSelect.value = rowData.type || 'normal';
+        if(r._refs.typeSelect) {
+          r._refs.typeSelect.value = rowData.type || 'normal';
+          // Show/hide custom fees based on type
+          const customFeesDiv = r.querySelector('.custom-fees');
+          if(customFeesDiv) {
+            customFeesDiv.style.display = rowData.type === 'custom' ? 'block' : 'none';
+          }
+        }
         if(r._refs.sportsbook) r._refs.sportsbook.value = rowData.sportsbook || '';
         r._refs.odds.value = rowData.odds;
         r._refs.stake.value = rowData.stake;
         r._refs.payout.value = rowData.payout;
+        if(r._refs.openFeePct) r._refs.openFeePct.value = rowData.openFeePct || '';
+        if(r._refs.winFeePct) r._refs.winFeePct.value = rowData.winFeePct || '';
       });
       
       // Restore other fields
@@ -1777,7 +1927,7 @@
     document.getElementById('exportCSV').addEventListener('click', () => {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, odds, stake, payout} = el._refs;
+        const {side, typeSelect, sportsbook, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         if(side.value) {
           rows.push({
             side: side.value,
@@ -1787,12 +1937,13 @@
             oddsValue: odds.value,
             stake: stake.value,
             payout: payout.value,
-            feeMarker: sportsbook ? sportsbook.value : ''
+            openFeePct: openFeePct ? openFeePct.value : '',
+            winFeePct: winFeePct ? winFeePct.value : ''
           });
         }
       });
       
-      const headers = ['side', 'type', 'sportsbook', 'oddsType', 'oddsValue', 'stake', 'payout', 'feeMarker'];
+      const headers = ['side', 'type', 'sportsbook', 'oddsType', 'oddsValue', 'stake', 'payout', 'openFeePct', 'winFeePct'];
       const csvRows = [headers.join(',')];
       rows.forEach(row => {
         const values = headers.map(h => `"${row[h] || ''}"`);
@@ -1836,11 +1987,20 @@
             if(clean.length >= 5) {
               const r = addRow();
               r._refs.side.value = clean[0];
-              if(r._refs.typeSelect) r._refs.typeSelect.value = clean[1] || 'normal';
+              if(r._refs.typeSelect) {
+                r._refs.typeSelect.value = clean[1] || 'normal';
+                // Show/hide custom fees based on type
+                const customFeesDiv = r.querySelector('.custom-fees');
+                if(customFeesDiv) {
+                  customFeesDiv.style.display = clean[1] === 'custom' ? 'block' : 'none';
+                }
+              }
               if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
               r._refs.odds.value = clean[4]; // oddsValue
               r._refs.stake.value = clean[5];
               if(clean[6]) r._refs.payout.value = clean[6];
+              if(r._refs.openFeePct && clean[7]) r._refs.openFeePct.value = clean[7];
+              if(r._refs.winFeePct && clean[8]) r._refs.winFeePct.value = clean[8];
             }
           }
           
