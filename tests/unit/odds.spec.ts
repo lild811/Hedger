@@ -23,6 +23,13 @@ describe('americanToDecimal', () => {
     expect(americanToDecimal(100)).toBe(2.0);
   });
   
+  it('handles exact decimal conversion for float odds', () => {
+    // Test that conversion is exact (no rounding in math)
+    expect(americanToDecimal(104.3)).toBe(1 + 104.3/100);
+    expect(americanToDecimal(-118.5)).toBe(1 + 100/118.5);
+    expect(americanToDecimal(+100.0)).toBe(2.0);
+  });
+  
   it('throws on invalid odds', () => {
     expect(() => americanToDecimal(0)).toThrow('bad odds');
     expect(() => americanToDecimal(NaN)).toThrow('bad odds');
@@ -143,10 +150,23 @@ describe('parseOdds', () => {
       expect(parseOdds('+100')).toBe(100);
     });
     
+    it('parses American float odds', () => {
+      expect(parseOdds('+104.3')).toBe(104.3);
+      expect(parseOdds('-118.5')).toBe(-118.5);
+      expect(parseOdds('+100.0')).toBe(100.0);
+      expect(parseOdds('-150.75')).toBe(-150.75);
+    });
+    
     it('rejects invalid American range', () => {
       expect(parseOdds('+50')).toBeNull();
       expect(parseOdds('-99')).toBeNull();
       expect(parseOdds('+99')).toBeNull();
+    });
+    
+    it('rejects American floats in invalid range', () => {
+      expect(parseOdds('+50.5')).toBeNull();
+      expect(parseOdds('-99.9')).toBeNull();
+      expect(parseOdds('+99.1')).toBeNull();
     });
   });
   
@@ -208,9 +228,20 @@ describe('formatFromAmerican', () => {
     expect(formatFromAmerican(-200, 'american')).toBe('-200');
   });
   
+  it('formats American float odds', () => {
+    expect(formatFromAmerican(104.3, 'american')).toBe('+104.3');
+    expect(formatFromAmerican(-118.5, 'american')).toBe('-118.5');
+    expect(formatFromAmerican(100.0, 'american')).toBe('+100');
+  });
+  
   it('formats to Decimal', () => {
     expect(formatFromAmerican(100, 'decimal')).toBe('2.00');
     expect(formatFromAmerican(200, 'decimal')).toBe('3.00');
+  });
+  
+  it('formats float American to Decimal', () => {
+    expect(formatFromAmerican(104.3, 'decimal')).toBe('2.04');
+    expect(formatFromAmerican(-118.5, 'decimal')).toBe((1 + 100/118.5).toFixed(2));
   });
   
   it('formats to Kalshi', () => {

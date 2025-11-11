@@ -130,34 +130,39 @@ export function parseOdds(raw: any, signToggleValue: string = "+"): number | nul
   
   // 4. Contains . → check if Kalshi price or decimal
   if (t.includes('.')) {
-    // Don't allow negative decimals
-    if (t.startsWith('-')) return null;
-    
-    const value = parseFloat(t);
-    if (!isFinite(value) || value <= 0) return null;
-    
-    if (value < 1) {
-      // Kalshi price (0.01 to 0.99)
-      // Special case: 0.50, .50, .5 = even money = +100
-      if (Math.abs(value - 0.5) < 0.000001) return 100;
-      
-      if (value > 0.5) {
-        return Math.round(-(value / (1 - value)) * 100);
-      } else {
-        return Math.round(((1 - value) / value) * 100);
-      }
-    } else if (value === 1.00) {
-      // Invalid decimal
-      return null;
+    // Skip if starts with +/- (American float odds, handled later)
+    if (t.startsWith('+') || t.startsWith('-')) {
+      // Let American odds handler deal with this
     } else {
-      // Decimal odds (≥1.01)
-      // Special case: 2.0, 2.00 = even money = +100
-      if (Math.abs(value - 2.0) < 0.000001) return 100;
+      // Don't allow negative decimals
+      if (t.startsWith('-')) return null;
       
-      if (value > 2) {
-        return Math.round((value - 1) * 100);
+      const value = parseFloat(t);
+      if (!isFinite(value) || value <= 0) return null;
+      
+      if (value < 1) {
+        // Kalshi price (0.01 to 0.99)
+        // Special case: 0.50, .50, .5 = even money = +100
+        if (Math.abs(value - 0.5) < 0.000001) return 100;
+        
+        if (value > 0.5) {
+          return Math.round(-(value / (1 - value)) * 100);
+        } else {
+          return Math.round(((1 - value) / value) * 100);
+        }
+      } else if (value === 1.00) {
+        // Invalid decimal
+        return null;
       } else {
-        return Math.round(-100 / (value - 1));
+        // Decimal odds (≥1.01)
+        // Special case: 2.0, 2.00 = even money = +100
+        if (Math.abs(value - 2.0) < 0.000001) return 100;
+        
+        if (value > 2) {
+          return Math.round((value - 1) * 100);
+        } else {
+          return Math.round(-100 / (value - 1));
+        }
       }
     }
   }
@@ -165,9 +170,9 @@ export function parseOdds(raw: any, signToggleValue: string = "+"): number | nul
   // 5. Special text cases (before numeric parsing)
   if (t === 'ev' || t === 'even') return 100;
   
-  // 6. Explicit +/− → American
+  // 6. Explicit +/− → American (accept floats)
   if (t.startsWith('+') || t.startsWith('-')) {
-    const american = parseInt(t);
+    const american = parseFloat(t);
     if (!isFinite(american)) return null;
     
     // Must be ≤ −100 or ≥ +100, with special case for exactly +100
