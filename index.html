@@ -378,7 +378,7 @@
         <div id="ghostContainer"></div>
         <div class="divider"></div>
         <div class="helper-text">
-          <div><strong>Accept:</strong> American ±100+ • Kalshi 1-99c/.01-.99/1-99 • Decimal 1.01+ • 1-99% • 5/2 • even</div>
+          <div><strong>Accept:</strong> American ±100+ (floats OK: +104.3, -118.5) • Kalshi 1-99c/.01-.99/1-99 • Decimal 1.01+ • 1-99% • 5/2 • even</div>
           <div><strong>Parse:</strong> % → c/k → / → . → ± → int (1-99→Kalshi, 100→+100, 101+→use ±)</div>
           <div><strong>Kalshi:</strong> 1% open + 2% settle fees • Contracts = floor(stake/price) • Net payout = N - settleFee</div>
           <div><strong>Reject:</strong> American -99 to +99 • Decimal 1.00/negative • 0c/100c • Mixed 1.43c</div>
@@ -687,43 +687,48 @@ Adds real row when clicked.">
       
       // 4. Contains . → check if Kalshi price or decimal
       if(t.includes('.')) {
-        // Don't allow negative decimals
-        if(t.startsWith('-')) return null;
-        
-        const value = parseFloat(t);
-        if(!isFinite(value) || value <= 0) return null;
-        
-        if(value < 1) {
-          // Kalshi price (0.01 to 0.99)
-          isKalshi = true;
-          // Special case: 0.50, .50, .5 = even money = +100
-          // Using tolerance for floating point comparison
-          if(Math.abs(value - 0.5) < 0.000001) return 100;
-          
-          if(value > 0.5) {
-            return Math.round(-(value / (1 - value)) * 100);
-          } else {
-            return Math.round(((1 - value) / value) * 100);
-          }
-        } else if(value === 1.00) {
-          // Invalid decimal
-          return null;
+        // Skip if starts with +/- (American float odds, handled later)
+        if(t.startsWith('+') || t.startsWith('-')) {
+          // Let American odds handler deal with this
         } else {
-          // Decimal odds (≥1.01)
-          // Special case: 2.0, 2.00 = even money = +100
-          if(Math.abs(value - 2.0) < 0.000001) return 100;
+          // Don't allow negative decimals
+          if(t.startsWith('-')) return null;
           
-          if(value > 2) {
-            return Math.round((value - 1) * 100);
+          const value = parseFloat(t);
+          if(!isFinite(value) || value <= 0) return null;
+          
+          if(value < 1) {
+            // Kalshi price (0.01 to 0.99)
+            isKalshi = true;
+            // Special case: 0.50, .50, .5 = even money = +100
+            // Using tolerance for floating point comparison
+            if(Math.abs(value - 0.5) < 0.000001) return 100;
+            
+            if(value > 0.5) {
+              return Math.round(-(value / (1 - value)) * 100);
+            } else {
+              return Math.round(((1 - value) / value) * 100);
+            }
+          } else if(value === 1.00) {
+            // Invalid decimal
+            return null;
           } else {
-            return Math.round(-100 / (value - 1));
+            // Decimal odds (≥1.01)
+            // Special case: 2.0, 2.00 = even money = +100
+            if(Math.abs(value - 2.0) < 0.000001) return 100;
+            
+            if(value > 2) {
+              return Math.round((value - 1) * 100);
+            } else {
+              return Math.round(-100 / (value - 1));
+            }
           }
         }
       }
       
-      // 5. Explicit +/− → American
+      // 5. Explicit +/− → American (accept floats)
       if(t.startsWith('+') || t.startsWith('-')) {
-        const american = parseInt(t);
+        const american = parseFloat(t);
         if(!isFinite(american)) return null;
         
         // Must be ≤ −100 or ≥ +100, with special case for exactly +100
@@ -843,10 +848,13 @@ Adds real row when clicked.">
         if(cents === 100) return "100c is invalid";
       }
       
-      // Check for negative decimals
+      // Check for negative decimals (but not American float odds like -118.5)
       if(t.startsWith('-') && t.includes('.')) {
+        // Check if it's a valid American float odds (magnitude >= 100)
         const val = parseFloat(t);
-        if(val < 0) return "Negative decimal is invalid";
+        if(val < 0 && val > -100) {
+          return "Negative decimal is invalid";
+        }
       }
       
       // Check if parseOdds returns null
@@ -1004,6 +1012,16 @@ Adds real row when clicked.">
         // Reset opacity if it was showing calculated odds
         if(oddsInput.style.opacity === '0.7') {
           oddsInput.style.opacity = '1';
+        }
+        
+        // Update tooltip with derived decimal odds
+        const {american: parsed} = parseOddsWithKalshi(oddsInput.value, signValue);
+        if(parsed !== null && !error) {
+          // Calculate decimal odds from American odds
+          const decimal = parsed > 0 ? 1 + parsed / 100 : 1 + 100 / Math.abs(parsed);
+          oddsInput.title = `Decimal: ${decimal.toFixed(2)}`;
+        } else {
+          oddsInput.title = '';
         }
         
         if(errorText) {
