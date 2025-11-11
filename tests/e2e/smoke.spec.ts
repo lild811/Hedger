@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Fast Hedger v2.3', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/index.html');
   });
 
   test('loads the page successfully', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Wagers');
+    await expect(page.locator('h1').first()).toContainText('Wagers');
   });
 
   test('has initial empty row', async ({ page }) => {
@@ -77,7 +77,14 @@ test.describe('Fast Hedger v2.3', () => {
     await page.locator('[data-row]').first().locator('.odds').fill('+100');
     await page.locator('[data-row]').first().locator('.stake').fill('100');
     
+    // Set odds for side B so cover can be calculated
+    await page.locator('#useB').fill('+100');
+    
+    // Wait a bit for recalc
+    await page.waitForTimeout(100);
+    
     // Check Cover B = 0 (to neutralize if A wins)
+    // Net B = -100, with +100 odds, need to stake 100
     await expect(page.locator('#bebStake')).toContainText('$100.00');
   });
 
