@@ -31,10 +31,10 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ -moz-appearance:textfield }
 
-    /* Wagers table - now includes Type column (8 columns) */
+    /* Wagers table - now includes Type column and action buttons (9 columns) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px}
-    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px;margin:4px 0}
+    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px}
+    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px;margin:4px 0}
     
     /* Ghost row special layout */
     .ghost-row{ 
@@ -88,7 +88,11 @@
     }
     
     .commit{background:#6cc4ff;border:1px solid #6cc4ff;color:#fff;border-radius:8px;cursor:pointer;height:32px;font-weight:bold;font-size:16px}
-    .clear{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:8px;cursor:pointer;height:32px}
+    .clear-btn,.delete-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;height:28px;padding:0 8px;font-size:11px}
+    .delete-btn{background:#ff7d7d;border-color:#ff7d7d;color:#fff}
+    .delete-btn:hover{background:#ff6060}
+    .clear-btn:hover{background:#2a2e37}
+    .row-actions{display:flex;gap:3px;justify-content:center;align-items:center}
 
     .profit{ text-align:right; font-variant-numeric:tabular-nums; padding:7px 9px; border:1px solid var(--grid); border-radius:8px; background:#0f1116 }
     .profit.pos{ color:var(--good) }
@@ -221,9 +225,10 @@
     /* Tablet: 600–899px */
     @media (max-width: 899px){
       .wrap{grid-template-columns:1fr}
-      .rows-head, .row{grid-template-columns:minmax(36px,48px) minmax(64px,90px) minmax(74px,110px) minmax(74px,110px) minmax(74px,110px) 28px}
+      .rows-head, .row{grid-template-columns:minmax(36px,48px) minmax(64px,90px) minmax(74px,110px) minmax(74px,110px) minmax(74px,110px) 64px}
       .ghost-meta{ font-size:10px; }
       .helper-text{ font-size:10px; padding:6px; }
+      .clear-btn,.delete-btn{font-size:10px;padding:0 6px;height:24px}
       
       /* Even smaller sign toggle on narrow screens */
       .sign-toggle{
@@ -449,7 +454,10 @@
       <input class="stake right" type="number" step="0.01" placeholder="0.00">
       <input class="payout right" type="number" step="0.01" placeholder="auto">
       <div class="profit">$0.00</div>
-      <button class="clear" title="Delete row">×</button>
+      <div class="row-actions">
+        <button class="clear-btn" title="Clear stake (keep book/odds)">C</button>
+        <button class="delete-btn" title="Delete row">×</button>
+      </div>
     </div>
   </template>
 
@@ -869,7 +877,8 @@
       const profit = el.querySelector('.profit');
       const signToggle = el.querySelector('.sign-toggle');
       const errorText = el.querySelector('.error-text');
-      const clearBtn = el.querySelector('.clear');
+      const clearBtn = el.querySelector('.clear-btn');
+      const deleteBtn = el.querySelector('.delete-btn');
       const commitBtn = el.querySelector('.commit');
       const dismissBtn = el.querySelector('.dismiss');
       const rowEl = el; // Store reference to row element
@@ -1001,9 +1010,21 @@
         }
       });
 
-      // Clear/commit button - Changed to DELETE behavior
+      // Clear button - zeros stake and payout, keeps book/odds
       if(clearBtn && !isGhost) {
         clearBtn.addEventListener('click', () => {
+          // Clear stake and payout, but keep side, type, sportsbook, and odds
+          stake.value = '';
+          payout.value = '';
+          
+          recalc();
+          saveCurrentState();
+        });
+      }
+      
+      // Delete button - removes row entirely
+      if(deleteBtn && !isGhost) {
+        deleteBtn.addEventListener('click', () => {
           // Delete the row entirely
           el.remove();
           
@@ -1071,7 +1092,7 @@
       }
 
       // Store refs
-      el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle};
+      el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn};
     }
 
     // Add regular row
