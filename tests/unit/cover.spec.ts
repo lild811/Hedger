@@ -88,15 +88,16 @@ describe('calculateEqualization', () => {
       { side: 1, stake: 100, profit: 100, odds: 100 }
     ];
     
-    // Net A = 100, Net B = -100
+    // Net A = 100 - 0 = 100, Net B = 0 - 100 = -100
     // To equalize, bet on B
+    // netA' = 100 (unchanged), netB' = 0 + Δ*1 - 100 = Δ - 100
+    // Set netA' = netB': 100 = Δ - 100, so Δ = 200
     const result = calculateEqualization(positions, 2, 100);
     
     expect(result).not.toBeNull();
     expect(result!.side).toBe(2);
-    // With decimal odds 2.0: Δ = (100 + 100 - 0 - 0) / 2 = 100
-    expect(result!.stake).toBeCloseTo(100, 2);
-    expect(result!.targetTotal).toBeCloseTo(100, 2);
+    expect(result!.stake).toBeCloseTo(200, 2);
+    expect(result!.targetTotal).toBeCloseTo(200, 2);
   });
   
   it('equalizes with positive American odds', () => {
@@ -104,13 +105,14 @@ describe('calculateEqualization', () => {
       { side: 1, stake: 100, profit: 100, odds: 100 }
     ];
     
-    // Bet on B with +200 odds (3.0 decimal)
+    // Bet on B with +200 odds (3.0 decimal, profit multiplier = 2.0)
+    // netA' = 100, netB' = 0 + Δ*2 - 100 = 2Δ - 100
+    // Set netA' = netB': 100 = 2Δ - 100, so Δ = 100
     const result = calculateEqualization(positions, 2, 200);
     
     expect(result).not.toBeNull();
     expect(result!.side).toBe(2);
-    // Δ = (100 + 100 - 0 - 0) / 3 = 66.67
-    expect(result!.stake).toBeCloseTo(66.67, 2);
+    expect(result!.stake).toBeCloseTo(100, 2);
   });
   
   it('equalizes with negative American odds', () => {
@@ -118,13 +120,14 @@ describe('calculateEqualization', () => {
       { side: 1, stake: 100, profit: 100, odds: 100 }
     ];
     
-    // Bet on B with -200 odds (1.5 decimal)
+    // Bet on B with -200 odds (1.5 decimal, profit multiplier = 0.5)
+    // netA' = 100, netB' = 0 + Δ*0.5 - 100 = 0.5Δ - 100
+    // Set netA' = netB': 100 = 0.5Δ - 100, so Δ = 400
     const result = calculateEqualization(positions, 2, -200);
     
     expect(result).not.toBeNull();
     expect(result!.side).toBe(2);
-    // Δ = (100 + 100 - 0 - 0) / 1.5 = 133.33
-    expect(result!.stake).toBeCloseTo(133.33, 2);
+    expect(result!.stake).toBeCloseTo(400, 2);
   });
   
   it('handles mixed odds correctly', () => {
@@ -165,11 +168,14 @@ describe('autoEqualize', () => {
       { side: 1, stake: 100, profit: 100, odds: 100 }
     ];
     
+    // netA = 100, netB = -100
+    // Bet on B with +100 odds to equalize
+    // Δ = 200 (as calculated above)
     const result = autoEqualize(positions, 100, 100);
     
     expect(result).not.toBeNull();
     expect(result!.side).toBe(2);
-    expect(result!.stake).toBeCloseTo(100, 2);
+    expect(result!.stake).toBeCloseTo(200, 2);
   });
   
   it('chooses side A when only position on B', () => {
@@ -177,11 +183,15 @@ describe('autoEqualize', () => {
       { side: 2, stake: 100, profit: 100, odds: 100 }
     ];
     
+    // netA = 0 - 100 = -100, netB = 100 - 0 = 100
+    // Bet on A with +100 odds to equalize
+    // netA' = 0 + Δ*1 - 100 = Δ - 100, netB' = 100
+    // Set netA' = netB': Δ - 100 = 100, so Δ = 200
     const result = autoEqualize(positions, 100, 100);
     
     expect(result).not.toBeNull();
     expect(result!.side).toBe(1);
-    expect(result!.stake).toBeCloseTo(100, 2);
+    expect(result!.stake).toBeCloseTo(200, 2);
   });
   
   it('chooses side with lower net when both have positions', () => {
