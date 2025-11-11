@@ -270,7 +270,7 @@
     .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
     .toggle-wrapper{display:flex;align-items:center;gap:6px}
     .tooltip{position:relative;cursor:help}
-    .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:nowrap;border-radius:4px;margin-bottom:4px;z-index:100}
+    .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:normal;max-width:250px;border-radius:4px;margin-bottom:4px;z-index:100}
     
     /* Preset buttons - text labels instead of emojis */
     .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin:8px 0}
@@ -305,7 +305,7 @@
           <div>Side</div>
           <div>Type</div>
           <div>Sportsbook</div>
-          <div>Odds</div>
+          <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
           <div>Stake</div>
           <div>Payout</div>
           <div>Profit</div>
@@ -387,13 +387,13 @@
         
         <!-- Presets - Text labels instead of emojis -->
         <div class="preset-grid">
-          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make both outcomes equal">
+          <button class="preset-btn tooltip" id="presetEqualize" data-tooltip="Add stake to the weaker side so both outcomes pay the same net profit.">
             <div>Equalize</div>
           </button>
-          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A=0: Bet on A to break even if A wins">
+          <button class="preset-btn tooltip" id="presetCoverA" data-tooltip="Raise this side to break-even, leaving profit on the other.">
             <div>Cover A</div>
           </button>
-          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B=0: Bet on B to break even if B wins">
+          <button class="preset-btn tooltip" id="presetCoverB" data-tooltip="Raise this side to break-even, leaving profit on the other.">
             <div>Cover B</div>
           </button>
         </div>
