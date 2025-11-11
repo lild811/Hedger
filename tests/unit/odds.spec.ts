@@ -257,3 +257,23 @@ describe('getOddsError', () => {
     expect(getOddsError(null)).toBeNull();
   });
 });
+
+describe('Exact case: Profit calculation from issue #19', () => {
+  it('calculates profit for +104.3 odds with $100 stake', () => {
+    const american = 104.3;
+    const decimal = americanToDecimal(american);
+    const stake = 100;
+    const profit = stake * profitPerDollar(american);
+    
+    expect(decimal).toBeCloseTo(2.043, 3);
+    expect(profit).toBeCloseTo(104.30, 2);
+  });
+  
+  it('calculates profit for -118.5 odds', () => {
+    const american = -118.5;
+    const decimal = americanToDecimal(american);
+    
+    expect(decimal).toBeCloseTo(1 + 100/118.5, 6);
+    expect(profitPerDollar(american)).toBeCloseTo(100/118.5, 6);
+  });
+});
