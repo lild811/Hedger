@@ -73,13 +73,14 @@ describe('Exact Cover Math Formulas with Fees', () => {
       // Net A = 100 - 0 - 0 = 100, Net B = 0 - 100 - 0 = -100
       // Bet on B with +100 odds (profit multiplier = 1)
       // With 1% open fee and 2% settle fee:
-      // Denominator = 1 - 0.02 - 0.01 = 0.97
+      // effectiveDenom = 1 + (dB-1)*(1-settleFeeRate) - openFeeRate
+      // effectiveDenom = 1 + 1*(1-0.02) - 0.01 = 1.97
       // Numerator = 100 - 0 - 0 - 0 + 100 + 0 = 200
-      // Δ = 200 / 0.97 ≈ 206.19
+      // Δ = 200 / 1.97 ≈ 101.52
       const result = calculateEqualization(positions, 2, 100, KALSHI_FEES);
       
       expect(result).not.toBeNull();
-      expect(result!.stake).toBeCloseTo(206.19, 2);
+      expect(result!.stake).toBeCloseTo(101.52, 2);
     });
 
     it('equalizes with no fees (backward compatibility)', () => {
@@ -90,7 +91,7 @@ describe('Exact Cover Math Formulas with Fees', () => {
       const result = calculateEqualization(positions, 2, 100, NO_FEES);
       
       expect(result).not.toBeNull();
-      expect(result!.stake).toBeCloseTo(200, 2);
+      expect(result!.stake).toBeCloseTo(100, 2);
     });
 
     it('equalizes with positions that have existing fees', () => {
@@ -103,12 +104,12 @@ describe('Exact Cover Math Formulas with Fees', () => {
       // Net B = 48 - 100 - 2 = -54
       // Bet on B to equalize
       // Numerator = 95 - 50 - 5 - 48 + 100 + 2 = 94
-      // Denominator = 1 - 0.02 - 0.01 = 0.97
-      // Δ = 94 / 0.97 ≈ 96.91
+      // effectiveDenom = 1 + 1*(1-0.02) - 0.01 = 1.97
+      // Δ = 94 / 1.97 ≈ 47.72
       const result = calculateEqualization(positions, 2, 100, KALSHI_FEES);
       
       expect(result).not.toBeNull();
-      expect(result!.stake).toBeCloseTo(96.91, 2);
+      expect(result!.stake).toBeCloseTo(47.72, 2);
     });
   });
 
