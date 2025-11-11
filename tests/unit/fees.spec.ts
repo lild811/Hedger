@@ -3,8 +3,14 @@ import {
   kalshiLedger,
   kalshiEffectiveOdds,
   applyCustomFees,
+  applyNoFees,
+  applyProphetXFee,
+  applyKalshiYesFees,
+  applyKalshiNoFees,
+  applyCustomFeesUnified,
   DEFAULT_KALSHI_FEES,
-  type FeeStructure
+  type FeeStructure,
+  type FeeResult
 } from '../../src/lib/fees';
 
 describe('kalshiLedger', () => {
@@ -117,6 +123,192 @@ describe('DEFAULT_KALSHI_FEES', () => {
   it('has correct default values', () => {
     expect(DEFAULT_KALSHI_FEES.openFee).toBe(0.01);
     expect(DEFAULT_KALSHI_FEES.settleFee).toBe(0.02);
+  });
+});
+
+describe('Unified Fee Adapters', () => {
+  describe('applyNoFees', () => {
+    it('returns profit with no fees', () => {
+      const result = applyNoFees(100, 100);
+      
+      expect(result.payout).toBe(200);
+      expect(result.profitBeforeFees).toBe(100);
+      expect(result.feesBreakdown.total).toBe(0);
+      expect(result.netProfit).toBe(100);
+    });
+    
+    it('handles negative profit (loss)', () => {
+      const result = applyNoFees(100, -50);
+      
+      expect(result.payout).toBe(50);
+      expect(result.profitBeforeFees).toBe(-50);
+      expect(result.feesBreakdown.total).toBe(0);
+      expect(result.netProfit).toBe(-50);
+    });
+  });
+  
+  describe('applyProphetXFee', () => {
+    it('applies 1% fee for PX! on positive profit', () => {
+      const result = applyProphetXFee(100, 100, 'PX!');
+      
+      expect(result.profitBeforeFees).toBe(100);
+      expect(result.feesBreakdown.winFee).toBe(1);
+      expect(result.feesBreakdown.total).toBe(1);
+      expect(result.netProfit).toBe(99);
+      expect(result.payout).toBe(199);
+    });
+    
+    it('does not apply fee for PX! on negative profit', () => {
+      const result = applyProphetXFee(100, -50, 'PX!');
+      
+      expect(result.profitBeforeFees).toBe(-50);
+      expect(result.feesBreakdown.total).toBe(0);
+      expect(result.netProfit).toBe(-50);
+    });
+    
+    it('does not apply fee for PX (without !)', () => {
+      const result = applyProphetXFee(100, 100, 'PX');
+      
+      expect(result.profitBeforeFees).toBe(100);
+      expect(result.feesBreakdown.total).toBe(0);
+      expect(result.netProfit).toBe(100);
+    });
+    
+    it('is case-insensitive', () => {
+      const result1 = applyProphetXFee(100, 100, 'px!');
+      const result2 = applyProphetXFee(100, 100, 'Px!');
+      
+      expect(result1.netProfit).toBe(99);
+      expect(result2.netProfit).toBe(99);
+    });
+    
+    it('does not apply fee for other sportsbooks', () => {
+      const result = applyProphetXFee(100, 100, 'DraftKings');
+      
+      expect(result.netProfit).toBe(100);
+      expect(result.feesBreakdown.total).toBe(0);
+    });
+    
+    it('does not apply fee when sportsbook is undefined', () => {
+      const result = applyProphetXFee(100, 100);
+      
+      expect(result.netProfit).toBe(100);
+      expect(result.feesBreakdown.total).toBe(0);
+    });
+  });
+  
+  describe('applyKalshiYesFees', () => {
+    it('calculates YES contract fees correctly', () => {
+      // Stake $100 at 50c (even money)
+      const result = applyKalshiYesFees(100, 0.50);
+      
+      expect(result.profitBeforeFees).toBe(100); // 200 contracts - 100 cost
+      expect(result.feesBreakdown.openFee).toBe(1); // 1% of 100
+      expect(result.feesBreakdown.settleFee).toBe(4); // 2% of 200 contracts
+      expect(result.feesBreakdown.total).toBe(5);
+      expect(result.netProfit).toBe(95);
+      expect(result.payout).toBe(196); // 200 - 4 settle fee
+    });
+    
+    it('calculates YES contract fees for 25c (3:1 odds)', () => {
+      const result = applyKalshiYesFees(100, 0.25);
+      
+      expect(result.profitBeforeFees).toBe(300); // 400 contracts - 100 cost
+      expect(result.feesBreakdown.openFee).toBe(1);
+      expect(result.feesBreakdown.settleFee).toBe(8); // 2% of 400
+      expect(result.feesBreakdown.total).toBe(9);
+      expect(result.netProfit).toBe(291);
+    });
+    
+    it('uses custom fee structure', () => {
+      const result = applyKalshiYesFees(100, 0.50, 0.02, 0.03);
+      
+      expect(result.feesBreakdown.openFee).toBe(2); // 2% of 100
+      expect(result.feesBreakdown.settleFee).toBe(6); // 3% of 200
+      expect(result.netProfit).toBe(92);
+    });
+  });
+  
+  describe('applyKalshiNoFees', () => {
+    it('calculates NO contract fees correctly', () => {
+      // Stake $100 at 50c YES price (means 50c NO price)
+      // NO price = 1 - 0.50 = 0.50
+      const result = applyKalshiNoFees(100, 0.50);
+      
+      // Contracts = floor(100 / 0.50) = 200
+      // Cost = 200 * 0.50 = 100
+      // Gross profit = 0.50 * 200 = 100 (what you get if NO wins)
+      // Open fee = 100 * 0.01 = 1
+      // Settle fee = 100 * 0.02 = 2
+      // Net payout = 100 - 2 = 98
+      // Net profit = 98 - 101 = -3
+      
+      expect(result.profitBeforeFees).toBe(100);
+      expect(result.feesBreakdown.openFee).toBe(1);
+      expect(result.feesBreakdown.settleFee).toBe(2);
+      expect(result.feesBreakdown.total).toBe(3);
+      expect(result.netProfit).toBe(-3);
+    });
+    
+    it('calculates NO contract fees for 75c YES price', () => {
+      // NO price = 1 - 0.75 = 0.25
+      // Contracts = floor(100 / 0.25) = 400
+      // Cost = 400 * 0.25 = 100
+      // Gross profit = 0.75 * 400 = 300
+      const result = applyKalshiNoFees(100, 0.75);
+      
+      expect(result.profitBeforeFees).toBe(300);
+      expect(result.feesBreakdown.openFee).toBe(1);
+      expect(result.feesBreakdown.settleFee).toBe(6); // 2% of 300
+      expect(result.netProfit).toBe(193); // 300 - 6 - 101
+    });
+    
+    it('uses custom fee structure', () => {
+      const result = applyKalshiNoFees(100, 0.50, 0.02, 0.03);
+      
+      expect(result.feesBreakdown.openFee).toBe(2); // 2% of 100
+      expect(result.feesBreakdown.settleFee).toBe(3); // 3% of 100
+      expect(result.netProfit).toBe(-5);
+    });
+  });
+  
+  describe('applyCustomFeesUnified', () => {
+    it('applies custom openFee and winFee', () => {
+      // 2% open fee, 3% win fee
+      const result = applyCustomFeesUnified(100, 100, 0.02, 0.03);
+      
+      expect(result.profitBeforeFees).toBe(100);
+      expect(result.feesBreakdown.openFee).toBe(2); // 2% of stake
+      expect(result.feesBreakdown.winFee).toBe(3); // 3% of profit
+      expect(result.feesBreakdown.total).toBe(5);
+      expect(result.netProfit).toBe(95);
+      expect(result.payout).toBe(195);
+    });
+    
+    it('does not apply winFee on negative profit', () => {
+      const result = applyCustomFeesUnified(100, -50, 0.02, 0.03);
+      
+      expect(result.feesBreakdown.openFee).toBe(2);
+      expect(result.feesBreakdown.winFee).toBe(0);
+      expect(result.feesBreakdown.total).toBe(2);
+      expect(result.netProfit).toBe(-52);
+    });
+    
+    it('handles zero fees', () => {
+      const result = applyCustomFeesUnified(100, 100, 0, 0);
+      
+      expect(result.feesBreakdown.total).toBe(0);
+      expect(result.netProfit).toBe(100);
+    });
+    
+    it('handles high fees', () => {
+      const result = applyCustomFeesUnified(100, 100, 0.05, 0.10);
+      
+      expect(result.feesBreakdown.openFee).toBe(5);
+      expect(result.feesBreakdown.winFee).toBe(10);
+      expect(result.feesBreakdown.total).toBe(15);
+      expect(result.netProfit).toBe(85);
+    });
   });
 });
 
