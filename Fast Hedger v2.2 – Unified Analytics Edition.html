@@ -1,0 +1,1514 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fast Hedger v2.2 – Unified Analytics Edition</title>
+  <style>
+    :root{ --bg:#0b0c10; --card:#15171c; --ink:#e8e9ed; --muted:#a7abb4; --accent:#6cc4ff; --good:#69e48a; --bad:#ff7d7d; --warn:#e6b25c; --grid:#23252b; --fade:0.6; }
+    html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif}
+    *{box-sizing:border-box}
+
+    .wrap{max-width:1200px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:1fr 360px;gap:12px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    h1{font-size:18px;margin:0}
+    .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .btn.secondary{background:#2a2e37}
+    .card{background:var(--card);border:1px solid var(--grid);border-radius:12px;padding:12px}
+    .small{font-size:12px;color:var(--muted)}
+    .helper-text{font-size:11px;color:var(--muted);line-height:1.5;padding:8px;background:rgba(167,171,180,0.05);border-radius:6px;margin-top:8px}
+    .helper-text div{margin:2px 0}
+    .helper-text strong{color:#a7abb4;font-weight:600}
+    .divider{height:1px;background:var(--grid);margin:8px 0}
+
+    input,button,select{font:inherit}
+    input[type="number"],input[type="text"]{width:100%;padding:7px 9px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease}
+    input[type="text"].compact{padding:4px 6px;font-size:13px}
+    input::placeholder{color:#667085}
+    input.right{ text-align:right; font-variant-numeric:tabular-nums; }
+    .warn{border-color:var(--warn)!important}
+    .err{border-color:var(--bad)!important}
+    input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+    input[type=number]{ -moz-appearance:textfield }
+
+    /* Wagers table */
+    .rows-head, .row{display:grid;align-items:center;gap:6px}
+    .rows-head{grid-template-columns:minmax(44px,56px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px}
+    .row{grid-template-columns:minmax(44px,56px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px;margin:4px 0}
+    
+    /* Ghost row special layout */
+    .ghost-row{ 
+      border:2px solid var(--accent); 
+      border-radius:8px; 
+      padding:8px; 
+      background:rgba(108,196,255,.03);
+      margin: 8px 0;
+    }
+    .ghost-row input{ background:#0e1015; color:var(--accent); border-color:rgba(108,196,255,.2) }
+    .ghost-meta{ 
+      font-size:11px; 
+      color:var(--accent); 
+      opacity:.9; 
+      margin-top:6px;
+      padding: 4px 8px;
+      background: rgba(108,196,255,.1);
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    /* Format toggle for ghost row */
+    .format-toggle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+      padding:4px;
+      background:rgba(108,196,255,.05);
+      border-radius:6px;
+    }
+    .format-buttons{display:flex;gap:2px}
+    .format-btn{
+      background:#20242f;
+      border:1px solid #2a2e37;
+      color:#c7d0e0;
+      border-radius:4px;
+      padding:2px 6px;
+      font-size:10px;
+      cursor:pointer;
+    }
+    .format-btn.active{
+      background:#6cc4ff;
+      border-color:#6cc4ff;
+      color:#fff;
+    }
+    .format-readout{
+      font-size:10px;
+      color:#a7abb4;
+      opacity:0.8;
+    }
+    
+    .commit{background:#6cc4ff;border:1px solid #6cc4ff;color:#fff;border-radius:8px;cursor:pointer;height:32px;font-weight:bold;font-size:16px}
+    .clear{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:8px;cursor:pointer;height:32px}
+
+    .profit{ text-align:right; font-variant-numeric:tabular-nums; padding:7px 9px; border:1px solid var(--grid); border-radius:8px; background:#0f1116 }
+    .profit.pos{ color:var(--good) }
+    .profit.neg{ color:var(--bad) }
+
+    /* Odds field with sign toggle */
+    .odds-wrapper{
+      position:relative;
+      display:flex;
+      align-items:center;
+    }
+    .sign-toggle{
+      position:absolute;
+      right:2px;
+      top:50%;
+      transform:translateY(-50%);
+      width:20px;
+      height:20px;
+      border:1px solid #2a2e37;
+      border-radius:3px;
+      background:#20242f;
+      color:#c7d0e0;
+      cursor:pointer;
+      font-size:11px;
+      font-weight:bold;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:10;
+    }
+    .sign-toggle[data-sign="-"]{
+      background:#ff7d7d;
+      border-color:#ff7d7d;
+      color:#fff;
+    }
+    .odds-input{
+      padding-right:24px !important;
+    }
+    
+    /* Error message - properly positioned */
+    .error-text{
+      position:absolute;
+      top:calc(100% + 2px);
+      left:0;
+      right:24px; /* Account for smaller sign toggle */
+      font-size:10px;
+      color:var(--bad);
+      padding:3px 6px;
+      background:rgba(255,125,125,0.1);
+      border:1px solid rgba(255,125,125,0.2);
+      border-radius:4px;
+      display:none;
+      z-index:20;
+      white-space:normal;
+      line-height:1.3;
+    }
+    .error-text.show{
+      display:block;
+    }
+    
+    /* Ensure odds wrapper has enough space for error */
+    .odds-wrapper{
+      min-height:32px; /* Match input height */
+    }
+    
+    /* Adjust row spacing when error is shown */
+    .row:has(.error-text.show){
+      margin-bottom:24px;
+    }
+    
+    /* Ghost row error positioning */
+    .ghost-row .error-text{
+      position:absolute;
+      top:calc(100% + 2px);
+    }
+
+    /* Unified analytics section - clean two-column layout */
+    .analytics-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .side-column{
+      background:#101319;
+      border:1px solid var(--grid);
+      border-radius:10px;
+      padding:10px;
+    }
+    .side-header{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:8px;
+      padding-bottom:6px;
+      border-bottom:1px solid var(--grid);
+    }
+    .metric-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin:5px 0;
+      font-size:13px;
+    }
+    .metric-label{
+      color:var(--muted);
+      font-size:12px;
+    }
+    .metric-value{
+      font-variant-numeric:tabular-nums;
+      font-weight:500;
+    }
+    .metric-value.accent{
+      color:var(--accent);
+    }
+    .metric-value.good{
+      color:var(--good);
+    }
+    .metric-value.bad{
+      color:var(--bad);
+    }
+    .net-result{
+      margin-top:8px;
+      padding-top:8px;
+      border-top:1px solid var(--grid);
+    }
+    .net-value{
+      font-size:15px;
+      font-weight:bold;
+    }
+
+    /* Tablet: 600–899px */
+    @media (max-width: 899px){
+      .wrap{grid-template-columns:1fr}
+      .rows-head, .row{grid-template-columns:minmax(36px,48px) minmax(64px,90px) minmax(74px,110px) minmax(74px,110px) minmax(74px,110px) 28px}
+      .ghost-meta{ font-size:10px; }
+      .helper-text{ font-size:10px; padding:6px; }
+      
+      /* Even smaller sign toggle on narrow screens */
+      .sign-toggle{
+        width:18px;
+        height:18px;
+        font-size:10px;
+        right:1px;
+      }
+      .odds-input{
+        padding-right:20px !important;
+      }
+      .error-text{
+        right:20px; /* Adjust for smaller toggle */
+      }
+    }
+
+    /* Lines / scenarios */
+    .field-row{display:grid;grid-template-columns:80px 1fr;gap:6px;align-items:center;margin:4px 0}
+    .field-row label{color:var(--muted);font-size:12px}
+    .hint{font-size:10px;color:var(--muted);margin-top:3px}
+
+    .kpi{margin-top:10px}
+    .kpi-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .kcard{background:#101319;border:1px solid var(--grid);border-radius:10px;padding:10px}
+    .kcard h3{margin:0 0 6px;font-size:13px;color:var(--muted)}
+    .krow{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
+    .val{font-variant-numeric:tabular-nums}
+    .copy,.add{ width:24px; height:24px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; background:#20242f; border:1px solid #2a2e37; color:#c7d0e0; cursor:pointer; font-size:12px; line-height:1 }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section>
+      <header>
+        <h1>Wagers</h1>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="addRow">+ Add Wager (Ctrl+Enter)</button>
+          <button class="btn secondary" id="clearAll">Clear All</button>
+        </div>
+      </header>
+
+      <div class="card">
+        <div class="rows-head small">
+          <div>Side</div>
+          <div>Odds</div>
+          <div>Stake</div>
+          <div>Payout</div>
+          <div>Profit</div>
+          <div></div>
+        </div>
+        <div id="rows"></div>
+        <div id="ghostContainer"></div>
+        <div class="divider"></div>
+        <div class="helper-text">
+          <div><strong>Accept:</strong> American ±100+ • Kalshi 1-99c/.01-.99/1-99 • Decimal 1.01+ • 1-99% • 5/2 • even</div>
+          <div><strong>Parse:</strong> % → c/k → / → . → ± → int (1-99→Kalshi, 100→+100, 101+→use ±)</div>
+          <div><strong>Kalshi:</strong> 1% open + 2% settle fees • Contracts = floor(stake/price) • Net payout = N - settleFee</div>
+          <div><strong>Reject:</strong> American -99 to +99 • Decimal 1.00/negative • 0c/100c • Mixed 1.43c</div>
+          <div><strong>Keys:</strong> Enter→next • 1/2→side • ± chip→sign for 101+ • Typed -/dash OK</div>
+        </div>
+      </div>
+
+      <div style="height:8px"></div>
+      
+      <!-- Unified Analytics - Merged Position Analysis + Totals -->
+      <div class="card" id="unifiedAnalytics">
+        <div class="analytics-grid">
+          <!-- Side A Column -->
+          <div class="side-column" id="sideAColumn">
+            <div class="side-header">Side A</div>
+            <div class="metric-row">
+              <span class="metric-label">Total Stake</span>
+              <span class="metric-value" id="a_stake">$0.00</span>
+            </div>
+            <div class="metric-row" id="a_odds_row" style="display:none">
+              <span class="metric-label">Effective Odds</span>
+              <span class="metric-value accent" id="a_odds">-</span>
+            </div>
+            <div class="metric-row" id="a_prob_row" style="display:none">
+              <span class="metric-label">Breakeven</span>
+              <span class="metric-value" id="a_prob">-</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Total Profit</span>
+              <span class="metric-value" id="a_profit">$0.00</span>
+            </div>
+            <div class="metric-row net-result">
+              <span class="metric-label">Net if A wins</span>
+              <span class="metric-value net-value" id="a_net">$0.00</span>
+            </div>
+          </div>
+          
+          <!-- Side B Column -->
+          <div class="side-column" id="sideBColumn">
+            <div class="side-header">Side B</div>
+            <div class="metric-row">
+              <span class="metric-label">Total Stake</span>
+              <span class="metric-value" id="b_stake">$0.00</span>
+            </div>
+            <div class="metric-row" id="b_odds_row" style="display:none">
+              <span class="metric-label">Effective Odds</span>
+              <span class="metric-value accent" id="b_odds">-</span>
+            </div>
+            <div class="metric-row" id="b_prob_row" style="display:none">
+              <span class="metric-label">Breakeven</span>
+              <span class="metric-value" id="b_prob">-</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Total Profit</span>
+              <span class="metric-value" id="b_profit">$0.00</span>
+            </div>
+            <div class="metric-row net-result">
+              <span class="metric-label">Net if B wins</span>
+              <span class="metric-value net-value" id="b_net">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <div class="card">
+        <h1 style="font-size:16px;margin:0 0 8px">Lines & Cover</h1>
+        
+        <div style="margin-bottom:12px">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div>
+              <div class="field-row"><label class="small">Line A</label><input id="useA" type="text" placeholder="auto" class="right compact"></div>
+              <div class="field-row"><label class="small">Line B</label><input id="useB" type="text" placeholder="auto" class="right compact"></div>
+            </div>
+            <div>
+              <div class="field-row"><label class="small">Side A</label><input id="labelA" type="text" placeholder="Team A" class="compact"></div>
+              <div class="field-row"><label class="small">Side B</label><input id="labelB" type="text" placeholder="Team B" class="compact"></div>
+            </div>
+          </div>
+          <div class="hint">Auto from latest odds • type to override</div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="kpi-cols" style="margin-top:8px">
+          <div class="kcard">
+            <h3>Cover A = 0</h3>
+            <div class="krow"><span class="small">Stake on A</span><div><strong class="val" id="beaStake">$0.00</strong> <button class="copy" data-copy="beaStake">⧉</button> <button class="add" id="a0Add">+</button></div></div>
+            <div class="krow"><span class="small">Net if B wins</span><strong class="val" id="beaNetB">$0.00</strong></div>
+          </div>
+          <div class="kcard">
+            <h3>Cover B = 0</h3>
+            <div class="krow"><span class="small">Stake on B</span><div><strong class="val" id="bebStake">$0.00</strong> <button class="copy" data-copy="bebStake">⧉</button> <button class="add" id="b0Add">+</button></div></div>
+            <div class="krow"><span class="small">Net if A wins</span><strong class="val" id="bebNetA">$0.00</strong></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <template id="rowT">
+    <div class="row" data-row>
+      <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
+      <div class="odds-wrapper">
+        <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
+        <button class="sign-toggle" data-sign="+">+</button>
+        <div class="error-text"></div>
+      </div>
+      <input class="stake right" type="number" step="0.01" placeholder="0.00">
+      <input class="payout right" type="number" step="0.01" placeholder="auto">
+      <div class="profit">$0.00</div>
+      <button class="clear">×</button>
+    </div>
+  </template>
+
+  <template id="ghostT">
+    <div class="ghost-row">
+      <div class="format-toggle">
+        <div class="format-buttons">
+          <button class="format-btn active" data-format="american">AMER</button>
+          <button class="format-btn" data-format="decimal">DEC</button>
+          <button class="format-btn" data-format="kalshi">KAL</button>
+          <button class="format-btn" data-format="percent">%</button>
+        </div>
+        <div class="format-readout"></div>
+      </div>
+      <div class="row">
+        <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
+        <div class="odds-wrapper">
+          <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
+          <button class="sign-toggle" data-sign="+">+</button>
+          <div class="error-text"></div>
+        </div>
+        <input class="stake right" type="number" step="0.01" placeholder="0.00" readonly>
+        <input class="payout right" type="number" step="0.01" placeholder="auto" readonly>
+        <div class="profit">$0.00</div>
+        <button class="commit">+</button>
+      </div>
+      <div class="ghost-meta"></div>
+    </div>
+  </template>
+
+  <script>
+  (function(){
+    // Core state
+    const rowsEl = document.getElementById('rows');
+    const ghostContainer = document.getElementById('ghostContainer');
+    const rowT = document.getElementById('rowT');
+    const ghostT = document.getElementById('ghostT');
+    const state = { 
+      eq: {side:null, stake:0, odds:null, net:0}, 
+      a0: {stake:0, odds:null}, 
+      b0: {stake:0, odds:null} 
+    };
+    
+    // Ghost state (stored separately)
+    const ghostState = {
+      mode: "equalize",
+      side: null,
+      american: null,  // Canonical American odds
+      isKalshi: false, // Kalshi format flag
+      stake: 0,
+      targetTotal: 0,  // Target total stake on the side
+      displayFormat: "american"
+    };
+
+    // CRITICAL: Single parseOdds function for all entry points
+    // Detection order exactly as specified
+    // Rounding policy: Math.round (nearest integer) everywhere, not floor
+    // BOUNDARY: 50%, 50c, 0.50 all map to +100 (even money), not -100
+    function parseOdds(raw, signToggleValue = "+") {
+      if(raw == null) return null;
+      let t = String(raw).trim().toLowerCase();
+      
+      // Handle Unicode minus, en/em dashes -> ASCII minus
+      t = t.replace(/[\u2212\u2013\u2014]/g, '-');
+      t = t.replace(/\s+/g, "");
+      
+      if(!t || t === '' || t === '-') return null;
+      
+      // Check for mixed tokens FIRST before any parsing
+      // Reject any combination of different format markers
+      const hasPercent = t.includes('%');
+      const hasCents = /[ck]$/.test(t);
+      const hasFraction = t.includes('/');
+      const formatCount = [hasPercent, hasCents, hasFraction].filter(Boolean).length;
+      if(formatCount > 1) return null; // Mixed formats
+      
+      // Also reject specific problematic patterns
+      if(/\d+\.\d+[ck]/.test(t)) return null; // e.g., 1.43c
+      if(/\d+%[ck]/.test(t)) return null; // e.g., 70%c
+      
+      // Kalshi detection flags
+      let isKalshi = false;
+      
+      // 1. Ends with % → percent (0–100)
+      if(t.endsWith('%')) {
+        const percent = parseFloat(t.slice(0, -1));
+        if(!isFinite(percent) || percent <= 0 || percent >= 100) return null;
+        
+        // Special case: 50% = even money = +100
+        if(percent === 50) return 100;
+        
+        const p = percent / 100;
+        // Convert to American using round (not floor)
+        if(p > 0.5) {
+          return Math.round(-(p / (1 - p)) * 100);
+        } else {
+          return Math.round(((1 - p) / p) * 100);
+        }
+      }
+      
+      // 2. Ends with c or k → Kalshi cents (1–99 only)
+      if(t.endsWith('c') || t.endsWith('k')) {
+        isKalshi = true;
+        const cents = parseFloat(t.slice(0, -1));
+        if(!isFinite(cents) || cents <= 0 || cents >= 100) return null;
+        
+        // Special case: 50c = even money = +100
+        if(cents === 50) return 100;
+        
+        const p = cents / 100;
+        if(p > 0.5) {
+          return Math.round(-(p / (1 - p)) * 100);
+        } else {
+          return Math.round(((1 - p) / p) * 100);
+        }
+      }
+      
+      // 3. Contains / → fractional
+      if(t.includes('/')) {
+        const parts = t.split('/');
+        if(parts.length !== 2) return null;
+        const num = parseFloat(parts[0]);
+        const den = parseFloat(parts[1]);
+        if(!isFinite(num) || !isFinite(den) || num <= 0 || den <= 0) return null;
+        const decimal = 1 + (num / den);
+        if(decimal === 2) return 100;
+        if(decimal > 2) {
+          return Math.round((decimal - 1) * 100);
+        } else {
+          return Math.round(-100 / (decimal - 1));
+        }
+      }
+      
+      // 4. Contains . → check if Kalshi price or decimal
+      if(t.includes('.')) {
+        // Don't allow negative decimals
+        if(t.startsWith('-')) return null;
+        
+        const value = parseFloat(t);
+        if(!isFinite(value) || value <= 0) return null;
+        
+        if(value < 1) {
+          // Kalshi price (0.01 to 0.99)
+          isKalshi = true;
+          // Special case: 0.50, .50, .5 = even money = +100
+          // Using tolerance for floating point comparison
+          if(Math.abs(value - 0.5) < 0.000001) return 100;
+          
+          if(value > 0.5) {
+            return Math.round(-(value / (1 - value)) * 100);
+          } else {
+            return Math.round(((1 - value) / value) * 100);
+          }
+        } else if(value === 1.00) {
+          // Invalid decimal
+          return null;
+        } else {
+          // Decimal odds (≥1.01)
+          // Special case: 2.0, 2.00 = even money = +100
+          if(Math.abs(value - 2.0) < 0.000001) return 100;
+          
+          if(value > 2) {
+            return Math.round((value - 1) * 100);
+          } else {
+            return Math.round(-100 / (value - 1));
+          }
+        }
+      }
+      
+      // 5. Explicit +/− → American
+      if(t.startsWith('+') || t.startsWith('-')) {
+        const american = parseInt(t);
+        if(!isFinite(american)) return null;
+        
+        // Must be ≤ −100 or ≥ +100, with special case for exactly +100
+        if(american === 100) return 100;
+        if(american > -100 && american < 100) return null; // Reject -99 to +99
+        return american;
+      }
+      
+      // 6. Plain integer
+      const num = parseInt(t);
+      if(!isFinite(num) || num <= 0) return null;
+      
+      if(num >= 1 && num <= 99) {
+        // Kalshi cents - special case: 50 = even money = +100
+        isKalshi = true;
+        if(num === 50) return 100;
+        
+        const p = num / 100;
+        if(p > 0.5) {
+          return Math.round(-(p / (1 - p)) * 100);
+        } else {
+          return Math.round(((1 - p) / p) * 100);
+        }
+      } else if(num === 100) {
+        return 100;
+      } else if(num >= 101) {
+        // American with sign toggle
+        return signToggleValue === "-" ? -num : num;
+      }
+      
+      // Special cases
+      if(t === 'ev' || t === 'even') return 100;
+      
+      return null;
+    }
+
+    // Kalshi ledger function (drop-in)
+    const r2 = x => Math.round(x*100)/100;
+
+    /** Kalshi actual settlement model */
+    function kalshiLedger(S, p, fOpen=0.01, fSettle=0.02) {
+      const N = Math.floor(S / p);             // contracts
+      const cost = r2(N * p);                  // debited
+      const openFee = r2(cost * fOpen);        // debited
+      const settleFee = r2(N * fSettle);       // deducted
+      const netPayout = r2(N - settleFee);     // credited if win
+      const profit = r2(netPayout - (cost + openFee));
+      return { N, cost, openFee, settleFee, netPayout, profit };
+    }
+
+    // Enhanced parseOdds with Kalshi detection
+    function parseOddsWithKalshi(raw, signToggleValue = "+") {
+      const result = parseOdds(raw, signToggleValue);
+      
+      // Determine if input is Kalshi format
+      let isKalshi = false;
+      if(raw && result !== null) {
+        const t = String(raw).trim().toLowerCase();
+        
+        // Check for Kalshi indicators
+        if(t.endsWith('c') || t.endsWith('k')) {
+          isKalshi = true;
+        } else if(t.includes('.') && parseFloat(t) < 1) {
+          isKalshi = true;
+        } else if(/^\d{1,2}$/.test(t) && parseInt(t) >= 1 && parseInt(t) <= 99) {
+          isKalshi = true;
+        }
+      }
+      
+      return { american: result, isKalshi };
+    }
+
+    // Error checking function
+    function getOddsError(raw, signToggleValue = "+") {
+      if(!raw || raw.trim() === '') return null;
+      
+      const t = String(raw).trim().toLowerCase();
+      
+      // Check for mixed tokens
+      if(/\d+\.\d+[ck]/.test(t)) return "Invalid format: mixed tokens";
+      if(/\d+%[ck]/.test(t)) return "Invalid format: mixed tokens";
+      
+      // Check for invalid American range
+      if(/^[+-]?\d+$/.test(t)) {
+        const val = parseInt(t);
+        if(val > -100 && val < 100 && val !== 0) {
+          return "American odds must be ≤-100 or ≥+100";
+        }
+      }
+      
+      // Check for decimal 1.00
+      if(t === '1.00' || t === '1.0' || t === '1') {
+        if(t.includes('.')) return "Decimal 1.00 is invalid";
+      }
+      
+      // Check Kalshi bounds
+      if(t.endsWith('c') || t.endsWith('k')) {
+        const cents = parseFloat(t.slice(0, -1));
+        if(cents === 0) return "0c is invalid";
+        if(cents === 100) return "100c is invalid";
+      }
+      
+      // Check for negative decimals
+      if(t.startsWith('-') && t.includes('.')) {
+        const val = parseFloat(t);
+        if(val < 0) return "Negative decimal is invalid";
+      }
+      
+      // Check if parseOdds returns null
+      const {american: parsed} = parseOddsWithKalshi(raw, signToggleValue);
+      if(parsed === null && raw.trim() !== '') {
+        return "Invalid odds format";
+      }
+      
+      return null;
+    }
+
+    // Format conversions
+    function formatFromAmerican(american, format) {
+      if(american == null || !isFinite(american)) return '';
+      
+      if(format === "american") {
+        return american > 0 ? ("+" + american) : String(american);
+      }
+      
+      if(format === "decimal") {
+        if(american >= 100) {
+          return (1 + american/100).toFixed(2);
+        } else {
+          return (1 + 100/Math.abs(american)).toFixed(2);
+        }
+      }
+      
+      if(format === "kalshi") {
+        const p = american >= 100 ? 100/(american+100) : Math.abs(american)/(Math.abs(american)+100);
+        return Math.round(p * 100) + "c";
+      }
+      
+      if(format === "percent") {
+        const p = american >= 100 ? 100/(american+100) : Math.abs(american)/(Math.abs(american)+100);
+        return (p * 100).toFixed(1) + "%";
+      }
+      
+      return '';
+    }
+
+    // Profit per dollar calculation
+    function pPerDollar(american) {
+      if(american == null || !isFinite(american)) return null;
+      return american > 0 ? american/100 : 100/Math.abs(american);
+    }
+
+    // Money formatting
+    function money(x) {
+      return '$' + (isFinite(x) ? Math.abs(x).toFixed(2) : '0.00');
+    }
+
+    // Calculate effective/blended American odds for multiple bets on same side
+    function calculateEffectiveOdds(totalStake, totalProfit) {
+      if(totalStake <= 0) return null;
+      
+      const profitRatio = totalProfit / totalStake;
+      
+      // Convert profit ratio to American odds
+      // If profit ratio >= 1, it's positive American odds
+      // If profit ratio < 1, it's negative American odds
+      if(profitRatio >= 1) {
+        return Math.round(profitRatio * 100);
+      } else {
+        return Math.round(-100 / profitRatio);
+      }
+    }
+
+    // Calculate implied probability from American odds
+    function impliedProbability(american) {
+      if(american == null || !isFinite(american)) return null;
+      
+      if(american >= 100) {
+        return 100 / (american + 100);
+      } else {
+        return Math.abs(american) / (Math.abs(american) + 100);
+      }
+    }
+
+    // Debounce helper
+    function debounce(fn, ms = 20) {
+      let t;
+      return (...a) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...a), ms);
+      };
+    }
+
+    // Bind row interactions
+    function bindRow(el, isGhost = false) {
+      const side = el.querySelector('.side');
+      const oddsInput = el.querySelector('.odds');
+      const stake = el.querySelector('.stake');
+      const payout = el.querySelector('.payout');
+      const profit = el.querySelector('.profit');
+      const signToggle = el.querySelector('.sign-toggle');
+      const errorText = el.querySelector('.error-text');
+      const clearBtn = el.querySelector('.clear');
+      const commitBtn = el.querySelector('.commit');
+      const rowEl = el; // Store reference to row element
+
+      // Sign toggle interaction
+      if(signToggle) {
+        signToggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          const newSign = signToggle.dataset.sign === "+" ? "-" : "+";
+          signToggle.dataset.sign = newSign;
+          signToggle.textContent = newSign;
+          
+          // Update visual state
+          if(newSign === "-") {
+            signToggle.style.background = '#ff7d7d';
+            signToggle.style.borderColor = '#ff7d7d';
+            signToggle.style.color = '#fff';
+          } else {
+            signToggle.style.background = '#20242f';
+            signToggle.style.borderColor = '#2a2e37';
+            signToggle.style.color = '#c7d0e0';
+          }
+          
+          // Re-parse if we have a plain integer ≥101
+          const raw = oddsInput.value.trim();
+          if(/^\d+$/.test(raw) && parseInt(raw) >= 101) {
+            recalcDebounced();
+          }
+        });
+      }
+
+      // Handle odds input
+      oddsInput.addEventListener('input', () => {
+        const signValue = signToggle ? signToggle.dataset.sign : "+";
+        const error = getOddsError(oddsInput.value, signValue);
+        
+        // Reset opacity if it was showing calculated odds
+        if(oddsInput.style.opacity === '0.7') {
+          oddsInput.style.opacity = '1';
+        }
+        
+        if(errorText) {
+          if(error) {
+            errorText.textContent = error;
+            errorText.classList.add('show');
+            oddsInput.classList.add('err');
+          } else {
+            errorText.classList.remove('show');
+            oddsInput.classList.remove('err');
+          }
+        }
+        
+        if(isGhost) {
+          // If user types something, mark it
+          if(oddsInput.value.trim() !== '') {
+            oddsInput.dataset.userTyping = 'true';
+            // Update ghost state when user types
+            const {american: parsed, isKalshi} = parseOddsWithKalshi(oddsInput.value, signValue);
+            ghostState.american = parsed; // Can be null if invalid
+            ghostState.isKalshi = isKalshi;
+          } else {
+            // User cleared the field - go back to auto
+            oddsInput.dataset.userTyping = 'false';
+            ghostState.american = null;
+            ghostState.isKalshi = false;
+            // This will trigger recalc which will set auto odds
+          }
+        }
+        
+        recalcDebounced();
+      });
+
+      // Navigation
+      side.addEventListener('keydown', (e) => {
+        if(['1','2'].includes(e.key)) {
+          e.preventDefault();
+          side.value = e.key;
+          oddsInput.focus();
+        }
+        if(e.key === 'Enter') {
+          e.preventDefault();
+          oddsInput.focus();
+        }
+      });
+
+      oddsInput.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+          e.preventDefault();
+          stake.focus();
+        }
+      });
+
+      stake.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+          e.preventDefault();
+          if(isGhost) {
+            commitGhost();
+          } else {
+            payout.focus();
+          }
+        }
+      });
+
+      payout.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+          e.preventDefault();
+          if(isGhost) {
+            commitGhost();
+          } else {
+            // Move to next row's side field, or create new if last
+            const allRows = Array.from(rowsEl.querySelectorAll('[data-row]'));
+            const currentIndex = allRows.indexOf(el);
+            
+            if(currentIndex < allRows.length - 1) {
+              // Focus next row's side field
+              allRows[currentIndex + 1]._refs.side.focus();
+            } else {
+              // Last row - create new
+              const newRow = addRow();
+              newRow.querySelector('.side').focus();
+            }
+          }
+        }
+      });
+
+      // Clear/commit button
+      if(clearBtn && !isGhost) {
+        clearBtn.addEventListener('click', () => {
+          side.value = '';
+          oddsInput.value = '';
+          oddsInput.style.opacity = '1'; // Reset opacity
+          stake.value = '';
+          payout.value = '';
+          if(errorText) errorText.classList.remove('show');
+          oddsInput.classList.remove('err');
+          recalc();
+        });
+      }
+
+      if(commitBtn && isGhost) {
+        commitBtn.addEventListener('click', commitGhost);
+      }
+
+      // Update stake on change
+      stake.addEventListener('input', recalcDebounced);
+      
+      payout.addEventListener('input', recalcDebounced);
+
+      // Store refs
+      el._refs = {side, odds: oddsInput, stake, payout, profit, signToggle};
+    }
+
+    // Add regular row
+    function addRow() {
+      const el = rowT.content.cloneNode(true).firstElementChild;
+      bindRow(el, false);
+      rowsEl.appendChild(el);
+      recalc();
+      return el;
+    }
+
+    // Ghost row management
+    let currentGhost = null;
+
+    function createGhostRow() {
+      if(currentGhost) return currentGhost;
+      
+      const el = ghostT.content.cloneNode(true).firstElementChild;
+      currentGhost = el;
+      
+      // Bind format toggle
+      el.querySelectorAll('.format-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          el.querySelectorAll('.format-btn').forEach(b => {
+            b.classList.remove('active');
+          });
+          btn.classList.add('active');
+          ghostState.displayFormat = btn.dataset.format;
+          updateGhostDisplay();
+        });
+      });
+      
+      // Bind the row inside
+      const rowEl = el.querySelector('.row');
+      bindRow(rowEl, true);
+      
+      // Clear any typing flags
+      const oddsInput = rowEl._refs.odds;
+      if(oddsInput) {
+        oddsInput.dataset.userTyping = 'false';
+      }
+      
+      ghostContainer.appendChild(el);
+      updateGhostDisplay();
+      return el;
+    }
+
+    function removeGhostRow() {
+      if(currentGhost) {
+        currentGhost.remove();
+        currentGhost = null;
+        // Reset ghost state
+        ghostState.american = null;
+        ghostState.isKalshi = false;
+        ghostState.stake = 0;
+        ghostState.targetTotal = 0;
+        ghostState.side = null;
+      }
+    }
+
+    function updateGhostDisplay() {
+      if(!currentGhost) return;
+      
+      const rowEl = currentGhost.querySelector('.row');
+      const oddsInput = rowEl._refs.odds;
+      const stakeInput = rowEl._refs.stake;
+      const profitEl = rowEl._refs.profit;
+      const formatReadout = currentGhost.querySelector('.format-readout');
+      const meta = currentGhost.querySelector('.ghost-meta');
+      const errorText = currentGhost.querySelector('.error-text');
+      
+      // Update side
+      if(rowEl._refs.side && ghostState.side) {
+        rowEl._refs.side.value = String(ghostState.side);
+      }
+      
+      // Update odds display if not currently being typed by user
+      if(ghostState.american !== null && oddsInput.dataset.userTyping !== 'true') {
+        oddsInput.value = formatFromAmerican(ghostState.american, ghostState.displayFormat);
+      }
+      
+      // Update stake (keep internal precision, round only for display)
+      stakeInput.value = ghostState.stake > 0 ? ghostState.stake.toFixed(2) : '';
+      
+      // Calculate and show profit for ghost row
+      if(ghostState.american !== null && ghostState.stake > 0) {
+        const p = pPerDollar(ghostState.american);
+        if(p !== null) {
+          const profit = ghostState.stake * p;
+          profitEl.textContent = money(profit);
+          profitEl.classList.toggle('pos', profit >= 0);
+          profitEl.classList.toggle('neg', profit < 0);
+        }
+      } else {
+        profitEl.textContent = money(0);
+        profitEl.classList.remove('pos', 'neg');
+      }
+      
+      // Update format readout
+      if(ghostState.american !== null) {
+        const formats = ['american', 'decimal', 'kalshi', 'percent']
+          .filter(f => f !== ghostState.displayFormat)
+          .map(f => formatFromAmerican(ghostState.american, f))
+          .join(' | ');
+        formatReadout.textContent = formats;
+      } else {
+        formatReadout.textContent = '';
+      }
+      
+      // Update meta
+      if(meta && ghostState.side && ghostState.american !== null && ghostState.stake > 0) {
+        const sideLabel = ghostState.side === 1 ? "Side A" : "Side B";
+        const oddsStr = formatFromAmerican(ghostState.american, 'american');
+        
+        // Show both target total and delta to add
+        if(ghostState.targetTotal > 0) {
+          const targetStr = ghostState.targetTotal.toFixed(2);
+          const deltaStr = ghostState.stake.toFixed(2);
+          meta.textContent = `Target total on ${sideLabel}: ${targetStr} @ ${oddsStr}. Add ${deltaStr} to equalize.`;
+        } else {
+          meta.textContent = `Add ${ghostState.stake.toFixed(2)} on ${sideLabel} @ ${oddsStr} to equalize`;
+        }
+      } else {
+        meta.textContent = '';
+      }
+
+      // Update error text
+      if(errorText) {
+        const signValue = rowEl._refs.signToggle ? rowEl._refs.signToggle.dataset.sign : "+";
+        const error = getOddsError(oddsInput.value, signValue);
+        if(error) {
+          errorText.textContent = error;
+          errorText.classList.add('show');
+          oddsInput.classList.add('err');
+        } else {
+          errorText.classList.remove('show');
+          oddsInput.classList.remove('err');
+        }
+      }
+    }
+
+    // CRITICAL: Correct equalization formula for mixed odds
+    // Uses actual current profits/stakes, not assuming homogeneous odds
+    // Formula: Δ = (Profit_A + Stake_A - Profit_B - Stake_B) / d_new
+    // This handles existing wagers at different odds correctly
+    function recomputeGhostStake() {
+      const rows = readRows();
+      const sum = (side, field) => rows.filter(r => r.side === side).reduce((a, b) => a + (b[field] || 0), 0);
+      
+      const stakeA = sum(1, 'stake');
+      const stakeB = sum(2, 'stake');
+      const profitA = sum(1, 'profit');
+      const profitB = sum(2, 'profit');
+      
+      const netA = profitA - stakeB;
+      const netB = profitB - stakeA;
+      
+      // Already balanced
+      if(Math.abs(netA - netB) < 0.01) {
+        ghostState.side = null;
+        ghostState.stake = 0;
+        ghostState.targetTotal = 0;
+        return;
+      }
+      
+      // Calculate the delta needed to equalize
+      if(ghostState.american !== null) {
+        // Convert American to decimal odds
+        const decimalOdds = ghostState.american >= 100 
+          ? 1 + ghostState.american / 100 
+          : 1 + 100 / Math.abs(ghostState.american);
+        
+        // General equalization formula that handles mixed odds correctly:
+        // To equalize nets, we need: Net_A_new = Net_B_new
+        // Net_A_new = Profit_A - (Stake_B + Δ) if betting on B
+        // Net_B_new = (Profit_B + Δ*(d-1)) - Stake_A if betting on B
+        // Setting equal and solving for Δ:
+        // Δ = (Profit_A + Stake_A - Profit_B - Stake_B) / d
+        
+        if(netA > netB || (stakeA > 0 && stakeB === 0)) {
+          // Need to bet on side 2 (B) to equalize
+          ghostState.side = 2;
+          const delta = (profitA + stakeA - profitB - stakeB) / decimalOdds;
+          ghostState.stake = Math.max(0, delta);
+          // For display purposes, show the target total
+          ghostState.targetTotal = stakeB + ghostState.stake;
+        } else if(netB > netA || (stakeB > 0 && stakeA === 0)) {
+          // Need to bet on side 1 (A) to equalize
+          ghostState.side = 1;
+          const delta = (profitB + stakeB - profitA - stakeA) / decimalOdds;
+          ghostState.stake = Math.max(0, delta);
+          // For display purposes, show the target total
+          ghostState.targetTotal = stakeA + ghostState.stake;
+        }
+      } else {
+        ghostState.side = null;
+        ghostState.stake = 0;
+        ghostState.targetTotal = 0;
+      }
+      
+      // Update the ghost row's side field if it exists
+      if(currentGhost && currentGhost.querySelector('.row')) {
+        const rowEl = currentGhost.querySelector('.row');
+        rowEl._refs.side.value = ghostState.side || '';
+      }
+    }
+
+    function commitGhost() {
+      if(!currentGhost || !ghostState.side || !ghostState.american || !ghostState.stake) return;
+      
+      // Create real row with ghost values
+      const newRow = addRow();
+      newRow._refs.side.value = String(ghostState.side);
+      
+      // Use original input format if Kalshi, otherwise American
+      if(ghostState.isKalshi) {
+        // Try to preserve original Kalshi format
+        const originalInput = currentGhost.querySelector('.odds').value;
+        newRow._refs.odds.value = originalInput;
+      } else {
+        newRow._refs.odds.value = formatFromAmerican(ghostState.american, 'american');
+      }
+      
+      newRow._refs.stake.value = ghostState.stake.toFixed(2);  // Use precise stake value
+      
+      // Clear typing flag on ghost odds input
+      const ghostOddsInput = currentGhost.querySelector('.odds');
+      if(ghostOddsInput) {
+        ghostOddsInput.dataset.userTyping = 'false';
+        ghostOddsInput.value = '';
+      }
+      
+      // Reset ghost state
+      ghostState.american = null;
+      ghostState.isKalshi = false;
+      ghostState.stake = 0;
+      ghostState.targetTotal = 0;
+      ghostState.side = null;
+      
+      recalc();
+    }
+
+    // Read all rows (excluding ghost)
+    function readRows() {
+      const rows = [];
+      rowsEl.querySelectorAll('[data-row]').forEach((el, idx) => {
+        const {side, odds, stake, payout, profit, signToggle} = el._refs;
+        const s = side.value === '2' ? 2 : 1;
+        const signValue = signToggle ? signToggle.dataset.sign : "+";
+        
+        // Check if user manually entered odds
+        const userEnteredOdds = odds.value.trim() !== '' && odds.style.opacity !== '0.7';
+        const {american: od, isKalshi} = userEnteredOdds ? parseOddsWithKalshi(odds.value, signValue) : {american: null, isKalshi: false};
+        
+        const st = stake.value !== '' ? Number(stake.value) : 0;
+        const po = payout.value !== '' ? Number(payout.value) : null;
+        
+        let pf = 0, pay = 0;
+        let effectiveOdds = od; // Store the effective odds (either entered or calculated)
+        
+        if(od !== null && st > 0) {
+          // Odds and stake entered
+          if(isKalshi) {
+            // Use Kalshi payout engine
+            const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
+            const {netPayout, profit: kalshiProfit} = kalshiLedger(st, price);
+            pf = kalshiProfit;
+            pay = netPayout; // Use net payout (after settle fee)
+          } else {
+            // Existing American / Decimal / % logic
+            const p = pPerDollar(od);
+            if(p !== null) {
+              pf = st * p;
+              pay = st + pf;
+            }
+          }
+          
+          // Make sure opacity is normal for user-entered odds
+          if(odds.style.opacity === '0.7') {
+            odds.style.opacity = '1';
+          }
+        } else if(po !== null && st > 0 && !userEnteredOdds) {
+          // Stake and payout entered (no user-entered odds) - calculate implied odds
+          pay = po;
+          pf = pay - st;
+          
+          // Calculate implied American odds from stake and profit
+          if(st > 0) {
+            const profitRatio = pf / st;
+            
+            if(profitRatio > 0) {
+              // Positive profit
+              if(profitRatio >= 1) {
+                effectiveOdds = Math.round(profitRatio * 100);
+              } else {
+                effectiveOdds = Math.round(-100 / profitRatio);
+              }
+              
+              // Display the calculated odds in the odds field
+              odds.value = formatFromAmerican(effectiveOdds, 'american');
+              odds.style.opacity = '0.7'; // Visual indicator it's calculated
+            } else if(profitRatio === 0) {
+              // Break even = +100 (even money)
+              effectiveOdds = 100;
+              odds.value = '+100';
+              odds.style.opacity = '0.7';
+            } else {
+              // Negative profit (losing bet) - clear any calculated odds
+              if(odds.style.opacity === '0.7') {
+                odds.value = '';
+                odds.style.opacity = '1';
+              }
+              effectiveOdds = null;
+            }
+          }
+        } else if(!od && !po) {
+          // No odds or payout - clear any calculated display
+          if(odds.style.opacity === '0.7') {
+            odds.value = '';
+            odds.style.opacity = '1';
+          }
+        }
+        
+        profit.textContent = money(pf);
+        profit.classList.toggle('pos', pf >= 0);
+        profit.classList.toggle('neg', pf < 0);
+        
+        rows.push({
+          idx: idx + 1, 
+          el, 
+          side: s, 
+          odds: effectiveOdds,  // Use effective odds (entered or calculated)
+          stake: st, 
+          profit: pf, 
+          payout: pay, 
+          isKalshi
+        });
+      });
+      return rows;
+    }
+
+    // Main recalc function
+    function recalc() {
+      const rows = readRows();
+      const sum = (side, field) => rows.filter(r => r.side === side).reduce((a, b) => a + (b[field] || 0), 0);
+      
+      const stakeA = sum(1, 'stake');
+      const stakeB = sum(2, 'stake');
+      const profitA = sum(1, 'profit');
+      const profitB = sum(2, 'profit');
+      
+      const netA = profitA - stakeB;
+      const netB = profitB - stakeA;
+      
+      // Update unified analytics display
+      document.getElementById('a_stake').textContent = money(stakeA);
+      document.getElementById('b_stake').textContent = money(stakeB);
+      document.getElementById('a_profit').textContent = money(profitA);
+      document.getElementById('b_profit').textContent = money(profitB);
+      
+      document.getElementById('a_net').textContent = money(netA);
+      document.getElementById('b_net').textContent = money(netB);
+      document.getElementById('a_net').classList.toggle('good', netA >= 0);
+      document.getElementById('a_net').classList.toggle('bad', netA < 0);
+      document.getElementById('b_net').classList.toggle('good', netB >= 0);
+      document.getElementById('b_net').classList.toggle('bad', netB < 0);
+      
+      // Calculate and show effective odds if there are stakes
+      const effectiveA = calculateEffectiveOdds(stakeA, profitA);
+      const effectiveB = calculateEffectiveOdds(stakeB, profitB);
+      
+      // Side A effective odds
+      if(stakeA > 0 && effectiveA !== null) {
+        document.getElementById('a_odds_row').style.display = 'flex';
+        document.getElementById('a_prob_row').style.display = 'flex';
+        document.getElementById('a_odds').textContent = formatFromAmerican(effectiveA, 'american');
+        const probA = impliedProbability(effectiveA);
+        document.getElementById('a_prob').textContent = probA ? (probA * 100).toFixed(1) + '%' : '-';
+      } else {
+        document.getElementById('a_odds_row').style.display = 'none';
+        document.getElementById('a_prob_row').style.display = 'none';
+      }
+      
+      // Side B effective odds
+      if(stakeB > 0 && effectiveB !== null) {
+        document.getElementById('b_odds_row').style.display = 'flex';
+        document.getElementById('b_prob_row').style.display = 'flex';
+        document.getElementById('b_odds').textContent = formatFromAmerican(effectiveB, 'american');
+        const probB = impliedProbability(effectiveB);
+        document.getElementById('b_prob').textContent = probB ? (probB * 100).toFixed(1) + '%' : '-';
+      } else {
+        document.getElementById('b_odds_row').style.display = 'none';
+        document.getElementById('b_prob_row').style.display = 'none';
+      }
+      
+      // Update Lines & Cover calculations
+      const useA = document.getElementById('useA');
+      const useB = document.getElementById('useB');
+      
+      // Get latest odds for each side (either entered directly or calculated from payout)
+      let latestA = null, latestB = null;
+      for(let i = rows.length - 1; i >= 0; i--) {
+        if(!latestA && rows[i].side === 1 && rows[i].odds !== null) latestA = rows[i].odds;
+        if(!latestB && rows[i].side === 2 && rows[i].odds !== null) latestB = rows[i].odds;
+        if(latestA && latestB) break;
+      }
+      
+      const lineA = useA.value ? parseOddsWithKalshi(useA.value).american : latestA;
+      const lineB = useB.value ? parseOddsWithKalshi(useB.value).american : latestB;
+      
+      // Update placeholders to show calculated odds too
+      if(latestA !== null) useA.placeholder = formatFromAmerican(latestA, 'american');
+      if(latestB !== null) useB.placeholder = formatFromAmerican(latestB, 'american');
+      
+      // Cover calculations
+      const pA = pPerDollar(lineA);
+      const pB = pPerDollar(lineB);
+      
+      let coverAStake = 0;
+      if(pA !== null && netA < 0) {
+        coverAStake = Math.abs(netA) / pA;
+      }
+      
+      let coverBStake = 0;
+      if(pB !== null && netB < 0) {
+        coverBStake = Math.abs(netB) / pB;
+      }
+      
+      document.getElementById('beaStake').textContent = money(coverAStake);
+      document.getElementById('bebStake').textContent = money(coverBStake);
+      document.getElementById('beaNetB').textContent = money(netB - coverAStake);
+      document.getElementById('bebNetA').textContent = money(netA - coverBStake);
+      
+      // Ghost row logic
+      // Ghost should appear when we have a position on one side and odds available on the other
+      const hasPositionA = stakeA > 0;
+      const hasPositionB = stakeB > 0;
+      
+      // Check if we have odds available for each side (either entered or calculated from payout)
+      const hasOddsA = rows.some(r => r.side === 1 && r.odds !== null) || lineA !== null;
+      const hasOddsB = rows.some(r => r.side === 2 && r.odds !== null) || lineB !== null;
+      
+      // Show ghost if:
+      // 1. We have stake on side A and odds on side B, OR
+      // 2. We have stake on side B and odds on side A, OR  
+      // 3. We have stakes on both sides with imbalance
+      const needsGhost = (
+        (hasPositionA && !hasPositionB && hasOddsB) ||  // Stake on A only, but odds exist for B
+        (hasPositionB && !hasPositionA && hasOddsA) ||  // Stake on B only, but odds exist for A
+        (hasPositionA && hasPositionB && Math.abs(netA - netB) > 0.01)  // Stakes on both with imbalance
+      );
+      
+      if(needsGhost) {
+        const ghostCreated = !currentGhost;
+        if(ghostCreated) {
+          createGhostRow();
+        }
+        
+        // Determine which side needs equalizing
+        let neededSide;
+        if(hasPositionA && !hasPositionB) {
+          neededSide = 2;  // Need to bet on B to balance
+        } else if(hasPositionB && !hasPositionA) {
+          neededSide = 1;  // Need to bet on A to balance
+        } else {
+          // Have positions on both sides - bet on the side that increases the lower net
+          // If netA > netB, we need to increase netB (bet on side B)
+          // If netB > netA, we need to increase netA (bet on side A)
+          neededSide = netA > netB ? 2 : 1;
+        }
+        
+        // Get the odds for the needed side (check all sources)
+        let neededOdds = neededSide === 1 ? lineA : lineB;
+        
+        // If no line odds, get latest odds (entered or calculated) from rows
+        if(!neededOdds) {
+          const sideRows = rows.filter(r => r.side === neededSide && r.odds !== null);
+          if(sideRows.length > 0) {
+            neededOdds = sideRows[sideRows.length - 1].odds;
+          }
+        }
+        
+        // Update side
+        ghostState.side = neededSide;
+        
+        // Set odds if: just created OR side changed OR no odds currently set
+        // But respect user input if they've typed something
+        const ghostOddsInput = currentGhost ? currentGhost.querySelector('.odds') : null;
+        const userHasInput = ghostOddsInput && ghostOddsInput.dataset.userTyping === 'true';
+        
+        if(!userHasInput) {
+          // No user input, use auto odds
+          if(neededOdds) {
+            ghostState.american = neededOdds;
+          } else if(!ghostState.american) {
+            // No odds available and no stored odds - can't calculate
+            ghostState.american = null;
+            ghostState.stake = 0;
+          }
+        }
+        // If user has input, ghostState.american is already set from the input handler
+        
+        // Always recompute stake
+        recomputeGhostStake();
+        updateGhostDisplay();
+      } else {
+        removeGhostRow();
+      }
+      
+      // Store state for cover buttons
+      state.a0 = {stake: coverAStake, odds: lineA};
+      state.b0 = {stake: coverBStake, odds: lineB};
+    }
+
+    const recalcDebounced = debounce(recalc, 20);
+
+    // Event listeners
+    document.getElementById('addRow').addEventListener('click', () => {
+      const r = addRow();
+      r.querySelector('.side').focus();
+    });
+
+    document.getElementById('clearAll').addEventListener('click', () => {
+      rowsEl.innerHTML = '';
+      removeGhostRow();
+      document.getElementById('useA').value = '';
+      document.getElementById('useB').value = '';
+      document.getElementById('labelA').value = '';
+      document.getElementById('labelB').value = '';
+      addRow();
+      recalc();
+    });
+
+    // Copy buttons
+    document.addEventListener('click', (e) => {
+      const copy = e.target.closest('.copy');
+      if(copy) {
+        const id = copy.getAttribute('data-copy');
+        const val = document.getElementById(id).textContent.replace(/[^\d.]/g, '');
+        navigator.clipboard?.writeText(val);
+      }
+      
+      const add = e.target.closest('.add');
+      if(add) {
+        if(add.id === 'a0Add') {
+          const r = addRow();
+          r._refs.side.value = '1';
+          r._refs.odds.value = state.a0.odds ? formatFromAmerican(state.a0.odds, 'american') : '';
+          r._refs.stake.value = state.a0.stake.toFixed(2);
+          recalc();
+        } else if(add.id === 'b0Add') {
+          const r = addRow();
+          r._refs.side.value = '2';
+          r._refs.odds.value = state.b0.odds ? formatFromAmerican(state.b0.odds, 'american') : '';
+          r._refs.stake.value = state.b0.stake.toFixed(2);
+          recalc();
+        }
+      }
+    });
+
+    // Handle Line A/B inputs
+    ['useA', 'useB'].forEach(id => {
+      const input = document.getElementById(id);
+      input.addEventListener('input', () => {
+        const error = getOddsError(input.value);
+        if(error) {
+          input.classList.add('err');
+          input.title = error;
+        } else {
+          input.classList.remove('err');
+          input.title = '';
+        }
+        recalcDebounced();
+      });
+    });
+    
+    ['labelA', 'labelB'].forEach(id => {
+      document.getElementById(id).addEventListener('input', recalcDebounced);
+    });
+
+    // Ctrl+Enter to add row
+    document.addEventListener('keydown', (e) => {
+      if(e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        const r = addRow();
+        r.querySelector('.side').focus();
+      }
+    });
+
+    // Initialize with one empty row
+    addRow();
+    recalc();
+  })();
+  </script>
+</body>
+</html>
