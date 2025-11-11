@@ -274,11 +274,39 @@ test.describe('Fast Hedger v2.3', () => {
     await expect(page.locator('[data-row]')).toHaveCount(2);
     
     // Delete first row
-    await page.locator('[data-row]').first().locator('.clear').click();
+    await page.locator('[data-row]').first().locator('.delete-btn').click();
     
     // Should only have one row left
     await expect(page.locator('[data-row]')).toHaveCount(1);
     await expect(page.locator('[data-row]').first().locator('.side')).toHaveValue('2');
+  });
+
+  test('Clear button zeros stake but keeps book and odds', async ({ page }) => {
+    // Fill in row with complete data
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.sportsbook').fill('DraftKings');
+    await page.locator('[data-row]').first().locator('.odds').fill('+150');
+    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    
+    // Verify profit is calculated
+    await expect(page.locator('[data-row]').first().locator('.profit')).toContainText('$150.00');
+    
+    // Click clear button
+    await page.locator('[data-row]').first().locator('.clear-btn').click();
+    
+    // Row should still exist
+    await expect(page.locator('[data-row]')).toHaveCount(1);
+    
+    // Book and odds should be preserved
+    await expect(page.locator('[data-row]').first().locator('.sportsbook')).toHaveValue('DraftKings');
+    await expect(page.locator('[data-row]').first().locator('.odds')).toHaveValue('+150');
+    
+    // Stake and payout should be cleared
+    await expect(page.locator('[data-row]').first().locator('.stake')).toHaveValue('');
+    await expect(page.locator('[data-row]').first().locator('.payout')).toHaveValue('');
+    
+    // Profit should be $0.00
+    await expect(page.locator('[data-row]').first().locator('.profit')).toContainText('$0.00');
   });
 
   test('Lines & Cover parity after commit', async ({ page }) => {
