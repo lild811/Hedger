@@ -214,8 +214,11 @@ export function parseOddsWithKalshi(raw: any, signToggleValue: string = "+"): Pa
     // Check for Kalshi indicators
     if (t.endsWith('c') || t.endsWith('k')) {
       isKalshi = true;
-    } else if (t.includes('.') && parseFloat(t) < 1) {
-      isKalshi = true;
+    } else if (t.includes('.')) {
+      const val = parseFloat(t);
+      if (!isNaN(val) && val < 1) {
+        isKalshi = true;
+      }
     } else if (/^\d{1,2}$/.test(t) && parseInt(t) >= 1 && parseInt(t) <= 99) {
       isKalshi = true;
     }

@@ -293,7 +293,6 @@ test.describe('Fast Hedger v2.3', () => {
     
     // Get Summary net values before commit
     const netABefore = await page.locator('#a_net').textContent();
-    const netBBefore = await page.locator('#b_net').textContent();
     
     // Commit the ghost row
     await page.locator('.ghost-row .commit').click();

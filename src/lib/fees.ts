@@ -47,6 +47,11 @@ export function kalshiLedger(
   fOpen: number = DEFAULT_KALSHI_FEES.openFee,
   fSettle: number = DEFAULT_KALSHI_FEES.settleFee
 ): KalshiLedger {
+  // Validate price to avoid division by zero and out-of-range values
+  if (price <= 0 || price >= 1) {
+    throw new Error('Invalid Kalshi price: must be between 0.01 and 0.99');
+  }
+  
   // Number of contracts = floor(stake / price)
   const contracts = Math.floor(stake / price);
   
@@ -87,6 +92,11 @@ export function kalshiEffectiveOdds(price: number, fees: FeeStructure = DEFAULT_
   // Calculate profit ratio
   const totalInvested = ledger.cost + ledger.openFee;
   const profitRatio = ledger.profit / totalInvested;
+  
+  // Validate profit ratio
+  if (profitRatio <= 0) {
+    throw new Error('Invalid profit ratio for odds calculation: must be positive');
+  }
   
   // Convert to American odds
   if (profitRatio >= 1) {
