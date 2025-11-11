@@ -1,0 +1,14 @@
+{
+  "name": "hedger",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --reporter=verbose",
+    "test:e2e": "playwright test",
+    "ci": "npm run test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "vitest": "^2.1.3"
+  }
+}
