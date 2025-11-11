@@ -921,6 +921,9 @@
             ghostState.isKalshi = false;
             // This will trigger recalc which will set auto odds
           }
+        } else {
+          // Regular row - save state on change
+          debouncedSave();
         }
         
         recalcDebounced();
@@ -931,10 +934,12 @@
         if(['1','2'].includes(e.key)) {
           e.preventDefault();
           side.value = e.key;
+          if(!isGhost) debouncedSave();
           oddsInput.focus();
         }
         if(e.key === 'Enter') {
           e.preventDefault();
+          if(!isGhost) debouncedSave();
           oddsInput.focus();
         }
       });
@@ -1003,13 +1008,22 @@
       }
 
       // Update stake on change
-      stake.addEventListener('input', recalcDebounced);
+      stake.addEventListener('input', () => {
+        recalcDebounced();
+        if(!isGhost) debouncedSave();
+      });
       
-      payout.addEventListener('input', recalcDebounced);
+      payout.addEventListener('input', () => {
+        recalcDebounced();
+        if(!isGhost) debouncedSave();
+      });
       
       // Update sportsbook on change (triggers recalc for ProphetX fees)
       if(sportsbook) {
-        sportsbook.addEventListener('input', recalcDebounced);
+        sportsbook.addEventListener('input', () => {
+          recalcDebounced();
+          if(!isGhost) debouncedSave();
+        });
       }
 
       // Store refs
@@ -1656,6 +1670,9 @@
         console.error('Failed to save state:', e);
       }
     }
+    
+    // Debounced save for input changes
+    const debouncedSave = debounce(saveCurrentState, 500);
     
     function restoreState(state) {
       if(!state) return;

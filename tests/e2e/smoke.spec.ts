@@ -26,11 +26,18 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('can add a wager with Kalshi format', async ({ page }) => {
+    // Turn on Kalshi mode first
+    await page.locator('#kalshiToggle').click();
+    await page.waitForTimeout(100);
+    
     await page.locator('[data-row]').first().locator('.side').fill('1');
     await page.locator('[data-row]').first().locator('.odds').fill('25c');
     await page.locator('[data-row]').first().locator('.stake').fill('100');
     
-    // Kalshi 25c = +300 American, but with fees
+    // Wait for calculation
+    await page.waitForTimeout(200);
+    
+    // Kalshi 25c = +300 American, but with fees (1% open + 2% settle)
     // Check that profit is calculated (should be ~291 based on our test)
     const profit = page.locator('[data-row]').first().locator('.profit');
     await expect(profit).toContainText('$291');
@@ -200,17 +207,27 @@ test.describe('Fast Hedger v2.3', () => {
     // Add a wager
     await page.locator('[data-row]').first().locator('.side').fill('1');
     await page.locator('[data-row]').first().locator('.odds').fill('+150');
+    
+    // Wait for auto-save to trigger
+    await page.waitForTimeout(300);
+    
     await page.locator('[data-row]').first().locator('.stake').fill('100');
     
-    // Undo button should be enabled
+    // Wait for state to be saved
+    await page.waitForTimeout(300);
+    
+    // Undo button should be enabled after changes
     await expect(page.locator('#undoBtn')).not.toBeDisabled();
     
     // Click undo
     await page.locator('#undoBtn').click();
     
-    // Row should be cleared
-    const side = page.locator('[data-row]').first().locator('.side');
-    await expect(side).toHaveValue('');
+    // Wait for undo to process
+    await page.waitForTimeout(100);
+    
+    // Stake should be cleared (undone)
+    const stake = page.locator('[data-row]').first().locator('.stake');
+    await expect(stake).toHaveValue('');
     
     // Redo button should be enabled
     await expect(page.locator('#redoBtn')).not.toBeDisabled();
@@ -218,8 +235,11 @@ test.describe('Fast Hedger v2.3', () => {
     // Click redo
     await page.locator('#redoBtn').click();
     
-    // Row should be restored
-    await expect(side).toHaveValue('1');
+    // Wait for redo
+    await page.waitForTimeout(100);
+    
+    // Stake should be restored
+    await expect(stake).toHaveValue('100');
   });
 
   test('CSV export and import round-trip', async ({ page }) => {
