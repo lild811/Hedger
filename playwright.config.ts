@@ -1,0 +1,10 @@
+import { defineConfig } from '@playwright/test';
+export default defineConfig({
+  testDir: 'tests/e2e',
+  use: { headless: true },
+  webServer: {
+    command: 'npx http-server . -p 5173 -c-1',
+    url: 'http://localhost:5173/index.html',
+    reuseExistingServer: !process.env.CI
+  }
+});
