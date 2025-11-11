@@ -31,10 +31,10 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ -moz-appearance:textfield }
 
-    /* Wagers table */
+    /* Wagers table - now includes sportsbook column */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(44px,56px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px}
-    .row{grid-template-columns:minmax(44px,56px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px;margin:4px 0}
+    .rows-head{grid-template-columns:minmax(44px,56px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px}
+    .row{grid-template-columns:minmax(44px,56px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px;margin:4px 0}
     
     /* Ghost row special layout */
     .ghost-row{ 
@@ -252,11 +252,43 @@
     .krow{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
     .val{font-variant-numeric:tabular-nums}
     .copy,.add{ width:24px; height:24px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; background:#20242f; border:1px solid #2a2e37; color:#c7d0e0; cursor:pointer; font-size:12px; line-height:1 }
+    
+    /* Settings and controls */
+    .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
+    .toggle-wrapper{display:flex;align-items:center;gap:6px}
+    .toggle{position:relative;width:36px;height:20px;background:#2a2e37;border-radius:10px;cursor:pointer;transition:background .2s}
+    .toggle.active{background:var(--accent)}
+    .toggle-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s}
+    .toggle.active .toggle-knob{left:18px}
+    .tooltip{position:relative;cursor:help}
+    .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:nowrap;border-radius:4px;margin-bottom:4px;z-index:100}
+    
+    /* Preset buttons */
+    .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin:8px 0}
+    .preset-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
+    .preset-btn:hover{background:#2a2e37;border-color:var(--accent)}
+    .preset-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
   </style>
 </head>
 <body>
   <div class="wrap">
     <section>
+      <!-- Settings Bar -->
+      <div class="settings-bar">
+        <div class="toggle-wrapper">
+          <span class="small">Kalshi Mode</span>
+          <div class="toggle" id="kalshiToggle" data-tooltip="Enable YES/NO pricing with Kalshi fees (1% open + 2% settle)">
+            <div class="toggle-knob"></div>
+          </div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn secondary" id="undoBtn" disabled title="Undo (Ctrl+Z)">↶</button>
+        <button class="btn secondary" id="redoBtn" disabled title="Redo (Ctrl+Y)">↷</button>
+        <button class="btn secondary" id="exportCSV">Export CSV</button>
+        <button class="btn secondary" id="importCSV">Import CSV</button>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+      </div>
+      
       <header>
         <h1>Wagers</h1>
         <div style="display:flex;gap:8px">
@@ -268,6 +300,7 @@
       <div class="card">
         <div class="rows-head small">
           <div>Side</div>
+          <div>Sportsbook</div>
           <div>Odds</div>
           <div>Stake</div>
           <div>Payout</div>
@@ -346,7 +379,22 @@
 
     <aside>
       <div class="card">
-        <h1 style="font-size:16px;margin:0 0 8px">Lines & Cover</h1>
+        <h1 style="font-size:16px;margin:0 0 8px">Cover & Equalize</h1>
+        
+        <!-- Presets -->
+        <div class="preset-grid">
+          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make both outcomes equal">
+            <div>⚖️ Equalize</div>
+          </button>
+          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A=0: Bet on A to break even if A wins">
+            <div>🛡️ Cover A</div>
+          </button>
+          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B=0: Bet on B to break even if B wins">
+            <div>🛡️ Cover B</div>
+          </button>
+        </div>
+        
+        <div class="divider"></div>
         
         <div style="margin-bottom:12px">
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -383,6 +431,7 @@
   <template id="rowT">
     <div class="row" data-row>
       <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
+      <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)">
       <div class="odds-wrapper">
         <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
         <button class="sign-toggle" data-sign="+">+</button>
@@ -391,7 +440,7 @@
       <input class="stake right" type="number" step="0.01" placeholder="0.00">
       <input class="payout right" type="number" step="0.01" placeholder="auto">
       <div class="profit">$0.00</div>
-      <button class="clear">×</button>
+      <button class="clear" title="Delete row">×</button>
     </div>
   </template>
 
@@ -408,6 +457,7 @@
       </div>
       <div class="row">
         <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
+        <input class="sportsbook compact" type="text" placeholder="Book" readonly>
         <div class="odds-wrapper">
           <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
           <button class="sign-toggle" data-sign="+">+</button>
@@ -416,7 +466,7 @@
         <input class="stake right" type="number" step="0.01" placeholder="0.00" readonly>
         <input class="payout right" type="number" step="0.01" placeholder="auto" readonly>
         <div class="profit">$0.00</div>
-        <button class="commit">+</button>
+        <button class="commit" title="Commit to wagers">+</button>
       </div>
       <div class="ghost-meta"></div>
     </div>
@@ -424,6 +474,12 @@
 
   <script>
   (function(){
+    // Application state
+    let kalshiMode = false; // Kalshi mode toggle (default OFF)
+    let historyStack = [];
+    let historyIndex = -1;
+    const maxHistory = 50;
+    
     // Core state
     const rowsEl = document.getElementById('rows');
     const ghostContainer = document.getElementById('ghostContainer');
@@ -642,6 +698,23 @@
       
       const t = String(raw).trim().toLowerCase();
       
+      // Check for Kalshi format when Kalshi mode is OFF
+      if(!kalshiMode) {
+        if(t.endsWith('c') || t.endsWith('k')) {
+          return "Kalshi format requires Kalshi mode ON";
+        }
+        if(t.includes('.') && parseFloat(t) < 1 && parseFloat(t) > 0) {
+          return "0.xx odds require Kalshi mode ON";
+        }
+        // Check for plain integers 1-99 (Kalshi cents)
+        if(/^\d{1,2}$/.test(t)) {
+          const num = parseInt(t);
+          if(num >= 1 && num <= 99) {
+            return "Kalshi cents (1-99) require Kalshi mode ON";
+          }
+        }
+      }
+      
       // Check for mixed tokens
       if(/\d+\.\d+[ck]/.test(t)) return "Invalid format: mixed tokens";
       if(/\d+%[ck]/.test(t)) return "Invalid format: mixed tokens";
@@ -710,7 +783,21 @@
       return '';
     }
 
-    // Profit per dollar calculation
+    // ProphetX fee calculation
+    // PX! = 1% fee on winnings
+    // PX = 0% fee (normal)
+    function applyProphetXFee(profit, sportsbook) {
+      if (!sportsbook) return profit;
+      const book = sportsbook.trim().toUpperCase();
+      if (book === 'PX!') {
+        // 1% fee on winnings (profit)
+        return profit > 0 ? profit * 0.99 : profit;
+      }
+      // PX or any other value = no fee
+      return profit;
+    }
+
+    // Profit per dollar calculation (base, before fees)
     function pPerDollar(american) {
       if(american == null || !isFinite(american)) return null;
       return american > 0 ? american/100 : 100/Math.abs(american);
@@ -760,6 +847,7 @@
     // Bind row interactions
     function bindRow(el, isGhost = false) {
       const side = el.querySelector('.side');
+      const sportsbook = el.querySelector('.sportsbook');
       const oddsInput = el.querySelector('.odds');
       const stake = el.querySelector('.stake');
       const payout = el.querySelector('.payout');
@@ -891,31 +979,41 @@
         }
       });
 
-      // Clear/commit button
+      // Clear/commit button - Changed to DELETE behavior
       if(clearBtn && !isGhost) {
         clearBtn.addEventListener('click', () => {
-          side.value = '';
-          oddsInput.value = '';
-          oddsInput.style.opacity = '1'; // Reset opacity
-          stake.value = '';
-          payout.value = '';
-          if(errorText) errorText.classList.remove('show');
-          oddsInput.classList.remove('err');
+          // Delete the row entirely
+          el.remove();
+          
+          // Ensure at least one row exists
+          if(rowsEl.querySelectorAll('[data-row]').length === 0) {
+            addRow();
+          }
+          
           recalc();
+          saveCurrentState();
         });
       }
 
       if(commitBtn && isGhost) {
-        commitBtn.addEventListener('click', commitGhost);
+        commitBtn.addEventListener('click', () => {
+          commitGhost();
+          saveCurrentState();
+        });
       }
 
       // Update stake on change
       stake.addEventListener('input', recalcDebounced);
       
       payout.addEventListener('input', recalcDebounced);
+      
+      // Update sportsbook on change (triggers recalc for ProphetX fees)
+      if(sportsbook) {
+        sportsbook.addEventListener('input', recalcDebounced);
+      }
 
       // Store refs
-      el._refs = {side, odds: oddsInput, stake, payout, profit, signToggle};
+      el._refs = {side, sportsbook, odds: oddsInput, stake, payout, profit, signToggle};
     }
 
     // Add regular row
@@ -1162,9 +1260,10 @@
     function readRows() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach((el, idx) => {
-        const {side, odds, stake, payout, profit, signToggle} = el._refs;
+        const {side, sportsbook, odds, stake, payout, profit, signToggle} = el._refs;
         const s = side.value === '2' ? 2 : 1;
         const signValue = signToggle ? signToggle.dataset.sign : "+";
+        const book = sportsbook ? sportsbook.value : '';
         
         // Check if user manually entered odds
         const userEnteredOdds = odds.value.trim() !== '' && odds.style.opacity !== '0.7';
@@ -1178,8 +1277,8 @@
         
         if(od !== null && st > 0) {
           // Odds and stake entered
-          if(isKalshi) {
-            // Use Kalshi payout engine
+          if(isKalshi && kalshiMode) {
+            // Use Kalshi payout engine only if Kalshi mode is ON
             const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
             const {netPayout, profit: kalshiProfit} = kalshiLedger(st, price);
             pf = kalshiProfit;
@@ -1189,6 +1288,8 @@
             const p = pPerDollar(od);
             if(p !== null) {
               pf = st * p;
+              // Apply ProphetX fee AFTER base profit calculation
+              pf = applyProphetXFee(pf, book);
               pay = st + pf;
             }
           }
@@ -1436,6 +1537,7 @@
     document.getElementById('addRow').addEventListener('click', () => {
       const r = addRow();
       r.querySelector('.side').focus();
+      saveCurrentState();
     });
 
     document.getElementById('clearAll').addEventListener('click', () => {
@@ -1447,6 +1549,7 @@
       document.getElementById('labelB').value = '';
       addRow();
       recalc();
+      saveCurrentState();
     });
 
     // Copy buttons
@@ -1496,18 +1599,259 @@
       document.getElementById(id).addEventListener('input', recalcDebounced);
     });
 
-    // Ctrl+Enter to add row
+    // Kalshi Mode Toggle
+    document.getElementById('kalshiToggle').addEventListener('click', () => {
+      const toggle = document.getElementById('kalshiToggle');
+      kalshiMode = !kalshiMode;
+      toggle.classList.toggle('active', kalshiMode);
+      
+      // When Kalshi mode changes, recalculate all rows
+      recalc();
+      
+      // Save state
+      saveCurrentState();
+    });
+
+    // Undo/Redo functionality
+    function saveCurrentState() {
+      const rows = [];
+      rowsEl.querySelectorAll('[data-row]').forEach(el => {
+        const {side, sportsbook, odds, stake, payout} = el._refs;
+        rows.push({
+          side: side.value,
+          sportsbook: sportsbook ? sportsbook.value : '',
+          odds: odds.value,
+          stake: stake.value,
+          payout: payout.value
+        });
+      });
+      
+      const state = {
+        rows,
+        kalshiMode,
+        lineA: document.getElementById('useA').value,
+        lineB: document.getElementById('useB').value,
+        labelA: document.getElementById('labelA').value,
+        labelB: document.getElementById('labelB').value
+      };
+      
+      // Save to history
+      historyStack = historyStack.slice(0, historyIndex + 1);
+      historyStack.push(JSON.parse(JSON.stringify(state)));
+      historyIndex++;
+      
+      if(historyStack.length > maxHistory) {
+        historyStack.shift();
+        historyIndex--;
+      }
+      
+      // Update button states
+      document.getElementById('undoBtn').disabled = historyIndex <= 0;
+      document.getElementById('redoBtn').disabled = historyIndex >= historyStack.length - 1;
+      
+      // Save to session storage
+      try {
+        sessionStorage.setItem('hedger_state', JSON.stringify(state));
+      } catch(e) {
+        console.error('Failed to save state:', e);
+      }
+    }
+    
+    function restoreState(state) {
+      if(!state) return;
+      
+      // Clear existing rows
+      rowsEl.innerHTML = '';
+      
+      // Restore rows
+      state.rows.forEach(rowData => {
+        const r = addRow();
+        r._refs.side.value = rowData.side;
+        if(r._refs.sportsbook) r._refs.sportsbook.value = rowData.sportsbook;
+        r._refs.odds.value = rowData.odds;
+        r._refs.stake.value = rowData.stake;
+        r._refs.payout.value = rowData.payout;
+      });
+      
+      // Restore other fields
+      kalshiMode = state.kalshiMode || false;
+      document.getElementById('kalshiToggle').classList.toggle('active', kalshiMode);
+      document.getElementById('useA').value = state.lineA || '';
+      document.getElementById('useB').value = state.lineB || '';
+      document.getElementById('labelA').value = state.labelA || '';
+      document.getElementById('labelB').value = state.labelB || '';
+      
+      recalc();
+    }
+
+    document.getElementById('undoBtn').addEventListener('click', () => {
+      if(historyIndex > 0) {
+        historyIndex--;
+        restoreState(historyStack[historyIndex]);
+        document.getElementById('undoBtn').disabled = historyIndex <= 0;
+        document.getElementById('redoBtn').disabled = false;
+      }
+    });
+
+    document.getElementById('redoBtn').addEventListener('click', () => {
+      if(historyIndex < historyStack.length - 1) {
+        historyIndex++;
+        restoreState(historyStack[historyIndex]);
+        document.getElementById('undoBtn').disabled = false;
+        document.getElementById('redoBtn').disabled = historyIndex >= historyStack.length - 1;
+      }
+    });
+
+    // CSV Export
+    document.getElementById('exportCSV').addEventListener('click', () => {
+      const rows = [];
+      rowsEl.querySelectorAll('[data-row]').forEach(el => {
+        const {side, sportsbook, odds, stake, payout} = el._refs;
+        if(side.value) {
+          rows.push({
+            side: side.value,
+            sportsbook: sportsbook ? sportsbook.value : '',
+            oddsType: 'american', // simplified
+            oddsValue: odds.value,
+            stake: stake.value,
+            payout: payout.value,
+            feeMarker: sportsbook ? sportsbook.value : ''
+          });
+        }
+      });
+      
+      const headers = ['side', 'sportsbook', 'oddsType', 'oddsValue', 'stake', 'payout', 'feeMarker'];
+      const csvRows = [headers.join(',')];
+      rows.forEach(row => {
+        const values = headers.map(h => `"${row[h] || ''}"`);
+        csvRows.push(values.join(','));
+      });
+      
+      const csv = csvRows.join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `hedger-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // CSV Import
+    document.getElementById('importCSV').addEventListener('click', () => {
+      document.getElementById('csvFileInput').click();
+    });
+
+    document.getElementById('csvFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const csv = event.target.result;
+          const lines = csv.trim().split('\n');
+          if(lines.length < 2) return;
+          
+          // Clear existing rows
+          rowsEl.innerHTML = '';
+          
+          // Skip header
+          for(let i = 1; i < lines.length; i++) {
+            const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+            const clean = values.map(v => v.replace(/^"|"$/g, '').trim());
+            
+            if(clean.length >= 4) {
+              const r = addRow();
+              r._refs.side.value = clean[0];
+              if(r._refs.sportsbook) r._refs.sportsbook.value = clean[1];
+              r._refs.odds.value = clean[3];
+              r._refs.stake.value = clean[4];
+              if(clean[5]) r._refs.payout.value = clean[5];
+            }
+          }
+          
+          recalc();
+          saveCurrentState();
+        } catch(err) {
+          console.error('Failed to import CSV:', err);
+          alert('Failed to import CSV file');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // Reset file input
+    });
+
+    // Preset buttons
+    document.getElementById('presetEqualize').addEventListener('click', () => {
+      // Trigger ghost row to show equalization
+      recalc();
+    });
+
+    document.getElementById('presetCoverA').addEventListener('click', () => {
+      // Add Cover A = 0 wager
+      if(state.a0.stake > 0 && state.a0.odds) {
+        const r = addRow();
+        r._refs.side.value = '1';
+        r._refs.odds.value = formatFromAmerican(state.a0.odds, 'american');
+        r._refs.stake.value = state.a0.stake.toFixed(2);
+        recalc();
+        saveCurrentState();
+      }
+    });
+
+    document.getElementById('presetCoverB').addEventListener('click', () => {
+      // Add Cover B = 0 wager
+      if(state.b0.stake > 0 && state.b0.odds) {
+        const r = addRow();
+        r._refs.side.value = '2';
+        r._refs.odds.value = formatFromAmerican(state.b0.odds, 'american');
+        r._refs.stake.value = state.b0.stake.toFixed(2);
+        recalc();
+        saveCurrentState();
+      }
+    });
+
+    // Ctrl+Enter to add row, Ctrl+Z for undo, Ctrl+Y for redo
     document.addEventListener('keydown', (e) => {
       if(e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
         const r = addRow();
         r.querySelector('.side').focus();
+        saveCurrentState();
+      }
+      if(e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('undoBtn').click();
+      }
+      if(e.ctrlKey && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        document.getElementById('redoBtn').click();
       }
     });
 
-    // Initialize with one empty row
-    addRow();
-    recalc();
+    // Initialize with one empty row or load from session
+    try {
+      const saved = sessionStorage.getItem('hedger_state');
+      if(saved) {
+        const state = JSON.parse(saved);
+        restoreState(state);
+        // Initialize history with loaded state
+        historyStack = [state];
+        historyIndex = 0;
+        document.getElementById('undoBtn').disabled = true;
+        document.getElementById('redoBtn').disabled = true;
+      } else {
+        addRow();
+        recalc();
+        saveCurrentState();
+      }
+    } catch(e) {
+      console.error('Failed to load state:', e);
+      addRow();
+      recalc();
+      saveCurrentState();
+    }
   })();
   </script>
 </body>
