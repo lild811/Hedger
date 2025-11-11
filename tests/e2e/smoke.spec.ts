@@ -309,6 +309,58 @@ test.describe('Fast Hedger v2.3', () => {
     const netAValue = parseFloat(netAAfter!.replace(/[^0-9.-]/g, ''));
     const netBValue = parseFloat(netBAfter!.replace(/[^0-9.-]/g, ''));
     expect(Math.abs(netAValue - netBValue)).toBeLessThan(1);
+    
+    // CRITICAL: Lines & Cover section must match Unified Summary after commit
+    // Get Lines & Cover values
+    const coverANetB = await page.locator('#beaNetB').textContent();
+    const coverBNetA = await page.locator('#bebNetA').textContent();
+    
+    // Parse the values (removing $ and handling negative numbers)
+    const coverANetBValue = parseFloat(coverANetB!.replace(/[^0-9.-]/g, ''));
+    const coverBNetAValue = parseFloat(coverBNetA!.replace(/[^0-9.-]/g, ''));
+    
+    // Lines & Cover values should match Unified Summary
+    // Cover A shows "Net if B wins" which should match Unified Summary's Net if B wins
+    // Cover B shows "Net if A wins" which should match Unified Summary's Net if A wins
+    expect(Math.abs(coverANetBValue - netBValue)).toBeLessThan(0.01);
+    expect(Math.abs(coverBNetAValue - netAValue)).toBeLessThan(0.01);
+  });
+
+  test('Lines & Cover parity with mixed odds', async ({ page }) => {
+    // Add a wager on side A with +150 odds
+    await page.locator('[data-row]').first().locator('.side').fill('1');
+    await page.locator('[data-row]').first().locator('.odds').fill('+150');
+    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    
+    // Set odds for side B with -110 odds
+    await page.locator('#useB').fill('-110');
+    await page.waitForTimeout(100);
+    
+    // Verify ghost row appears
+    await expect(page.locator('.ghost-row')).toBeVisible();
+    
+    // Commit the ghost row
+    await page.locator('.ghost-row .commit').click();
+    await page.waitForTimeout(100);
+    
+    // Get all values after commit
+    const netAAfter = await page.locator('#a_net').textContent();
+    const netBAfter = await page.locator('#b_net').textContent();
+    const coverANetB = await page.locator('#beaNetB').textContent();
+    const coverBNetA = await page.locator('#bebNetA').textContent();
+    
+    // Parse the values
+    const netAValue = parseFloat(netAAfter!.replace(/[^0-9.-]/g, ''));
+    const netBValue = parseFloat(netBAfter!.replace(/[^0-9.-]/g, ''));
+    const coverANetBValue = parseFloat(coverANetB!.replace(/[^0-9.-]/g, ''));
+    const coverBNetAValue = parseFloat(coverBNetA!.replace(/[^0-9.-]/g, ''));
+    
+    // After equalizing, nets should be approximately equal
+    expect(Math.abs(netAValue - netBValue)).toBeLessThan(1);
+    
+    // Lines & Cover must match Unified Summary
+    expect(Math.abs(coverANetBValue - netBValue)).toBeLessThan(0.01);
+    expect(Math.abs(coverBNetAValue - netAValue)).toBeLessThan(0.01);
   });
 
   test('Mixed ticket: Normal and Kalshi rows in same session', async ({ page }) => {
