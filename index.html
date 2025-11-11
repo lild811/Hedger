@@ -920,6 +920,16 @@
           oddsInput.style.opacity = '1';
         }
         
+        // Update tooltip with derived decimal odds
+        const {american: parsed} = parseOddsWithKalshi(oddsInput.value, signValue);
+        if(parsed !== null && !error) {
+          // Calculate decimal odds from American odds
+          const decimal = parsed > 0 ? 1 + parsed / 100 : 1 + 100 / Math.abs(parsed);
+          oddsInput.title = `Decimal: ${decimal.toFixed(2)}`;
+        } else {
+          oddsInput.title = '';
+        }
+        
         if(errorText) {
           if(error) {
             errorText.textContent = error;
