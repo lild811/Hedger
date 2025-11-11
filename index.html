@@ -758,10 +758,13 @@
         if(cents === 100) return "100c is invalid";
       }
       
-      // Check for negative decimals
+      // Check for negative decimals (but not American float odds like -118.5)
       if(t.startsWith('-') && t.includes('.')) {
+        // Check if it's a valid American float odds (magnitude >= 100)
         const val = parseFloat(t);
-        if(val < 0) return "Negative decimal is invalid";
+        if(val < 0 && val > -100) {
+          return "Negative decimal is invalid";
+        }
       }
       
       // Check if parseOdds returns null

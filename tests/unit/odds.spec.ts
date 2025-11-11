@@ -266,6 +266,12 @@ describe('getOddsError', () => {
     expect(getOddsError('2.5')).toBeNull();
   });
   
+  it('returns null for valid American float odds', () => {
+    expect(getOddsError('+104.3')).toBeNull();
+    expect(getOddsError('-118.5')).toBeNull();
+    expect(getOddsError('+100.0')).toBeNull();
+  });
+  
   it('returns error for mixed formats', () => {
     expect(getOddsError('1.43c')).toBe('Invalid format: mixed tokens');
   });
@@ -281,6 +287,11 @@ describe('getOddsError', () => {
   it('returns error for Kalshi bounds', () => {
     expect(getOddsError('0c')).toBe('0c is invalid');
     expect(getOddsError('100c')).toBe('100c is invalid');
+  });
+  
+  it('returns error for negative decimals in invalid range', () => {
+    expect(getOddsError('-1.5')).toBe('Negative decimal is invalid');
+    expect(getOddsError('-50.5')).toBe('Negative decimal is invalid');
   });
   
   it('returns null for empty input', () => {
