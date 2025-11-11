@@ -272,6 +272,33 @@
     .tooltip{position:relative;cursor:help}
     .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:nowrap;border-radius:4px;margin-bottom:4px;z-index:100}
     
+    /* Enhanced tooltips for preset buttons with formulas */
+    .preset-btn{position:relative}
+    .preset-btn::after{
+      content:attr(data-tooltip);
+      position:absolute;
+      bottom:calc(100% + 8px);
+      left:50%;
+      transform:translateX(-50%);
+      padding:8px 10px;
+      background:#1a1d24;
+      border:1px solid var(--accent);
+      color:var(--ink);
+      font-size:10px;
+      line-height:1.4;
+      white-space:pre-line;
+      border-radius:6px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s;
+      z-index:200;
+      max-width:280px;
+      text-align:left;
+    }
+    .preset-btn:hover::after{
+      opacity:1;
+    }
+    
     /* Preset buttons - text labels instead of emojis */
     .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin:8px 0}
     .preset-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
@@ -387,13 +414,30 @@
         
         <!-- Presets - Text labels instead of emojis -->
         <div class="preset-grid">
-          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make both outcomes equal">
+          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make net profit equal for both outcomes.
+
+Formula:
+Δ = (Profit_opposing + Stake_opposing - Profit_current - Stake_current) / decimal_odds
+
+Shows ghost row with computed stake to add.">
             <div>Equalize</div>
           </button>
-          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A=0: Bet on A to break even if A wins">
+          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A = 0: Raise side A to break even if A wins; profit remains on side B.
+
+Formula:
+Stake_A = |Net_A| / profit_per_dollar
+where Net_A = Profit_A - Stake_B
+
+Adds real row when clicked.">
             <div>Cover A</div>
           </button>
-          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B=0: Bet on B to break even if B wins">
+          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B = 0: Raise side B to break even if B wins; profit remains on side A.
+
+Formula:
+Stake_B = |Net_B| / profit_per_dollar
+where Net_B = Profit_B - Stake_A
+
+Adds real row when clicked.">
             <div>Cover B</div>
           </button>
         </div>
