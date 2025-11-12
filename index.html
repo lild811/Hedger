@@ -57,7 +57,7 @@
     .divider{height:1px;background:var(--grid);margin:6px 0}
 
     input,button,select{font:inherit;min-width:0;max-width:100%}
-    input[type="number"],input[type="text"]{width:100%;padding:7px 9px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease;max-width:100%;min-width:0}
+    input[type="number"],input[type="text"]{width:100%;padding:7px 5px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease;max-width:100%;min-width:0}
     input[type="text"].compact{padding:4px 6px;font-size:13px}
     input::placeholder{color:#667085}
     input.right{ text-align:right; font-variant-numeric:tabular-nums; }
@@ -68,8 +68,8 @@
 
     /* Wagers table - default desktop layout (8 columns: Side, Type, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,90px) minmax(0,130px) minmax(0,130px) minmax(0,130px) 72px}
-    .row{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,90px) minmax(0,130px) minmax(0,130px) minmax(0,130px) 72px;margin:4px 0}
+    .rows-head{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,105px) minmax(0,150px) minmax(0,150px) minmax(0,150px) 72px}
+    .row{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,105px) minmax(0,150px) minmax(0,150px) minmax(0,150px) 72px;margin:4px 0}
     .row > *, .rows-head > *, .row-secondary > *, .row-actions > *{min-width:0}
     
     /* Desktop mode: hide More toggle and secondary row (Type/Sportsbook inline) */
