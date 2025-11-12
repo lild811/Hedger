@@ -21,7 +21,12 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install deps (clean)
+      - name: Get Playwright Test version
+        id: playwright-version
+        run: |
+          node -e 'const v=require("@playwright/test/package.json").version; const fs=require("fs"); fs.appendFileSync(process.env.GITHUB_OUTPUT, "version="+v+"\n");'
+
+      - name: Install deps (clean & fast)
         run: npm ci
 
       - name: Get Playwright version
