@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fast Hedger v2.3 – ProphetX & Kalshi Edition</title>
+  <title>Fast Hedger v2.4 – Session Summary Edition</title>
   <style>
     :root{ --bg:#0b0c10; --card:#15171c; --ink:#e8e9ed; --muted:#a7abb4; --accent:#6cc4ff; --good:#69e48a; --bad:#ff7d7d; --warn:#e6b25c; --grid:#23252b; --fade:0.6; }
     html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif}
@@ -31,6 +31,10 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ -moz-appearance:textfield }
 
+    /* Wagers table - now includes Type column and Copy button (9 columns) */
+    .rows-head, .row{display:grid;align-items:center;gap:6px}
+    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px 36px}
+    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px 36px;margin:4px 0}
     /* Wagers table - now includes Type column and action buttons (9 columns) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
     .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px}
@@ -310,6 +314,113 @@
     .preset-btn:hover{background:#2a2e37;border-color:var(--accent)}
     .preset-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
     
+    /* Session Summary Strip - v2.4 */
+    .session-summary{
+      background:linear-gradient(135deg,#1a1d25 0%,#15171c 100%);
+      border:1px solid var(--grid);
+      border-radius:10px;
+      padding:10px 14px;
+      margin-bottom:12px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+      gap:12px;
+    }
+    .summary-item{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .summary-label{
+      font-size:10px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      font-weight:500;
+    }
+    .summary-value{
+      font-size:16px;
+      font-weight:600;
+      font-variant-numeric:tabular-nums;
+    }
+    .summary-value.good{color:var(--good)}
+    .summary-value.bad{color:var(--bad)}
+    .summary-value.accent{color:var(--accent)}
+    
+    /* Enhanced tooltips with formulas - v2.4 */
+    .tooltip-icon{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:rgba(167,171,180,0.2);
+      color:var(--muted);
+      font-size:10px;
+      font-weight:bold;
+      margin-left:4px;
+      cursor:help;
+      position:relative;
+    }
+    .tooltip-content{
+      display:none;
+      position:absolute;
+      bottom:calc(100% + 6px);
+      left:50%;
+      transform:translateX(-50%);
+      background:#1a1d25;
+      border:1px solid var(--accent);
+      border-radius:8px;
+      padding:10px;
+      min-width:280px;
+      max-width:320px;
+      z-index:1000;
+      box-shadow:0 4px 12px rgba(0,0,0,0.4);
+    }
+    .tooltip-icon:hover .tooltip-content{
+      display:block;
+    }
+    .tooltip-title{
+      font-size:12px;
+      font-weight:600;
+      color:var(--accent);
+      margin-bottom:6px;
+    }
+    .tooltip-formula{
+      font-family:monospace;
+      font-size:11px;
+      background:rgba(108,196,255,0.08);
+      padding:6px;
+      border-radius:4px;
+      margin:4px 0;
+      color:var(--ink);
+      line-height:1.4;
+    }
+    .tooltip-note{
+      font-size:10px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.3;
+    }
+    
+    /* Copy row button - v2.4 */
+    .copy-row-btn{
+      background:#20242f;
+      border:1px solid #2a2e37;
+      color:#c7d0e0;
+      border-radius:6px;
+      cursor:pointer;
+      width:32px;
+      height:32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
+    }
+    .copy-row-btn:hover{
+      background:#2a2e37;
+      border-color:var(--accent);
+      color:var(--accent);
     /* Custom fee inputs */
     .custom-fees{
       grid-column: 1 / -1;
@@ -362,6 +473,34 @@
           <button class="btn secondary" id="clearAll">Clear All</button>
         </div>
       </header>
+      
+      <!-- Session Summary Strip - v2.4 -->
+      <div class="session-summary" id="sessionSummary">
+        <div class="summary-item">
+          <div class="summary-label">Total Stake</div>
+          <div class="summary-value" id="sum_total_stake">$0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Net if A Wins</div>
+          <div class="summary-value" id="sum_net_a">$0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Net if B Wins</div>
+          <div class="summary-value" id="sum_net_b">$0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Exposure</div>
+          <div class="summary-value accent" id="sum_exposure">$0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Books</div>
+          <div class="summary-value accent" id="sum_books">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Hold</div>
+          <div class="summary-value" id="sum_hold">0.00%</div>
+        </div>
+      </div>
 
       <div class="card">
         <div class="rows-head small">
@@ -372,6 +511,7 @@
           <div>Stake</div>
           <div>Payout</div>
           <div>Profit</div>
+          <div></div>
           <div></div>
         </div>
         <div id="rows"></div>
@@ -448,7 +588,7 @@
       <div class="card">
         <h1 style="font-size:16px;margin:0 0 8px">Cover & Equalize</h1>
         
-        <!-- Presets - Text labels instead of emojis -->
+        <!-- Presets - Text labels with enhanced tooltips -->
         <div class="preset-grid">
           <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make net profit equal for both outcomes.
 
@@ -456,7 +596,21 @@ Formula:
 Δ = (Profit_opposing + Stake_opposing - Profit_current - Stake_current) / decimal_odds
 
 Shows ghost row with computed stake to add.">
-            <div>Equalize</div>
+            <div>Equalize
+              <span class="tooltip-icon">ⓘ
+                <div class="tooltip-content">
+                  <div class="tooltip-title">Equalize Formula</div>
+                  <div class="tooltip-formula">Δ = (netA − netB) / (1 + w<sub>side</sub>)</div>
+                  <div class="tooltip-note">Makes netA ≈ netB by adding wager to lower side</div>
+                  <div class="tooltip-note" style="margin-top:6px"><strong>Per-profile win factors:</strong></div>
+                  <div class="tooltip-formula" style="font-size:10px">
+                    Normal: w = (d − 1)<br>
+                    ProphetX: w = (d − 1) × 0.99<br>
+                    Kalshi (p): w = 0.98/p − 1.01
+                  </div>
+                </div>
+              </span>
+            </div>
           </button>
           <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A = 0: Raise side A to break even if A wins; profit remains on side B.
 
@@ -465,7 +619,20 @@ Stake_A = |Net_A| / profit_per_dollar
 where Net_A = Profit_A - Stake_B
 
 Adds real row when clicked.">
-            <div>Cover A</div>
+            <div>Cover A
+              <span class="tooltip-icon">ⓘ
+                <div class="tooltip-content">
+                  <div class="tooltip-title">Cover A=0 Formula</div>
+                  <div class="tooltip-formula">Δ = −netA / w<sub>A</sub></div>
+                  <div class="tooltip-note">Bet on A so netA = 0 after fees</div>
+                  <div class="tooltip-note" style="margin-top:6px"><strong>Loss factor:</strong></div>
+                  <div class="tooltip-formula" style="font-size:10px">
+                    Normal/ProphetX: loss = 1.00<br>
+                    Kalshi (p): loss = 1.01
+                  </div>
+                </div>
+              </span>
+            </div>
           </button>
           <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B = 0: Raise side B to break even if B wins; profit remains on side A.
 
@@ -474,7 +641,20 @@ Stake_B = |Net_B| / profit_per_dollar
 where Net_B = Profit_B - Stake_A
 
 Adds real row when clicked.">
-            <div>Cover B</div>
+            <div>Cover B
+              <span class="tooltip-icon">ⓘ
+                <div class="tooltip-content">
+                  <div class="tooltip-title">Cover B=0 Formula</div>
+                  <div class="tooltip-formula">Δ = −netB / w<sub>B</sub></div>
+                  <div class="tooltip-note">Bet on B so netB = 0 after fees</div>
+                  <div class="tooltip-note" style="margin-top:6px"><strong>Loss factor:</strong></div>
+                  <div class="tooltip-formula" style="font-size:10px">
+                    Normal/ProphetX: loss = 1.00<br>
+                    Kalshi (p): loss = 1.01
+                  </div>
+                </div>
+              </span>
+            </div>
           </button>
         </div>
         
@@ -530,6 +710,8 @@ Adds real row when clicked.">
       <input class="stake right" type="number" step="0.01" placeholder="0.00">
       <input class="payout right" type="number" step="0.01" placeholder="auto">
       <div class="profit">$0.00</div>
+      <button class="copy-row-btn" title="Copy row">⧉</button>
+      <button class="clear" title="Delete row">×</button>
       <div class="row-actions">
         <button class="clear-btn" title="Clear stake (keep book/odds)">C</button>
         <button class="delete-btn" title="Delete row">×</button>
@@ -967,6 +1149,8 @@ Adds real row when clicked.">
       const profit = el.querySelector('.profit');
       const signToggle = el.querySelector('.sign-toggle');
       const errorText = el.querySelector('.error-text');
+      const clearBtn = el.querySelector('.clear');
+      const copyBtn = el.querySelector('.copy-row-btn');
       const clearBtn = el.querySelector('.clear-btn');
       const deleteBtn = el.querySelector('.delete-btn');
       const commitBtn = el.querySelector('.commit');
@@ -1138,6 +1322,38 @@ Adds real row when clicked.">
           
           recalc();
           saveCurrentState();
+        });
+      }
+      
+      // Copy row button - v2.4
+      if(copyBtn && !isGhost) {
+        copyBtn.addEventListener('click', () => {
+          // Create a new row with the same values
+          const newRow = addRow();
+          const newRowEl = rowsEl.querySelector('[data-row]:last-child');
+          
+          // Copy values from current row
+          const newSide = newRowEl.querySelector('.side');
+          const newTypeSelect = newRowEl.querySelector('.type-select');
+          const newSportsbook = newRowEl.querySelector('.sportsbook');
+          const newOdds = newRowEl.querySelector('.odds');
+          const newStake = newRowEl.querySelector('.stake');
+          const newPayout = newRowEl.querySelector('.payout');
+          const newSignToggle = newRowEl.querySelector('.sign-toggle');
+          
+          if(side && newSide) newSide.value = side.value;
+          if(typeSelect && newTypeSelect) newTypeSelect.value = typeSelect.value;
+          if(sportsbook && newSportsbook) newSportsbook.value = sportsbook.value;
+          if(oddsInput && newOdds) newOdds.value = oddsInput.value;
+          if(stake && newStake) newStake.value = stake.value;
+          if(payout && newPayout) newPayout.value = payout.value;
+          if(signToggle && newSignToggle) newSignToggle.dataset.sign = signToggle.dataset.sign;
+          
+          recalc();
+          saveCurrentState();
+          
+          // Focus the new row's side input
+          if(newSide) newSide.focus();
         });
       }
 
@@ -1596,6 +1812,42 @@ Adds real row when clicked.">
       });
       return rows;
     }
+    
+    // Update Session Summary - v2.4
+    function updateSessionSummary(rows, stakeA, stakeB, netA, netB) {
+      const totalStake = stakeA + stakeB;
+      const exposure = Math.max(Math.abs(netA), Math.abs(netB));
+      
+      // Count distinct books
+      const books = new Set();
+      rows.forEach(r => {
+        const el = r.el;
+        if (el) {
+          const bookInput = el.querySelector('.sportsbook');
+          const book = bookInput ? bookInput.value.trim() : '';
+          if (book) books.add(book.toLowerCase());
+        }
+      });
+      const bookCount = books.size;
+      
+      // Calculate hold: |netA − netB| / totalStake
+      const hold = totalStake > 0 ? (Math.abs(netA - netB) / totalStake) * 100 : 0;
+      
+      // Update UI
+      document.getElementById('sum_total_stake').textContent = money(totalStake);
+      
+      document.getElementById('sum_net_a').textContent = money(netA);
+      document.getElementById('sum_net_a').classList.toggle('good', netA >= 0);
+      document.getElementById('sum_net_a').classList.toggle('bad', netA < 0);
+      
+      document.getElementById('sum_net_b').textContent = money(netB);
+      document.getElementById('sum_net_b').classList.toggle('good', netB >= 0);
+      document.getElementById('sum_net_b').classList.toggle('bad', netB < 0);
+      
+      document.getElementById('sum_exposure').textContent = money(exposure);
+      document.getElementById('sum_books').textContent = String(bookCount);
+      document.getElementById('sum_hold').textContent = hold.toFixed(2) + '%';
+    }
 
     // Main recalc function
     function recalc() {
@@ -1650,6 +1902,9 @@ Adds real row when clicked.">
         document.getElementById('b_odds_row').style.display = 'none';
         document.getElementById('b_prob_row').style.display = 'none';
       }
+      
+      // Update Session Summary - v2.4
+      updateSessionSummary(rows, stakeA, stakeB, netA, netB);
       
       // Update Lines & Cover calculations
       const useA = document.getElementById('useA');
@@ -1944,16 +2199,42 @@ Adds real row when clicked.">
     // CSV Export
     document.getElementById('exportCSV').addEventListener('click', () => {
       const rows = [];
+      const timestamp = new Date().toISOString();
+      
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
+        const {side, typeSelect, sportsbook, odds, stake, payout, signToggle} = el._refs;
         const {side, typeSelect, sportsbook, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         if(side.value) {
+          // Determine profile from type
+          let profile = 'normal';
+          const typeVal = typeSelect ? typeSelect.value : 'normal';
+          if(typeVal.startsWith('kalshi')) {
+            profile = 'kalshi';
+          }
+          
+          // Get sportsbook value to determine ProphetX
+          const bookVal = sportsbook ? sportsbook.value.trim().toLowerCase() : '';
+          if(bookVal === 'px!') {
+            profile = 'prophetx-fee';
+          } else if(bookVal === 'px') {
+            profile = 'prophetx-nofee';
+          }
+          
           rows.push({
             side: side.value,
-            type: typeSelect ? typeSelect.value : 'normal',
+            profile: profile,
             sportsbook: sportsbook ? sportsbook.value : '',
-            oddsType: 'american', // simplified
-            oddsValue: odds.value,
+            odds_type: 'american',
+            odds_value: odds.value,
             stake: stake.value,
+            payout_mode: payout.value ? 'manual' : 'auto',
+            timestamp: timestamp
+          });
+        }
+      });
+      
+      // CSV v2 schema
+      const headers = ['side', 'profile', 'sportsbook', 'odds_type', 'odds_value', 'stake', 'payout_mode', 'timestamp'];
             payout: payout.value,
             openFeePct: openFeePct ? openFeePct.value : '',
             winFeePct: winFeePct ? winFeePct.value : ''
@@ -1973,7 +2254,7 @@ Adds real row when clicked.">
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `hedger-${new Date().toISOString().slice(0,10)}.csv`;
+      a.download = `hedger-v2-${new Date().toISOString().slice(0,10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     });
@@ -1994,16 +2275,52 @@ Adds real row when clicked.">
           const lines = csv.trim().split('\n');
           if(lines.length < 2) return;
           
+          // Parse header to determine CSV version
+          const headerLine = lines[0];
+          const headers = headerLine.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+          const cleanHeaders = headers.map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
+          
+          // Detect v2 format (has 'profile' or 'odds_type' columns)
+          const isV2 = cleanHeaders.includes('profile') || cleanHeaders.includes('odds_type');
+          
           // Clear existing rows
           rowsEl.innerHTML = '';
           
-          // Skip header
+          // Skip header line and import data
           for(let i = 1; i < lines.length; i++) {
             const values = lines[i].match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
             const clean = values.map(v => v.replace(/^"|"$/g, '').trim());
             
             if(clean.length >= 5) {
               const r = addRow();
+              
+              if(isV2) {
+                // CSV v2 format: side, profile, sportsbook, odds_type, odds_value, stake, payout_mode, timestamp
+                r._refs.side.value = clean[0];
+                
+                // Map profile to type
+                const profile = clean[1] || 'normal';
+                if(r._refs.typeSelect) {
+                  if(profile === 'kalshi') {
+                    r._refs.typeSelect.value = 'kalshi-yes'; // Default to YES
+                  } else {
+                    r._refs.typeSelect.value = 'normal';
+                  }
+                }
+                
+                if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
+                r._refs.odds.value = clean[4]; // odds_value
+                r._refs.stake.value = clean[5];
+                // payout_mode and timestamp are informational only
+              } else {
+                // CSV v1 format (backward compatible): side, type, sportsbook, oddsType, oddsValue, stake, payout, feeMarker
+                r._refs.side.value = clean[0];
+                if(r._refs.typeSelect) r._refs.typeSelect.value = clean[1] || 'normal';
+                if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
+                r._refs.odds.value = clean[4]; // oddsValue
+                r._refs.stake.value = clean[5];
+                if(clean[6]) r._refs.payout.value = clean[6];
+              }
               r._refs.side.value = clean[0];
               if(r._refs.typeSelect) {
                 r._refs.typeSelect.value = clean[1] || 'normal';

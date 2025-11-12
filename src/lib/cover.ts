@@ -201,32 +201,27 @@ export function calculateEqualization(
   const decimalOdds = americanToDecimal(odds);
   const profitMultiplier = decimalOdds - 1;
   
-  // Calculate denominator: (dX-1) - fee_rate_on_winnings
-  const denominator = profitMultiplier - feeAdapter.settleFeeRate;
-  
-  if (denominator <= 0) return null; // Fees too high
-  
   let equalizeStake: number;
   let currentTotal: number;
   
   if (equalizeSide === 1) {
     // Betting on side A to equalize
-    // netA' = profitA + Δ*(dA-1) - stakeB - feesA - openFee - settleFee
+    // netA' = profitA + Δ*(dA-1)*(1-settleFeeRate) - Δ*openFeeRate - stakeB - feesA
     // netB' = profitB - (stakeA + Δ) - feesB
     // Set netA' = netB' and solve for Δ
-    // Formula: Δ = (profitB - stakeA - feesB - profitA + stakeB + feesA) / ((dA-1) - settleFeeRate - openFeeRate)
+    // Δ[1 + (dA-1)*(1-settleFeeRate) - openFeeRate] = profitB - stakeA - feesB - profitA + stakeB + feesA
     const numerator = profitB - stakeA - feesB - profitA + stakeB + feesA;
-    const effectiveDenom = denominator - feeAdapter.openFeeRate;
+    const effectiveDenom = 1 + profitMultiplier * (1 - feeAdapter.settleFeeRate) - feeAdapter.openFeeRate;
     equalizeStake = effectiveDenom > 0 ? numerator / effectiveDenom : 0;
     currentTotal = stakeA;
   } else {
     // Betting on side B to equalize
     // netA' = profitA - (stakeB + Δ) - feesA
-    // netB' = profitB + Δ*(dB-1) - stakeA - feesB - openFee - settleFee
+    // netB' = profitB + Δ*(dB-1)*(1-settleFeeRate) - Δ*openFeeRate - stakeA - feesB
     // Set netA' = netB' and solve for Δ
-    // Formula: Δ = (profitA - stakeB - feesA - profitB + stakeA + feesB) / ((dB-1) - settleFeeRate - openFeeRate)
+    // Δ[1 + (dB-1)*(1-settleFeeRate) - openFeeRate] = profitA - stakeB - feesA - profitB + stakeA + feesB
     const numerator = profitA - stakeB - feesA - profitB + stakeA + feesB;
-    const effectiveDenom = denominator - feeAdapter.openFeeRate;
+    const effectiveDenom = 1 + profitMultiplier * (1 - feeAdapter.settleFeeRate) - feeAdapter.openFeeRate;
     equalizeStake = effectiveDenom > 0 ? numerator / effectiveDenom : 0;
     currentTotal = stakeB;
   }
