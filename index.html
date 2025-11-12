@@ -10,13 +10,13 @@
     *{box-sizing:border-box}
     *,*::before,*::after{box-sizing:border-box}
 
-    .wrap{max-width:1200px;margin:12px auto;padding:0 8px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px}
+    .wrap{max-width:1200px;margin:12px auto;padding:0 8px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;overflow:hidden}
     .wrap > *{min-width:0}
     header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
     h1{font-size:16px;margin:0}
     .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:13px}
     .btn.secondary{background:#2a2e37}
-    .card{background:var(--card);border:1px solid var(--grid);border-radius:10px;padding:10px}
+    .card{background:var(--card);border:1px solid var(--grid);border-radius:10px;padding:10px;max-width:100%;box-sizing:border-box}
     .small{font-size:12px;color:var(--muted)}
     .helper-text{font-size:11px;color:var(--muted);line-height:1.5;padding:8px;background:rgba(167,171,180,0.05);border-radius:6px;margin-top:8px}
     .helper-text div{margin:2px 0}
@@ -96,6 +96,8 @@
       gap: 2px;
       margin: 4px 0;
       align-items: center;
+      max-width: 100%;
+      overflow: hidden;
     }
     
     /* Compact mode: hide Type and Sportsbook column headers */
@@ -454,86 +456,7 @@
       }
     }
 
-    /* Extra small mobile: 390px and below */
-    @media (max-width: 430px){
-      .wrap {
-        padding: 0 4px;
-        margin: 8px auto;
-      }
-      body.compact .row {
-        gap: 1px;
-      }
-      body.compact .row > .side {
-        width: 24px;
-        flex: 0 0 24px;
-        padding: 5px 1px;
-        font-size: 10px;
-      }
-      body.compact .row > .odds-wrapper {
-        width: 64px;
-        flex: 0 0 64px;
-      }
-      body.compact .row > .odds-wrapper .odds-input {
-        padding: 5px 2px;
-        padding-right: 17px !important;
-        font-size: 9px;
-      }
-      body.compact .row > .stake {
-        width: 66px;
-        flex: 0 0 66px;
-        padding: 5px 2px;
-        font-size: 9px;
-      }
-      body.compact .row > .payout {
-        width: 66px;
-        flex: 0 0 66px;
-        padding: 5px 2px;
-        font-size: 9px;
-      }
-      body.compact .row > .profit {
-        width: 62px;
-        flex: 0 0 62px;
-        padding: 5px 2px;
-        font-size: 9px;
-      }
-      body.compact .row > .row-actions {
-        gap: 1px;
-      }
-      body.compact .clear-btn,
-      body.compact .delete-btn,
-      body.compact .more-toggle-btn,
-      body.compact .copy-row-btn {
-        height: 20px;
-        min-width: 18px;
-        font-size: 8px;
-        padding: 0 2px;
-      }
-      body.compact .sign-toggle {
-        width: 15px;
-        height: 15px;
-        font-size: 8px;
-        right: 0px;
-      }
-      body.compact .rows-head {
-        grid-template-columns: minmax(0,32px) minmax(0,80px) minmax(0,82px) minmax(0,82px) minmax(0,76px) 40px;
-        gap: 1px;
-        font-size: 9px;
-      }
-      /* Secondary row (Type/Sportsbook when expanded) */
-      body.compact .row-secondary {
-        gap: 2px;
-        margin-top: 2px;
-        padding-top: 2px;
-      }
-      body.compact .row-secondary input,
-      body.compact .row-secondary select {
-        padding: 5px 4px;
-        font-size: 11px;
-      }
-      .card {
-        padding: 8px;
-      }
-    }
+    /* Optimized for 390px width - removed duplicate breakpoint */
 
     /* Lines / scenarios */
     .field-row{display:grid;grid-template-columns:70px 1fr;gap:6px;align-items:center;margin:3px 0}
@@ -797,7 +720,7 @@
       transition: transform 0.2s;
     }
     
-    /* Mobile/Compact Mode at 390px and below */
+    /* Mobile/Compact Mode - Optimized for 390px viewport */
     @media (max-width: 420px){
       body.compact .wrap{
         gap: 6px;
@@ -846,10 +769,15 @@
       body.compact .clear-btn,
       body.compact .delete-btn,
       body.compact .copy-row-btn{
-        height: 28px;
-        min-height: 28px;
-        padding: 0 4px;
-        min-width: 22px;
+        width: 13px;
+        height: 26px;
+        min-width: 13px;
+        min-height: 26px;
+        padding: 0;
+        font-size: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
       }
       
       /* Show condensed totals, hide session summary on mobile */
@@ -860,60 +788,143 @@
         display: none;
       }
       
-      /* Ensure wager row fields fit without horizontal scroll at 390px */
-      /* Total available: 390 - 12 (padding) - 12 (card padding) = 366px */
-      /* Inputs: 30 + 64 + 66 + 66 + 58 = 284px */
-      /* Buttons: 4 * 22 = 88px */
-      /* Gaps: ~10px */
-      /* Total: ~382px - still too much, need more aggressive sizing */
+      /* Optimized layout for 390px width - exact space budget */
+      /* Total available: 390 - 12 (wrap padding) - 12 (card padding) = 366px */
+      /* Distribution: Side(28) + Odds(68) + Stake(72) + Payout(72) + Profit(62) + Actions(52) + Gaps(6x1=6) = 360px */
       body.compact .row > .side{
-        width: 30px;
-        flex: 0 0 30px;
-        padding: 5px 2px;
-        font-size: 12px;
+        width: 28px;
+        flex: 0 0 28px;
+        padding: 4px 2px;
+        font-size: 11px;
         min-width: 0;
       }
       body.compact .row > .odds-wrapper{
-        width: 62px;
-        flex: 0 0 62px;
+        width: 68px;
+        flex: 0 0 68px;
         min-width: 0;
       }
       body.compact .row > .odds-wrapper .odds-input{
-        padding: 5px 18px 5px 4px;
-        font-size: 12px;
+        padding: 4px 17px 4px 3px;
+        font-size: 11px;
         min-width: 0;
       }
       body.compact .row > .stake{
-        width: 64px;
-        flex: 0 0 64px;
-        padding: 5px 3px;
-        font-size: 12px;
+        width: 72px;
+        flex: 0 0 72px;
+        padding: 4px 3px;
+        font-size: 11px;
         min-width: 0;
       }
       body.compact .row > .payout{
-        width: 64px;
-        flex: 0 0 64px;
-        padding: 5px 3px;
-        font-size: 12px;
+        width: 72px;
+        flex: 0 0 72px;
+        padding: 4px 3px;
+        font-size: 11px;
         min-width: 0;
       }
       body.compact .row > .profit{
-        width: 56px;
-        flex: 0 0 56px;
-        padding: 5px 3px;
-        font-size: 12px;
+        width: 62px;
+        flex: 0 0 62px;
+        padding: 4px 3px;
+        font-size: 11px;
         min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       body.compact .row-actions{
         gap: 1px;
         flex: 0 0 auto;
       }
       body.compact .row{
-        gap: 2px;
+        gap: 1px;
         max-width: 100%;
       }
       body.compact .rows-head{
+        gap: 1px;
+      }
+      body.compact .sign-toggle {
+        width: 15px;
+        height: 15px;
+        font-size: 8px;
+        right: 1px;
+      }
+      /* Secondary row (Type/Sportsbook when expanded) */
+      body.compact .row-secondary {
         gap: 2px;
+        margin-top: 2px;
+        padding-top: 2px;
+      }
+      body.compact .row-secondary input,
+      body.compact .row-secondary select {
+        padding: 4px 5px;
+        font-size: 11px;
+      }
+      /* Ghost row optimization for 390px */
+      body.compact .ghost-row {
+        padding: 6px;
+        margin: 6px 0;
+      }
+      body.compact .ghost-row .row {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 1px;
+        max-width: 100%;
+      }
+      body.compact .ghost-row .row > * {
+        min-width: 0;
+      }
+      body.compact .ghost-row .side {
+        width: 28px;
+        flex: 0 0 28px;
+        padding: 4px 2px;
+        font-size: 11px;
+      }
+      body.compact .ghost-row .odds-wrapper {
+        width: 68px;
+        flex: 0 0 68px;
+      }
+      body.compact .ghost-row .odds-input {
+        padding: 4px 17px 4px 3px;
+        font-size: 11px;
+      }
+      body.compact .ghost-row .stake {
+        width: 72px;
+        flex: 0 0 72px;
+        padding: 4px 3px;
+        font-size: 11px;
+      }
+      body.compact .ghost-row .payout {
+        width: 72px;
+        flex: 0 0 72px;
+        padding: 4px 3px;
+        font-size: 11px;
+      }
+      body.compact .ghost-row .profit {
+        width: 62px;
+        flex: 0 0 62px;
+        padding: 4px 3px;
+        font-size: 11px;
+      }
+      body.compact .ghost-row .commit,
+      body.compact .ghost-row .dismiss {
+        width: 24px;
+        height: 26px;
+        font-size: 11px;
+        min-width: 24px;
+      }
+      body.compact .format-toggle {
+        gap: 4px;
+        padding: 3px;
+        margin-bottom: 6px;
+      }
+      body.compact .format-btn {
+        padding: 2px 5px;
+        font-size: 9px;
+        min-width: 32px;
+      }
+      body.compact .format-readout {
+        font-size: 9px;
       }
     }
   </style>
@@ -1190,10 +1201,9 @@ Adds real row when clicked.">
   <template id="rowT">
     <div class="row" data-row>
       <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
-      <select class="type-select" title="Row type: Normal rejects Kalshi formats, Kalshi YES/NO uses Kalshi fees, Custom allows setting fees" aria-label="Row type">
+      <select class="type-select" title="Row type: Normal uses standard odds, Kalshi uses Kalshi fees, Custom allows setting fees" aria-label="Row type">
         <option value="normal">Normal</option>
-        <option value="kalshi-yes">Kalshi YES</option>
-        <option value="kalshi-no">Kalshi NO</option>
+        <option value="kalshi">Kalshi</option>
         <option value="custom">Custom...</option>
       </select>
       <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)" aria-label="Sportsbook">
@@ -2262,8 +2272,8 @@ Adds real row when clicked.">
             // Determine which fee adapter to use based on row type
             let feeResult;
             
-            if(rowType === 'kalshi-yes' && isKalshi) {
-              // Kalshi YES contract
+            if(rowType === 'kalshi' && isKalshi) {
+              // Kalshi contract (using YES contract logic)
               const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
               // Use inline Kalshi calculation (matching the unified adapter)
               const N = Math.floor(st / price);
@@ -2271,18 +2281,6 @@ Adds real row when clicked.">
               const openFee = r2(cost * 0.01);
               const settleFee = r2(N * 0.02);
               const netPayout = r2(N - settleFee);
-              pf = r2(netPayout - (cost + openFee));
-              pay = netPayout;
-            } else if(rowType === 'kalshi-no' && isKalshi) {
-              // Kalshi NO contract
-              const yesPrice = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
-              const noPrice = 1 - yesPrice;
-              const N = Math.floor(st / noPrice);
-              const cost = r2(N * noPrice);
-              const openFee = r2(cost * 0.01);
-              const grossProfit = r2(yesPrice * N);
-              const settleFee = r2(grossProfit * 0.02);
-              const netPayout = r2(grossProfit - settleFee);
               pf = r2(netPayout - (cost + openFee));
               pay = netPayout;
             } else if(rowType === 'custom') {
