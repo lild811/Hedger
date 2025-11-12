@@ -6,10 +6,12 @@
   <title>Fast Hedger v2.4 – Session Summary Edition</title>
   <style>
     :root{ --bg:#0b0c10; --card:#15171c; --ink:#e8e9ed; --muted:#a7abb4; --accent:#6cc4ff; --good:#69e48a; --bad:#ff7d7d; --warn:#e6b25c; --grid:#23252b; --fade:0.6; }
-    html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif}
+    html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;width:100%;max-width:100vw;overflow-x:hidden}
     *{box-sizing:border-box}
+    *,*::before,*::after{box-sizing:border-box}
 
-    .wrap{max-width:1200px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:1fr 360px;gap:12px}
+    .wrap{max-width:1200px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}
+    .wrap > *{min-width:0}
     header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     h1{font-size:18px;margin:0}
     .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
@@ -54,8 +56,8 @@
     }
     .divider{height:1px;background:var(--grid);margin:8px 0}
 
-    input,button,select{font:inherit}
-    input[type="number"],input[type="text"]{width:100%;padding:7px 9px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease}
+    input,button,select{font:inherit;min-width:0;max-width:100%}
+    input[type="number"],input[type="text"]{width:100%;padding:7px 9px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease;max-width:100%;min-width:0}
     input[type="text"].compact{padding:4px 6px;font-size:13px}
     input::placeholder{color:#667085}
     input.right{ text-align:right; font-variant-numeric:tabular-nums; }
@@ -66,15 +68,28 @@
 
     /* Wagers table - default desktop layout (8 columns: Side, Type, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px}
-    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px;margin:4px 0}
+    .rows-head{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,90px) minmax(0,110px) minmax(0,1fr) minmax(0,110px) 72px}
+    .row{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,90px) minmax(0,110px) minmax(0,1fr) minmax(0,110px) 72px;margin:4px 0}
+    .row > *, .rows-head > *, .row-secondary > *, .row-actions > *{min-width:0}
+    
+    /* Desktop mode: hide More toggle and secondary row (Type/Sportsbook inline) */
+    .more-toggle-btn {
+      display: none;
+    }
+    .row-secondary {
+      display: none;
+    }
     
     /* Compact Mode - optimized for ~430px width */
     /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
     /* Type and Sportsbook move to collapsible secondary line */
+    body.compact {
+      overflow-x: clip;
+    }
+    
     body.compact .rows-head {
       /* Header shows: Side, Odds, Stake, Payout, Profit, More */
-      grid-template-columns: minmax(36px,42px) minmax(68px,85px) minmax(74px,88px) minmax(74px,88px) minmax(66px,80px) 48px;
+      grid-template-columns: minmax(0,42px) minmax(0,85px) minmax(0,88px) minmax(0,88px) minmax(0,80px) 48px;
       gap: 4px;
     }
     
@@ -82,9 +97,10 @@
       /* Main row: Side, Odds, Stake, Payout, Profit, Actions (More toggle + C + X) */
       display: flex;
       flex-wrap: nowrap;
-      gap: 3px;
+      gap: 2px;
       margin: 4px 0;
       align-items: center;
+      max-width: 100%;
     }
     
     /* Compact mode: hide Type and Sportsbook column headers */
@@ -97,6 +113,11 @@
     body.compact .row > .type-select,
     body.compact .row > .sportsbook {
       display: none;
+    }
+    
+    /* Compact mode: show More toggle button */
+    body.compact .more-toggle-btn {
+      display: inline-flex;
     }
     
     /* When moved to secondary, show them */
@@ -117,59 +138,60 @@
     
     body.compact .row-secondary.expanded {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
-    
-    /* When secondary is collapsed, hide fields from accessibility */
-    body.compact .row-secondary:not(.expanded) .type-select,
-    body.compact .row-secondary:not(.expanded) .sportsbook {
-      visibility: hidden;
+      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
     }
     
     /* Compact mode: main line field sizing */
     body.compact .row > .side {
-      width: 38px;
-      flex: 0 0 38px;
-      padding: 6px 5px;
+      width: 32px;
+      flex: 0 0 32px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .odds-wrapper {
-      width: 72px;
-      flex: 0 0 72px;
+      width: 66px;
+      flex: 0 0 66px;
+      min-width: 0;
     }
     
     body.compact .row > .odds-wrapper .odds-input {
       padding: 6px 5px;
       padding-right: 20px !important;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .stake {
-      width: 76px;
-      flex: 0 0 76px;
-      padding: 6px 5px;
+      width: 68px;
+      flex: 0 0 68px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .payout {
-      width: 76px;
-      flex: 0 0 76px;
-      padding: 6px 5px;
+      width: 68px;
+      flex: 0 0 68px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .profit {
-      width: 68px;
-      flex: 0 0 68px;
-      padding: 6px 5px;
+      width: 60px;
+      flex: 0 0 60px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .row-actions {
       flex: 0 0 auto;
       display: flex;
       gap: 2px;
+      min-width: 0;
     }
     
     body.compact .sign-toggle {
@@ -182,16 +204,18 @@
     body.compact .clear-btn,
     body.compact .delete-btn {
       font-size: 10px;
-      padding: 0 5px;
-      height: 24px;
-      min-width: 24px;
+      padding: 0 4px;
+      height: 22px;
+      min-width: 22px;
+      max-width: 100%;
     }
     
     body.compact .more-toggle-btn {
       font-size: 10px;
-      padding: 0 5px;
-      height: 24px;
-      min-width: 24px;
+      padding: 0 4px;
+      height: 22px;
+      min-width: 22px;
+      max-width: 100%;
       background: #20242f;
       border: 1px solid #2a2e37;
       color: #c7d0e0;
@@ -210,10 +234,11 @@
     }
     
     body.compact .copy-row-btn {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       font-size: 11px;
-      min-width: 24px;
+      min-width: 22px;
+      max-width: 100%;
       padding: 0;
     }
     
@@ -235,20 +260,13 @@
     }
     .ghost-row input{ background:#0e1015; color:var(--accent); border-color:rgba(108,196,255,.2) }
     .ghost-meta{ 
-      font-size:11px; 
-      color:var(--accent); 
-      opacity:.9; 
-      margin-top:6px;
-      padding: 4px 8px;
-      background: rgba(108,196,255,.1);
-      border-radius: 4px;
-      text-align: center;
+      display: none !important;
     }
     
     /* Ghost row in compact mode: keep grid layout but hide Type and Sportsbook */
     body.compact .ghost-row .row {
       display: grid;
-      grid-template-columns: minmax(36px,42px) 0 0 minmax(68px,85px) minmax(74px,88px) minmax(74px,88px) minmax(66px,80px) auto;
+      grid-template-columns: minmax(0,42px) 0 0 minmax(0,85px) minmax(0,88px) minmax(0,88px) minmax(0,80px) auto;
       gap: 4px;
       align-items: center;
     }
@@ -426,9 +444,8 @@
 
     /* Tablet: 600–899px */
     @media (max-width: 899px){
-      .wrap{grid-template-columns:1fr}
+      .wrap{grid-template-columns:minmax(0,1fr)}
       .rows-head, .row{grid-template-columns:minmax(36px,48px) minmax(64px,90px) minmax(74px,110px) minmax(74px,110px) minmax(74px,110px) 64px}
-      .ghost-meta{ font-size:10px; }
       .helper-text{ font-size:10px; padding:6px; }
       .clear-btn,.delete-btn{font-size:10px;padding:0 6px;height:24px}
       
@@ -474,7 +491,8 @@
     .type-select option{background:#0f1116;color:var(--ink)}
     
     /* Settings and controls */
-    .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
+    .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px;max-width:100%;min-width:0}
+    .settings-bar > *{min-width:0}
     .toggle-wrapper{display:flex;align-items:center;gap:6px}
     .tooltip{position:relative;cursor:help}
     .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:normal;max-width:250px;border-radius:4px;margin-bottom:4px;z-index:100}
@@ -708,17 +726,25 @@
       transition: transform 0.2s;
     }
     
+    /* Compact Mode at 430-500px: reduce padding to fit content */
+    @media (max-width: 500px){
+      body.compact .wrap{
+        padding: 0 8px;
+        max-width: 100%;
+      }
+      body.compact .card{
+        padding: 8px;
+        max-width: 100%;
+      }
+    }
+    
     /* Mobile/Compact Mode at 390px and below */
     @media (max-width: 420px){
-      body.compact{
-        overflow-x: hidden;
-      }
       body.compact .wrap{
         gap: 6px;
         padding: 0 6px;
         margin: 10px auto;
         max-width: 100%;
-        overflow-x: hidden;
       }
       body.compact .settings-bar{
         padding: 5px 6px;
@@ -729,7 +755,6 @@
       body.compact .card{
         padding: 6px;
         max-width: 100%;
-        overflow-x: hidden;
       }
       body.compact header{
         margin-bottom: 6px;

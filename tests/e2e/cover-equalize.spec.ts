@@ -118,10 +118,8 @@ test.describe('Cover & Equalize Panel', () => {
     // Ghost row should have format toggle
     await expect(page.locator('.ghost-row .format-btn')).toHaveCount(4);
     
-    // Ghost row should show metadata
-    await expect(page.locator('.ghost-meta')).toBeVisible();
-    await expect(page.locator('.ghost-meta')).toContainText('Side B');
-    await expect(page.locator('.ghost-meta')).toContainText('equalize');
+    // Ghost meta is now hidden (display:none), so it should not be visible
+    await expect(page.locator('.ghost-meta')).toBeHidden();
   });
 
   test('ghost row format toggle changes odds display', async ({ page }) => {
