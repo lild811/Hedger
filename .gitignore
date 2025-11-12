@@ -145,3 +145,8 @@ playwright-report/
 
 # Package lock file
 package-lock.json
+
+# Local backup files
+*.backup
+*.pre-*
+index.html.v*
