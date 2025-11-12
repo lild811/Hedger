@@ -2,20 +2,38 @@ name: CI
 on:
   push:
   pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
-        with: 
+        with:
           node-version: 20
           cache: 'npm'
+
+      - name: Install deps (clean & fast)
+        run: npm ci
+
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
-      - run: npm i
-      - run: npx playwright install --with-deps
-      - run: npm run ci
+
+      - name: Install Playwright (Chromium only)
+        run: npx playwright install --with-deps chromium
+
+      - name: Run CI test script
+        env:
+          CI: true
+        run: npm run ci
