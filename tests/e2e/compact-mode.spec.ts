@@ -114,28 +114,23 @@ test.describe('Compact Mode at 430px', () => {
   });
 
   test('Helper text toggle works', async ({ page }) => {
-    const helperToggle = page.locator('#helperToggle');
-    const helperContent = page.locator('#helperContent');
-    const helperIcon = page.locator('#helperToggleIcon');
+    const helperDetails = page.locator('#helperDetails');
     
-    // Initially collapsed
-    await expect(helperContent).not.toHaveClass(/expanded/);
-    await expect(helperToggle).toHaveAttribute('aria-expanded', 'false');
-    await expect(helperContent).toHaveAttribute('aria-hidden', 'true');
-    await expect(helperIcon).toContainText('▼');
+    // Initially closed
+    const isOpen = await helperDetails.evaluate((el: HTMLDetailsElement) => el.open);
+    expect(isOpen).toBe(false);
     
-    // Click to expand
-    await helperToggle.click();
+    // Click summary to expand
+    await helperDetails.locator('summary').click();
     
-    await expect(helperContent).toHaveClass(/expanded/);
-    await expect(helperToggle).toHaveAttribute('aria-expanded', 'true');
-    await expect(helperContent).toHaveAttribute('aria-hidden', 'false');
-    await expect(helperIcon).toContainText('▲');
+    // Should be open now
+    const isOpenAfter = await helperDetails.evaluate((el: HTMLDetailsElement) => el.open);
+    expect(isOpenAfter).toBe(true);
     
     // Should show help content
-    await expect(helperContent).toContainText('Accept:');
-    await expect(helperContent).toContainText('Parse:');
-    await expect(helperContent).toContainText('Kalshi:');
+    await expect(helperDetails).toContainText('Accept:');
+    await expect(helperDetails).toContainText('Parse:');
+    await expect(helperDetails).toContainText('Kalshi:');
   });
 
   test('visual snapshot at 430px', async ({ page }) => {
