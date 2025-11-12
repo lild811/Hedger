@@ -172,15 +172,15 @@ test.describe('Mobile Mode at 390×780', () => {
   });
 
   test('visual snapshot at 390×780', async ({ page }) => {
-    // Fill in a complete wager
-    const row = page.locator('[data-row]').first();
-    await row.locator('.side').fill('1');
-    await row.locator('.odds').fill('+150');
-    await row.locator('.stake').fill('100');
-    
+    // Fill with extreme values to test field widths
+    const row1 = page.locator('[data-row]').first();
+    await row1.locator('.side').fill('1');
+    await row1.locator('.odds').fill('+9999');
+    await row1.locator('.stake').fill('99999.99');
+
     // Wait for calculations
     await page.waitForTimeout(300);
-    
+
     // Take snapshot
     await expect(page).toHaveScreenshot('mobile-390.png', {
       fullPage: true,

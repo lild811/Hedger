@@ -134,12 +134,13 @@ test.describe('Compact Mode at 430px', () => {
   });
 
   test('visual snapshot at 430px', async ({ page }) => {
-    // Fill in a complete wager
-    const row = page.locator('[data-row]').first();
-    await row.locator('.side').fill('1');
-    await row.locator('.odds').fill('+150');
-    await row.locator('.stake').fill('100');
-    
+    // Fill first wager with realistic large values
+    const row1 = page.locator('[data-row]').first();
+    await row1.locator('.side').fill('1');
+    await row1.locator('.odds').fill('-9999');
+    await row1.locator('.stake').fill('99999.99');
+    await page.waitForTimeout(300);
+
     // Take snapshot
     await expect(page).toHaveScreenshot('compact-430px.png', {
       fullPage: true,
@@ -148,12 +149,12 @@ test.describe('Compact Mode at 430px', () => {
   });
 
   test('visual snapshot with More expanded', async ({ page }) => {
-    // Fill in a complete wager
+    // Fill in a complete wager with large values
     const row = page.locator('[data-row]').first();
     await row.locator('.side').fill('1');
-    await row.locator('.odds').fill('+150');
-    await row.locator('.stake').fill('100');
-    
+    await row.locator('.odds').fill('+9999');
+    await row.locator('.stake').fill('12345.67');
+
     // Expand More
     await row.locator('.more-toggle-btn').click();
     
