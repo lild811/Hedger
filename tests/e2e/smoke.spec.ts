@@ -1,5 +1,17 @@
 import { test, expect } from './setup.compact';
 
+// Helper function to expand More section in compact mode
+async function expandMore(row) {
+  const moreBtn = row.locator('.more-toggle-btn');
+  const secondary = row.locator('.row-secondary');
+  
+  // Check if already expanded
+  const isExpanded = await secondary.evaluate(el => el.classList.contains('expanded'));
+  if (!isExpanded) {
+    await moreBtn.click();
+  }
+}
+
 test.describe('Fast Hedger v2.3', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/index.html');
@@ -26,13 +38,18 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('can add a wager with Kalshi format', async ({ page }) => {
+    const row = page.locator('[data-row]').first();
+    
+    // Expand More section to access Type selector
+    await expandMore(row);
+    
     // Set row type to Kalshi YES
-    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    await row.locator('.type-select').selectOption('kalshi-yes');
     await page.waitForTimeout(100);
     
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.odds').fill('25c');
-    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    await row.locator('.side').fill('1');
+    await row.locator('.odds').fill('25c');
+    await row.locator('.stake').fill('100');
     
     // Wait for calculation
     await page.waitForTimeout(200);
@@ -151,35 +168,56 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('ProphetX fee marker: PX! applies 1% fee on winnings', async ({ page }) => {
-    // Add wager with PX! marker
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.sportsbook').fill('PX!');
-    await page.locator('[data-row]').first().locator('.odds').fill('+100');
-    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    const row = page.locator('[data-row]').first();
+    
+    // Fill main fields first
+    await row.locator('.side').fill('1');
+    await row.locator('.odds').fill('+100');
+    await row.locator('.stake').fill('100');
+    
+    // Expand More to access sportsbook
+    await expandMore(row);
+    await row.locator('.sportsbook').fill('PX!');
+    
+    // Wait for recalc
+    await page.waitForTimeout(200);
     
     // Profit should be 99 (100 - 1% fee)
-    const profit = page.locator('[data-row]').first().locator('.profit');
+    const profit = row.locator('.profit');
     await expect(profit).toContainText('$99.00');
   });
 
   test('ProphetX fee marker: PX has no fee', async ({ page }) => {
-    // Add wager with PX marker (no exclamation)
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.sportsbook').fill('PX');
-    await page.locator('[data-row]').first().locator('.odds').fill('+100');
-    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    const row = page.locator('[data-row]').first();
+    
+    // Fill main fields first
+    await row.locator('.side').fill('1');
+    await row.locator('.odds').fill('+100');
+    await row.locator('.stake').fill('100');
+    
+    // Expand More to access sportsbook
+    await expandMore(row);
+    await row.locator('.sportsbook').fill('PX');
+    
+    // Wait for recalc
+    await page.waitForTimeout(200);
     
     // Profit should be 100 (no fee)
-    const profit = page.locator('[data-row]').first().locator('.profit');
+    const profit = row.locator('.profit');
     await expect(profit).toContainText('$100.00');
   });
 
   test('Per-row Kalshi: Normal row rejects Kalshi formats', async ({ page }) => {
+    const row = page.locator('[data-row]').first();
+    
+    // Expand More to check type
+    await expandMore(row);
+    
     // Row should be Normal by default
-    await expect(page.locator('[data-row]').first().locator('.type-select')).toHaveValue('normal');
+    await expect(row.locator('.type-select')).toHaveValue('normal');
     
     // Try to enter Kalshi format odds
-    const oddsInput = page.locator('[data-row]').first().locator('.odds');
+    const oddsInput = row.locator('.odds');
     await oddsInput.fill('25c');
     
     // Should show error
@@ -188,8 +226,13 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('Per-row Kalshi: Kalshi row accepts Kalshi formats with fees', async ({ page }) => {
+    const row = page.locator('[data-row]').first();
+    
+    // Expand More to access type selector
+    await expandMore(row);
+    
     // Set row to Kalshi YES
-    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    await row.locator('.type-select').selectOption('kalshi-yes');
     await page.waitForTimeout(100);
     
     // Enter Kalshi format odds
@@ -247,11 +290,16 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('CSV export and import round-trip', async ({ page }) => {
-    // Add a wager
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.sportsbook').fill('PX!');
-    await page.locator('[data-row]').first().locator('.odds').fill('+150');
-    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    const row = page.locator('[data-row]').first();
+    
+    // Fill main fields
+    await row.locator('.side').fill('1');
+    await row.locator('.odds').fill('+150');
+    await row.locator('.stake').fill('100');
+    
+    // Expand More to access sportsbook
+    await expandMore(row);
+    await row.locator('.sportsbook').fill('PX!');
     
     // Wait for recalc
     await page.waitForTimeout(100);
@@ -282,28 +330,37 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('Clear button zeros stake but keeps book and odds', async ({ page }) => {
-    // Fill in row with complete data
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.sportsbook').fill('DraftKings');
-    await page.locator('[data-row]').first().locator('.odds').fill('+150');
-    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    const row = page.locator('[data-row]').first();
+    
+    // Fill main fields first
+    await row.locator('.side').fill('1');
+    await row.locator('.odds').fill('+150');
+    await row.locator('.stake').fill('100');
+    
+    // Expand More to access sportsbook
+    await expandMore(row);
+    await row.locator('.sportsbook').fill('DraftKings');
+    
+    // Wait for recalc
+    await page.waitForTimeout(100);
     
     // Verify profit is calculated
-    await expect(page.locator('[data-row]').first().locator('.profit')).toContainText('$150.00');
+    await expect(row.locator('.profit')).toContainText('$150.00');
     
     // Click clear button
-    await page.locator('[data-row]').first().locator('.clear-btn').click();
+    await row.locator('.clear-btn').click();
     
     // Row should still exist
     await expect(page.locator('[data-row]')).toHaveCount(1);
     
-    // Book and odds should be preserved
-    await expect(page.locator('[data-row]').first().locator('.sportsbook')).toHaveValue('DraftKings');
-    await expect(page.locator('[data-row]').first().locator('.odds')).toHaveValue('+150');
+    // Book and odds should be preserved - need to check after expanding More again
+    await expandMore(row);
+    await expect(row.locator('.sportsbook')).toHaveValue('DraftKings');
+    await expect(row.locator('.odds')).toHaveValue('+150');
     
     // Stake and payout should be cleared
-    await expect(page.locator('[data-row]').first().locator('.stake')).toHaveValue('');
-    await expect(page.locator('[data-row]').first().locator('.payout')).toHaveValue('');
+    await expect(row.locator('.stake')).toHaveValue('');
+    await expect(row.locator('.payout')).toHaveValue('');
     
     // Profit should be $0.00
     await expect(page.locator('[data-row]').first().locator('.profit')).toContainText('$0.00');
@@ -393,27 +450,35 @@ test.describe('Fast Hedger v2.3', () => {
 
   test('Mixed ticket: Normal and Kalshi rows in same session', async ({ page }) => {
     // Add Normal row with American odds
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.type-select').selectOption('normal');
-    await page.locator('[data-row]').first().locator('.odds').fill('+150');
-    await page.locator('[data-row]').first().locator('.stake').fill('100');
+    const row1 = page.locator('[data-row]').first();
+    await row1.locator('.side').fill('1');
+    await row1.locator('.odds').fill('+150');
+    await row1.locator('.stake').fill('100');
+    
+    // Expand More to set type to Normal (should be default)
+    await expandMore(row1);
+    await row1.locator('.type-select').selectOption('normal');
     
     // Add second row as Kalshi YES
     await page.locator('#addRow').click();
     await page.waitForTimeout(100);
     
-    await page.locator('[data-row]').nth(1).locator('.side').fill('2');
-    await page.locator('[data-row]').nth(1).locator('.type-select').selectOption('kalshi-yes');
-    await page.locator('[data-row]').nth(1).locator('.odds').fill('40c');
-    await page.locator('[data-row]').nth(1).locator('.stake').fill('100');
+    const row2 = page.locator('[data-row]').nth(1);
+    await row2.locator('.side').fill('2');
+    await row2.locator('.odds').fill('40c');
+    await row2.locator('.stake').fill('100');
+    
+    // Expand More on second row to set type to Kalshi YES
+    await expandMore(row2);
+    await row2.locator('.type-select').selectOption('kalshi-yes');
     
     await page.waitForTimeout(200);
     
     // Both rows should calculate profits
-    const profit1 = page.locator('[data-row]').first().locator('.profit');
+    const profit1 = row1.locator('.profit');
     await expect(profit1).toContainText('$150');
     
-    const profit2 = page.locator('[data-row]').nth(1).locator('.profit');
+    const profit2 = row2.locator('.profit');
     // 40c with Kalshi fees
     await expect(profit2).toContainText('$');
     
@@ -471,24 +536,27 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('Kalshi YES@0.62 with 10 shares: verify net for both outcomes', async ({ page }) => {
-    // Set row to Kalshi YES
-    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    const row = page.locator('[data-row]').first();
+    
+    // Expand More to set type to Kalshi YES
+    await expandMore(row);
+    await row.locator('.type-select').selectOption('kalshi-yes');
     await page.waitForTimeout(100);
     
     // Enter Kalshi format odds: YES@0.62 means 62c or 0.62 price
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.odds').fill('0.62');
+    await row.locator('.side').fill('1');
+    await row.locator('.odds').fill('0.62');
     
     // Calculate stake for 10 contracts: 10 * 0.62 = 6.2
     // With Kalshi, N contracts = floor(stake / price), so for 10 contracts at 0.62, stake = 6.2
-    await page.locator('[data-row]').first().locator('.stake').fill('6.2');
+    await row.locator('.stake').fill('6.2');
     
     await page.waitForTimeout(200);
     
     // Verify profit is calculated with Kalshi fees
     // 10 contracts at 0.62: cost = 6.20, open fee = 0.06 (1%), settle fee = 0.20 (2%)
     // If YES wins: net payout = 10 - 0.20 = 9.80, profit = 9.80 - 6.20 - 0.06 = 3.54
-    const profit = page.locator('[data-row]').first().locator('.profit');
+    const profit = row.locator('.profit');
     await expect(profit).toContainText('$3.54');
     
     // Verify Side A net (if A wins, profit A - stake B)
@@ -503,11 +571,16 @@ test.describe('Fast Hedger v2.3', () => {
   });
 
   test('Kalshi Toggle: Normal mode rejects 0.xx odds format', async ({ page }) => {
+    const row = page.locator('[data-row]').first();
+    
+    // Expand More to check type
+    await expandMore(row);
+    
     // Row should be Normal by default
-    await expect(page.locator('[data-row]').first().locator('.type-select')).toHaveValue('normal');
+    await expect(row.locator('.type-select')).toHaveValue('normal');
     
     // Try to enter Kalshi price format 0.62
-    const oddsInput = page.locator('[data-row]').first().locator('.odds');
+    const oddsInput = row.locator('.odds');
     await oddsInput.fill('0.62');
     
     await page.waitForTimeout(100);
@@ -516,20 +589,20 @@ test.describe('Fast Hedger v2.3', () => {
     await expect(page.locator('.error-text')).toBeVisible();
     await expect(page.locator('.error-text')).toContainText('0.xx odds not allowed for Normal rows');
     
-    // Now switch to Kalshi YES mode
-    await page.locator('[data-row]').first().locator('.type-select').selectOption('kalshi-yes');
+    // Now switch to Kalshi YES mode (More should still be expanded)
+    await row.locator('.type-select').selectOption('kalshi-yes');
     await page.waitForTimeout(100);
     
     // Error should disappear and format should be accepted
     await expect(page.locator('.error-text')).not.toBeVisible();
     
     // Can now enter stake and it should calculate
-    await page.locator('[data-row]').first().locator('.side').fill('1');
-    await page.locator('[data-row]').first().locator('.stake').fill('10');
+    await row.locator('.side').fill('1');
+    await row.locator('.stake').fill('10');
     await page.waitForTimeout(200);
     
     // Should calculate profit with Kalshi fees
-    const profit = page.locator('[data-row]').first().locator('.profit');
+    const profit = row.locator('.profit');
     await expect(profit).toContainText('$');
   });
 

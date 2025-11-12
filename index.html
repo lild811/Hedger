@@ -19,6 +19,39 @@
     .helper-text{font-size:11px;color:var(--muted);line-height:1.5;padding:8px;background:rgba(167,171,180,0.05);border-radius:6px;margin-top:8px}
     .helper-text div{margin:2px 0}
     .helper-text strong{color:#a7abb4;font-weight:600}
+    .helper-text-toggle{
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:6px 8px;
+      background:rgba(167,171,180,0.05);
+      border-radius:6px;
+      margin-top:8px;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:600;
+    }
+    .helper-text-toggle:hover{
+      background:rgba(167,171,180,0.1);
+    }
+    .helper-text-content{
+      display:none;
+      padding:8px;
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .helper-text-content.expanded{
+      display:block;
+    }
+    .helper-text-content div{
+      margin:2px 0;
+    }
+    .helper-text-content strong{
+      color:#a7abb4;
+      font-weight:600;
+    }
     .divider{height:1px;background:var(--grid);margin:8px 0}
 
     input,button,select{font:inherit}
@@ -37,76 +70,159 @@
     .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px;margin:4px 0}
     
     /* Compact Mode - optimized for ~430px width */
-    body.compact .rows-head,
-    body.compact .row {
-      gap:4px;
-    }
+    /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
+    /* Type and Sportsbook move to collapsible secondary line */
     body.compact .rows-head {
-      grid-template-columns:minmax(36px,42px) 0 0 minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
-    }
-    body.compact .row {
-      grid-template-columns:minmax(36px,42px) 0 0 minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
+      /* Header shows: Side, Odds, Stake, Payout, Profit, More */
+      grid-template-columns: minmax(36px,42px) minmax(68px,85px) minmax(74px,88px) minmax(74px,88px) minmax(66px,80px) 48px;
+      gap: 4px;
     }
     
-    /* Visually hide Type and Sportsbook columns but keep them in DOM for tests */
+    body.compact .row {
+      /* Main row: Side, Odds, Stake, Payout, Profit, Actions (More toggle + C + X) */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin: 4px 0;
+      align-items: center;
+    }
+    
+    /* Compact mode: hide Type and Sportsbook column headers */
     body.compact .rows-head > div:nth-child(2),
     body.compact .rows-head > div:nth-child(3) {
-      width: 0;
-      min-width: 0;
-      overflow: hidden;
-      opacity: 0;
-      padding: 0;
+      display: none;
     }
     
+    /* Compact mode: hide Type and Sportsbook in main row until moved to secondary */
     body.compact .row > .type-select,
     body.compact .row > .sportsbook {
-      width: 1px;
-      min-width: 1px;
-      max-width: 1px;
-      height: 1px;
-      padding: 0;
-      border: 0;
-      opacity: 0;
-      position: absolute;
-      left: -9999px;
+      display: none;
     }
     
-    /* Adjust input sizing in compact mode */
-    body.compact .row input,
-    body.compact .row select {
-      flex:1 1 auto;
-      min-width:0;
-      padding:6px 7px;
-      font-size:13px;
+    /* When moved to secondary, show them */
+    body.compact .row-secondary .type-select,
+    body.compact .row-secondary .sportsbook {
+      display: block;
     }
     
-    body.compact .odds-input {
-      padding-right:20px !important;
+    /* Compact mode: secondary row for Type and Sportsbook */
+    body.compact .row-secondary {
+      display: none;
+      width: 100%;
+      gap: 4px;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid var(--grid);
+    }
+    
+    body.compact .row-secondary.expanded {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    /* When secondary is collapsed, hide fields from accessibility */
+    body.compact .row-secondary:not(.expanded) .type-select,
+    body.compact .row-secondary:not(.expanded) .sportsbook {
+      visibility: hidden;
+    }
+    
+    /* Compact mode: main line field sizing */
+    body.compact .row > .side {
+      width: 38px;
+      flex: 0 0 38px;
+      padding: 6px 5px;
+      font-size: 13px;
+    }
+    
+    body.compact .row > .odds-wrapper {
+      width: 72px;
+      flex: 0 0 72px;
+    }
+    
+    body.compact .row > .odds-wrapper .odds-input {
+      padding: 6px 5px;
+      padding-right: 20px !important;
+      font-size: 13px;
+    }
+    
+    body.compact .row > .stake {
+      width: 76px;
+      flex: 0 0 76px;
+      padding: 6px 5px;
+      font-size: 13px;
+    }
+    
+    body.compact .row > .payout {
+      width: 76px;
+      flex: 0 0 76px;
+      padding: 6px 5px;
+      font-size: 13px;
+    }
+    
+    body.compact .row > .profit {
+      width: 68px;
+      flex: 0 0 68px;
+      padding: 6px 5px;
+      font-size: 13px;
+    }
+    
+    body.compact .row > .row-actions {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 2px;
     }
     
     body.compact .sign-toggle {
-      width:18px;
-      height:18px;
-      font-size:10px;
-      right:1px;
-    }
-    
-    body.compact .profit {
-      padding:6px 7px;
-      font-size:13px;
+      width: 18px;
+      height: 18px;
+      font-size: 10px;
+      right: 1px;
     }
     
     body.compact .clear-btn,
     body.compact .delete-btn {
-      font-size:10px;
-      padding:0 5px;
-      height:24px;
+      font-size: 10px;
+      padding: 0 5px;
+      height: 24px;
+      min-width: 24px;
+    }
+    
+    body.compact .more-toggle-btn {
+      font-size: 10px;
+      padding: 0 5px;
+      height: 24px;
+      min-width: 24px;
+      background: #20242f;
+      border: 1px solid #2a2e37;
+      color: #c7d0e0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    
+    body.compact .more-toggle-btn:hover {
+      background: #2a2e37;
+    }
+    
+    body.compact .more-toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }
     
     body.compact .copy-row-btn {
-      width:28px;
-      height:28px;
-      font-size:12px;
+      width: 24px;
+      height: 24px;
+      font-size: 11px;
+      min-width: 24px;
+      padding: 0;
+    }
+    
+    /* Secondary line field sizing */
+    body.compact .row-secondary input,
+    body.compact .row-secondary select {
+      padding: 6px 7px;
+      font-size: 13px;
+      width: 100%;
     }
     
     /* Ghost row special layout */
@@ -127,6 +243,19 @@
       background: rgba(108,196,255,.1);
       border-radius: 4px;
       text-align: center;
+    }
+    
+    /* Ghost row in compact mode: keep grid layout but hide Type and Sportsbook */
+    body.compact .ghost-row .row {
+      display: grid;
+      grid-template-columns: minmax(36px,42px) 0 0 minmax(68px,85px) minmax(74px,88px) minmax(74px,88px) minmax(66px,80px) auto;
+      gap: 4px;
+      align-items: center;
+    }
+    
+    body.compact .ghost-row .row .type-select,
+    body.compact .ghost-row .row .sportsbook {
+      display: none;
     }
     
     /* Format toggle for ghost row */
@@ -585,7 +714,11 @@
         <div id="rows"></div>
         <div id="ghostContainer"></div>
         <div class="divider"></div>
-        <div class="helper-text">
+        <div class="helper-text-toggle" id="helperToggle" aria-expanded="false" aria-controls="helperContent">
+          <span>Format & Key Reference</span>
+          <span id="helperToggleIcon">▼</span>
+        </div>
+        <div class="helper-text-content" id="helperContent" aria-hidden="true">
           <div><strong>Accept:</strong> American ±100+ (floats OK: +104.3, -118.5) • Kalshi 1-99c/.01-.99/1-99 • Decimal 1.01+ • 1-99% • 5/2 • even</div>
           <div><strong>Parse:</strong> % → c/k → / → . → ± → int (1-99→Kalshi, 100→+100, 101+→use ±)</div>
           <div><strong>Kalshi:</strong> 1% open + 2% settle fees • Contracts = floor(stake/price) • Net payout = N - settleFee</div>
@@ -762,26 +895,37 @@ Adds real row when clicked.">
 
   <template id="rowT">
     <div class="row" data-row>
-      <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
-      <select class="type-select" title="Row type: Normal rejects Kalshi formats, Kalshi YES/NO uses Kalshi fees, Custom allows setting fees">
+      <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
+      <select class="type-select" title="Row type: Normal rejects Kalshi formats, Kalshi YES/NO uses Kalshi fees, Custom allows setting fees" aria-label="Row type">
         <option value="normal">Normal</option>
         <option value="kalshi-yes">Kalshi YES</option>
         <option value="kalshi-no">Kalshi NO</option>
         <option value="custom">Custom...</option>
       </select>
-      <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)">
+      <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)" aria-label="Sportsbook">
       <div class="odds-wrapper">
-        <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
-        <button class="sign-toggle" data-sign="+">+</button>
+        <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off" aria-label="Odds">
+        <button class="sign-toggle" data-sign="+" aria-label="Toggle odds sign">+</button>
         <div class="error-text"></div>
       </div>
-      <input class="stake right" type="number" step="0.01" placeholder="0.00">
-      <input class="payout right" type="number" step="0.01" placeholder="auto">
-      <div class="profit">$0.00</div>
+      <input class="stake right" type="number" step="0.01" placeholder="0.00" aria-label="Stake amount">
+      <input class="payout right" type="number" step="0.01" placeholder="auto" aria-label="Payout amount">
+      <div class="profit" aria-label="Profit">$0.00</div>
       <div class="row-actions">
-        <button class="copy-row-btn" title="Copy row">⧉</button>
-        <button class="clear-btn" title="Clear stake (keep book/odds)">C</button>
-        <button class="delete-btn" title="Delete row">×</button>
+        <button class="more-toggle-btn" title="Show/hide additional fields (Type, Sportsbook)" aria-label="Show more fields" aria-expanded="false">⋯</button>
+        <button class="copy-row-btn" title="Copy row" aria-label="Copy row">⧉</button>
+        <button class="clear-btn" title="Clear stake (keep book/odds)" aria-label="Clear stake">C</button>
+        <button class="delete-btn" title="Delete row" aria-label="Delete row">×</button>
+      </div>
+      <div class="row-secondary" aria-hidden="true">
+        <div>
+          <label class="small" style="display:block;margin-bottom:2px;color:var(--muted)">Type</label>
+          <!-- Type select is actually at index 1 in the row, will be moved here via JS -->
+        </div>
+        <div>
+          <label class="small" style="display:block;margin-bottom:2px;color:var(--muted)">Sportsbook</label>
+          <!-- Sportsbook input is actually at index 2 in the row, will be moved here via JS -->
+        </div>
       </div>
       <div class="custom-fees" style="display:none;">
         <div class="custom-fee-inputs">
@@ -804,22 +948,22 @@ Adds real row when clicked.">
         <div class="format-readout"></div>
       </div>
       <div class="row">
-        <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2">
-        <select class="type-select" disabled>
+        <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
+        <select class="type-select" disabled aria-label="Row type">
           <option value="normal">Normal</option>
         </select>
-        <input class="sportsbook compact" type="text" placeholder="Book" readonly>
+        <input class="sportsbook compact" type="text" placeholder="Book" readonly aria-label="Sportsbook">
         <div class="odds-wrapper">
-          <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off">
-          <button class="sign-toggle" data-sign="+">+</button>
+          <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off" aria-label="Odds">
+          <button class="sign-toggle" data-sign="+" aria-label="Toggle odds sign">+</button>
           <div class="error-text"></div>
         </div>
-        <input class="stake right" type="number" step="0.01" placeholder="0.00" readonly>
-        <input class="payout right" type="number" step="0.01" placeholder="auto" readonly>
-        <div class="profit">$0.00</div>
+        <input class="stake right" type="number" step="0.01" placeholder="0.00" readonly aria-label="Stake amount">
+        <input class="payout right" type="number" step="0.01" placeholder="auto" readonly aria-label="Payout amount">
+        <div class="profit" aria-label="Profit">$0.00</div>
         <div style="display:flex;gap:2px">
-          <button class="commit" title="Commit to wagers">✓</button>
-          <button class="dismiss" title="Dismiss" style="width:18px;height:18px;padding:0;background:#ff7d7d;border:1px solid#ff7d7d;color:#fff;border-radius:4px;cursor:pointer;font-size:10px">✕</button>
+          <button class="commit" title="Commit to wagers" aria-label="Commit wager">✓</button>
+          <button class="dismiss" title="Dismiss" aria-label="Dismiss" style="width:18px;height:18px;padding:0;background:#ff7d7d;border:1px solid#ff7d7d;color:#fff;border-radius:4px;cursor:pointer;font-size:10px">✕</button>
         </div>
       </div>
       <div class="ghost-meta"></div>
@@ -1503,6 +1647,53 @@ Adds real row when clicked.">
           if(!isGhost) debouncedSave();
         });
       }
+      
+      // More toggle button (compact mode only)
+      const moreToggleBtn = el.querySelector('.more-toggle-btn');
+      const rowSecondary = el.querySelector('.row-secondary');
+      if(moreToggleBtn && rowSecondary && !isGhost) {
+        // Setup initial compact mode state
+        const isCompact = document.body.classList.contains('compact');
+        if(isCompact) {
+          // Move Type and Sportsbook into secondary container
+          const typeContainer = rowSecondary.children[0];
+          const sportsbookContainer = rowSecondary.children[1];
+          if(typeSelect && typeContainer && !typeContainer.querySelector('.type-select')) {
+            typeContainer.appendChild(typeSelect);
+          }
+          if(sportsbook && sportsbookContainer && !sportsbookContainer.querySelector('.sportsbook')) {
+            sportsbookContainer.appendChild(sportsbook);
+          }
+          
+          // Set initial accessibility attributes
+          typeSelect.setAttribute('tabindex', '-1');
+          typeSelect.setAttribute('aria-hidden', 'true');
+          sportsbook.setAttribute('tabindex', '-1');
+          sportsbook.setAttribute('aria-hidden', 'true');
+        }
+        
+        moreToggleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isExpanded = rowSecondary.classList.toggle('expanded');
+          moreToggleBtn.classList.toggle('active', isExpanded);
+          moreToggleBtn.setAttribute('aria-expanded', isExpanded);
+          moreToggleBtn.setAttribute('aria-label', isExpanded ? 'Hide additional fields' : 'Show more fields');
+          rowSecondary.setAttribute('aria-hidden', !isExpanded);
+          
+          // Update accessibility
+          if(isExpanded) {
+            typeSelect.removeAttribute('tabindex');
+            typeSelect.removeAttribute('aria-hidden');
+            sportsbook.removeAttribute('tabindex');
+            sportsbook.removeAttribute('aria-hidden');
+          } else {
+            typeSelect.setAttribute('tabindex', '-1');
+            typeSelect.setAttribute('aria-hidden', 'true');
+            sportsbook.setAttribute('tabindex', '-1');
+            sportsbook.setAttribute('aria-hidden', 'true');
+          }
+        });
+      }
 
       // Store refs
       el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn, openFeePct, winFeePct};
@@ -2119,6 +2310,19 @@ Adds real row when clicked.">
       recalc();
       saveCurrentState();
     });
+    
+    // Helper text toggle
+    const helperToggle = document.getElementById('helperToggle');
+    const helperContent = document.getElementById('helperContent');
+    const helperToggleIcon = document.getElementById('helperToggleIcon');
+    if(helperToggle && helperContent && helperToggleIcon) {
+      helperToggle.addEventListener('click', () => {
+        const isExpanded = helperContent.classList.toggle('expanded');
+        helperToggle.setAttribute('aria-expanded', isExpanded);
+        helperContent.setAttribute('aria-hidden', !isExpanded);
+        helperToggleIcon.textContent = isExpanded ? '▲' : '▼';
+      });
+    }
 
     // Copy buttons
     document.addEventListener('click', (e) => {
