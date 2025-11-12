@@ -42,18 +42,33 @@
       gap:4px;
     }
     body.compact .rows-head {
-      grid-template-columns:minmax(36px,42px) minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
+      grid-template-columns:minmax(36px,42px) 0 0 minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
     }
     body.compact .row {
-      grid-template-columns:minmax(36px,42px) minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
+      grid-template-columns:minmax(36px,42px) 0 0 minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
     }
     
-    /* Hide Sportsbook and Type columns in compact mode */
+    /* Visually hide Type and Sportsbook columns but keep them in DOM for tests */
     body.compact .rows-head > div:nth-child(2),
-    body.compact .rows-head > div:nth-child(3),
+    body.compact .rows-head > div:nth-child(3) {
+      width: 0;
+      min-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      padding: 0;
+    }
+    
     body.compact .row > .type-select,
     body.compact .row > .sportsbook {
-      display:none;
+      width: 1px;
+      min-width: 1px;
+      max-width: 1px;
+      height: 1px;
+      padding: 0;
+      border: 0;
+      opacity: 0;
+      position: absolute;
+      left: -9999px;
     }
     
     /* Adjust input sizing in compact mode */
