@@ -83,6 +83,10 @@
     /* Compact Mode - optimized for ~430px width */
     /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
     /* Type and Sportsbook move to collapsible secondary line */
+    body.compact {
+      overflow-x: clip;
+    }
+    
     body.compact .rows-head {
       /* Header shows: Side, Odds, Stake, Payout, Profit, More */
       grid-template-columns: minmax(0,42px) minmax(0,85px) minmax(0,88px) minmax(0,88px) minmax(0,80px) 48px;
@@ -93,9 +97,10 @@
       /* Main row: Side, Odds, Stake, Payout, Profit, Actions (More toggle + C + X) */
       display: flex;
       flex-wrap: nowrap;
-      gap: 3px;
+      gap: 2px;
       margin: 4px 0;
       align-items: center;
+      max-width: 100%;
     }
     
     /* Compact mode: hide Type and Sportsbook column headers */
@@ -138,48 +143,55 @@
     
     /* Compact mode: main line field sizing */
     body.compact .row > .side {
-      width: 38px;
-      flex: 0 0 38px;
-      padding: 6px 5px;
+      width: 32px;
+      flex: 0 0 32px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .odds-wrapper {
-      width: 72px;
-      flex: 0 0 72px;
+      width: 66px;
+      flex: 0 0 66px;
+      min-width: 0;
     }
     
     body.compact .row > .odds-wrapper .odds-input {
       padding: 6px 5px;
       padding-right: 20px !important;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .stake {
-      width: 76px;
-      flex: 0 0 76px;
-      padding: 6px 5px;
+      width: 68px;
+      flex: 0 0 68px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .payout {
-      width: 76px;
-      flex: 0 0 76px;
-      padding: 6px 5px;
+      width: 68px;
+      flex: 0 0 68px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .profit {
-      width: 68px;
-      flex: 0 0 68px;
-      padding: 6px 5px;
+      width: 60px;
+      flex: 0 0 60px;
+      padding: 6px 4px;
       font-size: 13px;
+      min-width: 0;
     }
     
     body.compact .row > .row-actions {
       flex: 0 0 auto;
       display: flex;
       gap: 2px;
+      min-width: 0;
     }
     
     body.compact .sign-toggle {
@@ -192,16 +204,18 @@
     body.compact .clear-btn,
     body.compact .delete-btn {
       font-size: 10px;
-      padding: 0 5px;
-      height: 24px;
-      min-width: 24px;
+      padding: 0 4px;
+      height: 22px;
+      min-width: 22px;
+      max-width: 100%;
     }
     
     body.compact .more-toggle-btn {
       font-size: 10px;
-      padding: 0 5px;
-      height: 24px;
-      min-width: 24px;
+      padding: 0 4px;
+      height: 22px;
+      min-width: 22px;
+      max-width: 100%;
       background: #20242f;
       border: 1px solid #2a2e37;
       color: #c7d0e0;
@@ -220,10 +234,11 @@
     }
     
     body.compact .copy-row-btn {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       font-size: 11px;
-      min-width: 24px;
+      min-width: 22px;
+      max-width: 100%;
       padding: 0;
     }
     
@@ -476,7 +491,7 @@
     .type-select option{background:#0f1116;color:var(--ink)}
     
     /* Settings and controls */
-    .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
+    .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px;max-width:100%;min-width:0}
     .settings-bar > *{min-width:0}
     .toggle-wrapper{display:flex;align-items:center;gap:6px}
     .tooltip{position:relative;cursor:help}
@@ -709,6 +724,18 @@
     }
     .helper-toggle-indicator{
       transition: transform 0.2s;
+    }
+    
+    /* Compact Mode at 430-500px: reduce padding to fit content */
+    @media (max-width: 500px){
+      body.compact .wrap{
+        padding: 0 8px;
+        max-width: 100%;
+      }
+      body.compact .card{
+        padding: 8px;
+        max-width: 100%;
+      }
     }
     
     /* Mobile/Compact Mode at 390px and below */
