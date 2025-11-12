@@ -72,9 +72,9 @@ test.describe('Compact Mode at 430px', () => {
     // Expand secondary fields
     await moreBtn.click();
     
-    // Should be able to select Kalshi YES
-    await typeSelect.selectOption('kalshi-yes');
-    await expect(typeSelect).toHaveValue('kalshi-yes');
+    // Should be able to select Kalshi
+    await typeSelect.selectOption('kalshi');
+    await expect(typeSelect).toHaveValue('kalshi');
   });
 
   test('can enter Sportsbook when More is expanded', async ({ page }) => {

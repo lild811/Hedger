@@ -43,8 +43,8 @@ test.describe('Fast Hedger v2.3', () => {
     // Expand More section to access Type selector
     await expandMore(row);
     
-    // Set row type to Kalshi YES
-    await row.locator('.type-select').selectOption('kalshi-yes');
+    // Set row type to Kalshi
+    await row.locator('.type-select').selectOption('kalshi');
     await page.waitForTimeout(100);
     
     await row.locator('.side').fill('1');
@@ -231,8 +231,8 @@ test.describe('Fast Hedger v2.3', () => {
     // Expand More to access type selector
     await expandMore(row);
     
-    // Set row to Kalshi YES
-    await row.locator('.type-select').selectOption('kalshi-yes');
+    // Set row to Kalshi
+    await row.locator('.type-select').selectOption('kalshi');
     await page.waitForTimeout(100);
     
     // Enter Kalshi format odds
@@ -468,9 +468,9 @@ test.describe('Fast Hedger v2.3', () => {
     await row2.locator('.odds').fill('40c');
     await row2.locator('.stake').fill('100');
     
-    // Expand More on second row to set type to Kalshi YES
+    // Expand More on second row to set type to Kalshi
     await expandMore(row2);
-    await row2.locator('.type-select').selectOption('kalshi-yes');
+    await row2.locator('.type-select').selectOption('kalshi');
     
     await page.waitForTimeout(200);
     
@@ -538,9 +538,9 @@ test.describe('Fast Hedger v2.3', () => {
   test('Kalshi YES@0.62 with 10 shares: verify net for both outcomes', async ({ page }) => {
     const row = page.locator('[data-row]').first();
     
-    // Expand More to set type to Kalshi YES
+    // Expand More to set type to Kalshi
     await expandMore(row);
-    await row.locator('.type-select').selectOption('kalshi-yes');
+    await row.locator('.type-select').selectOption('kalshi');
     await page.waitForTimeout(100);
     
     // Enter Kalshi format odds: YES@0.62 means 62c or 0.62 price
@@ -589,8 +589,8 @@ test.describe('Fast Hedger v2.3', () => {
     await expect(page.locator('.error-text')).toBeVisible();
     await expect(page.locator('.error-text')).toContainText('0.xx odds not allowed for Normal rows');
     
-    // Now switch to Kalshi YES mode (More should still be expanded)
-    await row.locator('.type-select').selectOption('kalshi-yes');
+    // Now switch to Kalshi mode (More should still be expanded)
+    await row.locator('.type-select').selectOption('kalshi');
     await page.waitForTimeout(100);
     
     // Error should disappear and format should be accepted
