@@ -590,7 +590,12 @@
         
         <!-- Presets - Text labels with enhanced tooltips -->
         <div class="preset-grid">
-          <button class="preset-btn" id="presetEqualize">
+          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make net profit equal for both outcomes.
+
+Formula:
+Δ = (Profit_opposing + Stake_opposing - Profit_current - Stake_current) / decimal_odds
+
+Shows ghost row with computed stake to add.">
             <div>Equalize
               <span class="tooltip-icon">ⓘ
                 <div class="tooltip-content">
@@ -607,7 +612,13 @@
               </span>
             </div>
           </button>
-          <button class="preset-btn" id="presetCoverA">
+          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A = 0: Raise side A to break even if A wins; profit remains on side B.
+
+Formula:
+Stake_A = |Net_A| / profit_per_dollar
+where Net_A = Profit_A - Stake_B
+
+Adds real row when clicked.">
             <div>Cover A
               <span class="tooltip-icon">ⓘ
                 <div class="tooltip-content">
@@ -623,7 +634,13 @@
               </span>
             </div>
           </button>
-          <button class="preset-btn" id="presetCoverB">
+          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B = 0: Raise side B to break even if B wins; profit remains on side A.
+
+Formula:
+Stake_B = |Net_B| / profit_per_dollar
+where Net_B = Profit_B - Stake_A
+
+Adds real row when clicked.">
             <div>Cover B
               <span class="tooltip-icon">ⓘ
                 <div class="tooltip-content">
@@ -638,32 +655,6 @@
                 </div>
               </span>
             </div>
-          <button class="preset-btn tooltip" id="presetEqualize" data-tooltip="Add stake to the weaker side so both outcomes pay the same net profit.">
-          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make net profit equal for both outcomes.
-
-Formula:
-Δ = (Profit_opposing + Stake_opposing - Profit_current - Stake_current) / decimal_odds
-
-Shows ghost row with computed stake to add.">
-            <div>Equalize</div>
-          </button>
-          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A = 0: Raise side A to break even if A wins; profit remains on side B.
-
-Formula:
-Stake_A = |Net_A| / profit_per_dollar
-where Net_A = Profit_A - Stake_B
-
-Adds real row when clicked.">
-            <div>Cover A</div>
-          </button>
-          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B = 0: Raise side B to break even if B wins; profit remains on side A.
-
-Formula:
-Stake_B = |Net_B| / profit_per_dollar
-where Net_B = Profit_B - Stake_A
-
-Adds real row when clicked.">
-            <div>Cover B</div>
           </button>
         </div>
         
