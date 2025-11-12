@@ -81,7 +81,7 @@
     body.compact .row {
       /* Main row: Side, Odds, Stake, Payout, Profit, Actions (More toggle + C + X) */
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 3px;
       margin: 4px 0;
       align-items: center;
@@ -619,6 +619,7 @@
       background:#2a2e37;
       border-color:var(--accent);
       color:var(--accent);
+    }
     /* Custom fee inputs */
     .custom-fees{
       grid-column: 1 / -1;
@@ -649,6 +650,188 @@
       border: 1px solid var(--grid);
       border-radius: 4px;
     }
+    
+    /* Condensed Totals Card - Hidden by default, shown on mobile */
+    .condensed-totals{
+      display: none;
+    }
+    .condensed-totals-grid{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .condensed-metric{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .condensed-label{
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+    .condensed-value{
+      font-size: 14px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .condensed-value.good{color:var(--good)}
+    .condensed-value.bad{color:var(--bad)}
+    .condensed-value.accent{color:var(--accent)}
+    
+    /* Helper details native element styling */
+    #helperDetails summary{
+      cursor: pointer;
+      padding: 6px 8px;
+      background: rgba(167,171,180,0.05);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #helperDetails summary::-webkit-details-marker{
+      display: none;
+    }
+    #helperDetails summary:hover{
+      background: rgba(167,171,180,0.1);
+    }
+    #helperDetails[open] .helper-toggle-indicator{
+      transform: rotate(180deg);
+    }
+    .helper-toggle-indicator{
+      transition: transform 0.2s;
+    }
+    
+    /* Mobile/Compact Mode at 390px and below */
+    @media (max-width: 420px){
+      body.compact{
+        overflow-x: hidden;
+      }
+      body.compact .wrap{
+        gap: 6px;
+        padding: 0 6px;
+        margin: 10px auto;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      body.compact .settings-bar{
+        padding: 5px 6px;
+        gap: 6px;
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+      }
+      body.compact .card{
+        padding: 6px;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+      body.compact header{
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      body.compact h1{
+        font-size: 16px;
+      }
+      body.compact .btn{
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+      body.compact input[type="number"],
+      body.compact input[type="text"]{
+        height: 32px;
+        padding: 5px 6px;
+        font-size: 12px;
+        min-width: 0;
+      }
+      body.compact .row > .side,
+      body.compact .row > .odds-wrapper .odds-input,
+      body.compact .row > .stake,
+      body.compact .row > .payout,
+      body.compact .row > .profit{
+        height: 32px;
+        line-height: 1.4;
+      }
+      body.compact .more-toggle-btn,
+      body.compact .clear-btn,
+      body.compact .delete-btn,
+      body.compact .copy-row-btn{
+        height: 28px;
+        min-height: 28px;
+        padding: 0 4px;
+        min-width: 22px;
+      }
+      
+      /* Show condensed totals, hide session summary on mobile */
+      body.compact .condensed-totals{
+        display: block;
+      }
+      body.compact .session-summary{
+        display: none;
+      }
+      
+      /* Ensure wager row fields fit without horizontal scroll at 390px */
+      /* Total available: 390 - 12 (padding) - 12 (card padding) = 366px */
+      /* Inputs: 30 + 64 + 66 + 66 + 58 = 284px */
+      /* Buttons: 4 * 22 = 88px */
+      /* Gaps: ~10px */
+      /* Total: ~382px - still too much, need more aggressive sizing */
+      body.compact .row > .side{
+        width: 30px;
+        flex: 0 0 30px;
+        padding: 5px 2px;
+        font-size: 12px;
+        min-width: 0;
+      }
+      body.compact .row > .odds-wrapper{
+        width: 62px;
+        flex: 0 0 62px;
+        min-width: 0;
+      }
+      body.compact .row > .odds-wrapper .odds-input{
+        padding: 5px 18px 5px 4px;
+        font-size: 12px;
+        min-width: 0;
+      }
+      body.compact .row > .stake{
+        width: 64px;
+        flex: 0 0 64px;
+        padding: 5px 3px;
+        font-size: 12px;
+        min-width: 0;
+      }
+      body.compact .row > .payout{
+        width: 64px;
+        flex: 0 0 64px;
+        padding: 5px 3px;
+        font-size: 12px;
+        min-width: 0;
+      }
+      body.compact .row > .profit{
+        width: 56px;
+        flex: 0 0 56px;
+        padding: 5px 3px;
+        font-size: 12px;
+        min-width: 0;
+      }
+      body.compact .row-actions{
+        gap: 1px;
+        flex: 0 0 auto;
+      }
+      body.compact .row{
+        gap: 2px;
+        max-width: 100%;
+      }
+      body.compact .rows-head{
+        gap: 2px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -671,8 +854,62 @@
           <button class="btn secondary" id="clearAll">Clear All</button>
         </div>
       </header>
+
+      <!-- Wagers Card - Moved above analytics for mobile-first -->
+      <div class="card">
+        <div class="rows-head small">
+          <div>Side</div>
+          <div>Type</div>
+          <div>Sportsbook</div>
+          <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
+          <div>Stake</div>
+          <div>Payout</div>
+          <div>Profit</div>
+          <div></div>
+        </div>
+        <div id="rows"></div>
+        <div id="ghostContainer"></div>
+        <div class="divider"></div>
+        <details id="helperDetails">
+          <summary style="cursor:pointer;padding:6px 8px;background:rgba(167,171,180,0.05);border-radius:6px;font-size:11px;color:var(--muted);font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center">
+            <span>Format & Key Reference</span>
+            <span class="helper-toggle-indicator">▼</span>
+          </summary>
+          <div style="padding:8px;font-size:11px;color:var(--muted);line-height:1.5">
+            <div style="margin:2px 0"><strong style="color:#a7abb4;font-weight:600">Accept:</strong> American ±100+ (floats OK: +104.3, -118.5) • Kalshi 1-99c/.01-.99/1-99 • Decimal 1.01+ • 1-99% • 5/2 • even</div>
+            <div style="margin:2px 0"><strong style="color:#a7abb4;font-weight:600">Parse:</strong> % → c/k → / → . → ± → int (1-99→Kalshi, 100→+100, 101+→use ±)</div>
+            <div style="margin:2px 0"><strong style="color:#a7abb4;font-weight:600">Kalshi:</strong> 1% open + 2% settle fees • Contracts = floor(stake/price) • Net payout = N - settleFee</div>
+            <div style="margin:2px 0"><strong style="color:#a7abb4;font-weight:600">Reject:</strong> American -99 to +99 • Decimal 1.00/negative • 0c/100c • Mixed 1.43c</div>
+            <div style="margin:2px 0"><strong style="color:#a7abb4;font-weight:600">Keys:</strong> Enter→next • 1/2→side • ± chip→sign for 101+ • Typed -/dash OK</div>
+          </div>
+        </details>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <!-- Condensed Totals Card for Mobile -->
+      <div class="card condensed-totals" id="condensedTotals">
+        <div class="condensed-totals-grid">
+          <div class="condensed-metric">
+            <div class="condensed-label">Total Stake</div>
+            <div class="condensed-value" id="condensed_total_stake">$0.00</div>
+          </div>
+          <div class="condensed-metric">
+            <div class="condensed-label">Total Profit</div>
+            <div class="condensed-value" id="sum_total_profit">$0.00</div>
+          </div>
+          <div class="condensed-metric">
+            <div class="condensed-label">Net if A wins</div>
+            <div class="condensed-value" id="condensed_a_net">$0.00</div>
+          </div>
+          <div class="condensed-metric">
+            <div class="condensed-label">Net if B wins</div>
+            <div class="condensed-value" id="condensed_b_net">$0.00</div>
+          </div>
+        </div>
+      </div>
       
-      <!-- Session Summary Strip - v2.4 -->
+      <!-- Session Summary Strip - v2.4 (Desktop) -->
       <div class="session-summary" id="sessionSummary">
         <div class="summary-item">
           <div class="summary-label">Total Stake</div>
@@ -697,33 +934,6 @@
         <div class="summary-item">
           <div class="summary-label">Hold</div>
           <div class="summary-value" id="sum_hold">0.00%</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="rows-head small">
-          <div>Side</div>
-          <div>Type</div>
-          <div>Sportsbook</div>
-          <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
-          <div>Stake</div>
-          <div>Payout</div>
-          <div>Profit</div>
-          <div></div>
-        </div>
-        <div id="rows"></div>
-        <div id="ghostContainer"></div>
-        <div class="divider"></div>
-        <div class="helper-text-toggle" id="helperToggle" aria-expanded="false" aria-controls="helperContent">
-          <span>Format & Key Reference</span>
-          <span id="helperToggleIcon">▼</span>
-        </div>
-        <div class="helper-text-content" id="helperContent" aria-hidden="true">
-          <div><strong>Accept:</strong> American ±100+ (floats OK: +104.3, -118.5) • Kalshi 1-99c/.01-.99/1-99 • Decimal 1.01+ • 1-99% • 5/2 • even</div>
-          <div><strong>Parse:</strong> % → c/k → / → . → ± → int (1-99→Kalshi, 100→+100, 101+→use ±)</div>
-          <div><strong>Kalshi:</strong> 1% open + 2% settle fees • Contracts = floor(stake/price) • Net payout = N - settleFee</div>
-          <div><strong>Reject:</strong> American -99 to +99 • Decimal 1.00/negative • 0c/100c • Mixed 1.43c</div>
-          <div><strong>Keys:</strong> Enter→next • 1/2→side • ± chip→sign for 101+ • Typed -/dash OK</div>
         </div>
       </div>
 
@@ -2081,6 +2291,9 @@ Adds real row when clicked.">
     // Update Session Summary - v2.4
     function updateSessionSummary(rows, stakeA, stakeB, netA, netB) {
       const totalStake = stakeA + stakeB;
+      const profitA = rows.filter(r => r.side === 1).reduce((a, b) => a + (b.profit || 0), 0);
+      const profitB = rows.filter(r => r.side === 2).reduce((a, b) => a + (b.profit || 0), 0);
+      const totalProfit = profitA + profitB;
       const exposure = Math.max(Math.abs(netA), Math.abs(netB));
       
       // Count distinct books
@@ -2098,7 +2311,7 @@ Adds real row when clicked.">
       // Calculate hold: |netA − netB| / totalStake
       const hold = totalStake > 0 ? (Math.abs(netA - netB) / totalStake) * 100 : 0;
       
-      // Update UI
+      // Update desktop session summary
       document.getElementById('sum_total_stake').textContent = money(totalStake);
       
       document.getElementById('sum_net_a').textContent = money(netA);
@@ -2112,6 +2325,32 @@ Adds real row when clicked.">
       document.getElementById('sum_exposure').textContent = money(exposure);
       document.getElementById('sum_books').textContent = String(bookCount);
       document.getElementById('sum_hold').textContent = hold.toFixed(2) + '%';
+      
+      // Update condensed totals (mobile)
+      const condensedTotalStake = document.getElementById('condensed_total_stake');
+      const condensedTotalProfit = document.getElementById('sum_total_profit');
+      const condensedNetA = document.getElementById('condensed_a_net');
+      const condensedNetB = document.getElementById('condensed_b_net');
+      
+      if(condensedTotalStake) condensedTotalStake.textContent = money(totalStake);
+      
+      if(condensedTotalProfit) {
+        condensedTotalProfit.textContent = money(totalProfit);
+        condensedTotalProfit.classList.toggle('good', totalProfit >= 0);
+        condensedTotalProfit.classList.toggle('bad', totalProfit < 0);
+      }
+      
+      if(condensedNetA) {
+        condensedNetA.textContent = money(netA);
+        condensedNetA.classList.toggle('good', netA >= 0);
+        condensedNetA.classList.toggle('bad', netA < 0);
+      }
+      
+      if(condensedNetB) {
+        condensedNetB.textContent = money(netB);
+        condensedNetB.classList.toggle('good', netB >= 0);
+        condensedNetB.classList.toggle('bad', netB < 0);
+      }
     }
 
     // Main recalc function
@@ -2311,19 +2550,6 @@ Adds real row when clicked.">
       saveCurrentState();
     });
     
-    // Helper text toggle
-    const helperToggle = document.getElementById('helperToggle');
-    const helperContent = document.getElementById('helperContent');
-    const helperToggleIcon = document.getElementById('helperToggleIcon');
-    if(helperToggle && helperContent && helperToggleIcon) {
-      helperToggle.addEventListener('click', () => {
-        const isExpanded = helperContent.classList.toggle('expanded');
-        helperToggle.setAttribute('aria-expanded', isExpanded);
-        helperContent.setAttribute('aria-hidden', !isExpanded);
-        helperToggleIcon.textContent = isExpanded ? '▲' : '▼';
-      });
-    }
-
     // Copy buttons
     document.addEventListener('click', (e) => {
       const copy = e.target.closest('.copy');
