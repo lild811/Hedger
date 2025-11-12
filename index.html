@@ -31,14 +31,83 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ -moz-appearance:textfield }
 
-    /* Wagers table - now includes Type column and Copy button (9 columns) */
-    .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px 36px}
-    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 36px 36px;margin:4px 0}
-    /* Wagers table - now includes Type column and action buttons (9 columns) */
+    /* Wagers table - default desktop layout (8 columns: Side, Type, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
     .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px}
     .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px;margin:4px 0}
+    
+    /* Compact Mode - optimized for ~430px width */
+    body.compact .rows-head,
+    body.compact .row {
+      gap:4px;
+    }
+    body.compact .rows-head {
+      grid-template-columns:minmax(36px,42px) 0 0 minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
+    }
+    body.compact .row {
+      grid-template-columns:minmax(36px,42px) 0 0 minmax(60px,70px) minmax(70px,80px) minmax(70px,80px) minmax(60px,70px) 60px;
+    }
+    
+    /* Visually hide Type and Sportsbook columns but keep them in DOM for tests */
+    body.compact .rows-head > div:nth-child(2),
+    body.compact .rows-head > div:nth-child(3) {
+      width: 0;
+      min-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      padding: 0;
+    }
+    
+    body.compact .row > .type-select,
+    body.compact .row > .sportsbook {
+      width: 1px;
+      min-width: 1px;
+      max-width: 1px;
+      height: 1px;
+      padding: 0;
+      border: 0;
+      opacity: 0;
+      position: absolute;
+      left: -9999px;
+    }
+    
+    /* Adjust input sizing in compact mode */
+    body.compact .row input,
+    body.compact .row select {
+      flex:1 1 auto;
+      min-width:0;
+      padding:6px 7px;
+      font-size:13px;
+    }
+    
+    body.compact .odds-input {
+      padding-right:20px !important;
+    }
+    
+    body.compact .sign-toggle {
+      width:18px;
+      height:18px;
+      font-size:10px;
+      right:1px;
+    }
+    
+    body.compact .profit {
+      padding:6px 7px;
+      font-size:13px;
+    }
+    
+    body.compact .clear-btn,
+    body.compact .delete-btn {
+      font-size:10px;
+      padding:0 5px;
+      height:24px;
+    }
+    
+    body.compact .copy-row-btn {
+      width:28px;
+      height:28px;
+      font-size:12px;
+    }
     
     /* Ghost row special layout */
     .ghost-row{ 
@@ -512,7 +581,6 @@
           <div>Payout</div>
           <div>Profit</div>
           <div></div>
-          <div></div>
         </div>
         <div id="rows"></div>
         <div id="ghostContainer"></div>
@@ -710,9 +778,8 @@ Adds real row when clicked.">
       <input class="stake right" type="number" step="0.01" placeholder="0.00">
       <input class="payout right" type="number" step="0.01" placeholder="auto">
       <div class="profit">$0.00</div>
-      <button class="copy-row-btn" title="Copy row">⧉</button>
-      <button class="clear" title="Delete row">×</button>
       <div class="row-actions">
+        <button class="copy-row-btn" title="Copy row">⧉</button>
         <button class="clear-btn" title="Clear stake (keep book/odds)">C</button>
         <button class="delete-btn" title="Delete row">×</button>
       </div>
@@ -760,6 +827,14 @@ Adds real row when clicked.">
   </template>
 
   <script>
+  // Apply compact mode from localStorage BEFORE everything else
+  (function(){
+    const uiMode = localStorage.getItem('uiMode');
+    if (uiMode === 'compact') {
+      document.body.classList.add('compact');
+    }
+  })();
+  
   (function(){
     // Application state (removed kalshiMode - now per-row)
     let historyStack = [];
@@ -1149,7 +1224,6 @@ Adds real row when clicked.">
       const profit = el.querySelector('.profit');
       const signToggle = el.querySelector('.sign-toggle');
       const errorText = el.querySelector('.error-text');
-      const clearBtn = el.querySelector('.clear');
       const copyBtn = el.querySelector('.copy-row-btn');
       const clearBtn = el.querySelector('.clear-btn');
       const deleteBtn = el.querySelector('.delete-btn');
@@ -2202,39 +2276,15 @@ Adds real row when clicked.">
       const timestamp = new Date().toISOString();
       
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, odds, stake, payout, signToggle} = el._refs;
         const {side, typeSelect, sportsbook, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         if(side.value) {
-          // Determine profile from type
-          let profile = 'normal';
-          const typeVal = typeSelect ? typeSelect.value : 'normal';
-          if(typeVal.startsWith('kalshi')) {
-            profile = 'kalshi';
-          }
-          
-          // Get sportsbook value to determine ProphetX
-          const bookVal = sportsbook ? sportsbook.value.trim().toLowerCase() : '';
-          if(bookVal === 'px!') {
-            profile = 'prophetx-fee';
-          } else if(bookVal === 'px') {
-            profile = 'prophetx-nofee';
-          }
-          
           rows.push({
             side: side.value,
-            profile: profile,
+            type: typeSelect ? typeSelect.value : 'normal',
             sportsbook: sportsbook ? sportsbook.value : '',
-            odds_type: 'american',
-            odds_value: odds.value,
+            oddsType: 'american',
+            oddsValue: odds.value,
             stake: stake.value,
-            payout_mode: payout.value ? 'manual' : 'auto',
-            timestamp: timestamp
-          });
-        }
-      });
-      
-      // CSV v2 schema
-      const headers = ['side', 'profile', 'sportsbook', 'odds_type', 'odds_value', 'stake', 'payout_mode', 'timestamp'];
             payout: payout.value,
             openFeePct: openFeePct ? openFeePct.value : '',
             winFeePct: winFeePct ? winFeePct.value : ''
@@ -2275,16 +2325,12 @@ Adds real row when clicked.">
           const lines = csv.trim().split('\n');
           if(lines.length < 2) return;
           
-          // Parse header to determine CSV version
-          const headerLine = lines[0];
-          const headers = headerLine.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
-          const cleanHeaders = headers.map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-          
-          // Detect v2 format (has 'profile' or 'odds_type' columns)
-          const isV2 = cleanHeaders.includes('profile') || cleanHeaders.includes('odds_type');
-          
           // Clear existing rows
           rowsEl.innerHTML = '';
+          
+          // Parse header
+          const headerLine = lines[0];
+          const headers = headerLine.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
           
           // Skip header line and import data
           for(let i = 1; i < lines.length; i++) {
@@ -2293,34 +2339,6 @@ Adds real row when clicked.">
             
             if(clean.length >= 5) {
               const r = addRow();
-              
-              if(isV2) {
-                // CSV v2 format: side, profile, sportsbook, odds_type, odds_value, stake, payout_mode, timestamp
-                r._refs.side.value = clean[0];
-                
-                // Map profile to type
-                const profile = clean[1] || 'normal';
-                if(r._refs.typeSelect) {
-                  if(profile === 'kalshi') {
-                    r._refs.typeSelect.value = 'kalshi-yes'; // Default to YES
-                  } else {
-                    r._refs.typeSelect.value = 'normal';
-                  }
-                }
-                
-                if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
-                r._refs.odds.value = clean[4]; // odds_value
-                r._refs.stake.value = clean[5];
-                // payout_mode and timestamp are informational only
-              } else {
-                // CSV v1 format (backward compatible): side, type, sportsbook, oddsType, oddsValue, stake, payout, feeMarker
-                r._refs.side.value = clean[0];
-                if(r._refs.typeSelect) r._refs.typeSelect.value = clean[1] || 'normal';
-                if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
-                r._refs.odds.value = clean[4]; // oddsValue
-                r._refs.stake.value = clean[5];
-                if(clean[6]) r._refs.payout.value = clean[6];
-              }
               r._refs.side.value = clean[0];
               if(r._refs.typeSelect) {
                 r._refs.typeSelect.value = clean[1] || 'normal';

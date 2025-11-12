@@ -566,8 +566,8 @@ test.describe('Fast Hedger v2.3', () => {
     const netBValue = parseFloat(netBText!.replace(/[^0-9.-]/g, ''));
     expect(Math.abs(netAValue - netBValue)).toBeLessThan(1);
     
-    // Delete the second row (click clear button)
-    await page.locator('[data-row]').nth(1).locator('.clear').click();
+    // Delete the second row (click delete button)
+    await page.locator('[data-row]').nth(1).locator('.delete-btn').click();
     await page.waitForTimeout(600);
     
     // Should have 1 row again
