@@ -10,7 +10,8 @@
     *{box-sizing:border-box}
     *,*::before,*::after{box-sizing:border-box}
 
-    .wrap{max-width:1200px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:1fr 360px;gap:12px}
+    .wrap{max-width:1200px;margin:18px auto;padding:0 12px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px}
+    .wrap > *{min-width:0}
     header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     h1{font-size:18px;margin:0}
     .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
@@ -428,7 +429,7 @@
 
     /* Tablet: 600–899px */
     @media (max-width: 899px){
-      .wrap{grid-template-columns:1fr}
+      .wrap{grid-template-columns:minmax(0,1fr)}
       .rows-head, .row{grid-template-columns:minmax(36px,48px) minmax(64px,90px) minmax(74px,110px) minmax(74px,110px) minmax(74px,110px) 64px}
       .helper-text{ font-size:10px; padding:6px; }
       .clear-btn,.delete-btn{font-size:10px;padding:0 6px;height:24px}
@@ -476,6 +477,7 @@
     
     /* Settings and controls */
     .settings-bar{display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:8px}
+    .settings-bar > *{min-width:0}
     .toggle-wrapper{display:flex;align-items:center;gap:6px}
     .tooltip{position:relative;cursor:help}
     .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:normal;max-width:250px;border-radius:4px;margin-bottom:4px;z-index:100}
