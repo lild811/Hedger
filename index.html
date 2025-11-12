@@ -64,69 +64,215 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ -moz-appearance:textfield }
 
-    /* Wagers table - default desktop layout (8 columns: Side, Type, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
-    .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px}
-    .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px;margin:4px 0}
+    /* Wagers table - default desktop layout - NOW SINGLE LINE with More toggle */
+    /* Primary columns: Side, Odds, Stake, Payout, Profit, Actions */
+    /* Type and Sportsbook behind More toggle for ALL viewports */
+    .rows-head {
+      display: grid;
+      align-items: center;
+      gap: 6px;
+      grid-template-columns: minmax(44px,56px) minmax(90px,110px) minmax(100px,130px) minmax(120px,1fr) minmax(100px,120px) 110px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      margin: 4px 0;
+      align-items: center;
+      min-height: 44px;
+    }
+    
+    /* Type and Sportsbook hidden by default on ALL viewports - behind More toggle */
+    .rows-head > div:nth-child(2),
+    .rows-head > div:nth-child(3) {
+      display: none;
+    }
+    
+    .row > .type-select,
+    .row > .sportsbook {
+      display: none;
+    }
+    
+    /* Row secondary container for Type/Sportsbook */
+    .row-secondary {
+      display: none;
+      width: 100%;
+      gap: 8px;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--grid);
+    }
+    
+    .row-secondary.expanded {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    
+    /* When secondary is collapsed, hide it completely */
+    .row-secondary:not(.expanded) {
+      display: none !important;
+    }
+    
+    .row-secondary:not(.expanded) .type-select,
+    .row-secondary:not(.expanded) .sportsbook {
+      visibility: hidden;
+    }
+    
+    /* Desktop row field sizing */
+    .row > .side {
+      width: 50px;
+      flex: 0 0 50px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .row > .odds-wrapper {
+      width: 100px;
+      flex: 0 0 100px;
+      position: relative;
+    }
+    
+    .row > .stake {
+      width: 110px;
+      flex: 0 0 110px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .row > .payout {
+      width: 130px;
+      flex: 0 0 130px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    .row > .profit {
+      width: 110px;
+      flex: 0 0 110px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      padding: 7px 9px;
+      background: rgba(167,171,180,0.05);
+      border-radius: 6px;
+      min-width: 0;
+    }
+    
+    .row > .row-actions {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    
+    /* More toggle button - now for ALL viewports */
+    .more-toggle-btn {
+      background: #20242f;
+      border: 1px solid #2a2e37;
+      color: #c7d0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 0 6px;
+      height: 32px;
+      min-width: 28px;
+      font-size: 11px;
+    }
+    
+    .more-toggle-btn:hover {
+      background: #2a2e37;
+    }
+    
+    .more-toggle-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    
+    .copy-row-btn,
+    .clear-btn,
+    .delete-btn {
+      background: #20242f;
+      border: 1px solid #2a2e37;
+      color: #c7d0e0;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 0 8px;
+      height: 32px;
+      min-width: 28px;
+      font-size: 11px;
+    }
+    
+    .copy-row-btn:hover,
+    .clear-btn:hover,
+    .delete-btn:hover {
+      background: #2a2e37;
+    }
+    
+    .delete-btn {
+      background: rgba(255,125,125,0.1);
+      border-color: rgba(255,125,125,0.3);
+      color: var(--bad);
+    }
+    
+    .delete-btn:hover {
+      background: rgba(255,125,125,0.2);
+    }
+    
+    /* Sign toggle */
+    .sign-toggle {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--grid);
+      background: #1a1c22;
+      color: var(--muted);
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+    
+    .sign-toggle:hover {
+      background: #23252b;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .odds-wrapper .odds-input {
+      padding-right: 26px !important;
+    }
+    
+    /* Row secondary field sizing */
+    .row-secondary input,
+    .row-secondary select {
+      padding: 7px 9px;
+      font-size: 14px;
+      width: 100%;
+    }
+    
+    .row-secondary .sportsbook {
+      min-width: 0;
+      max-width: 16ch;
+      text-overflow: ellipsis;
+    }
+    
     
     /* Compact Mode - optimized for ~430px width */
-    /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
-    /* Type and Sportsbook move to collapsible secondary line */
     body.compact .rows-head {
-      /* Header shows: Side, Odds, Stake, Payout, Profit, More */
       grid-template-columns: minmax(36px,42px) minmax(68px,85px) minmax(74px,88px) minmax(74px,88px) minmax(66px,80px) 48px;
       gap: 4px;
     }
     
     body.compact .row {
-      /* Main row: Side, Odds, Stake, Payout, Profit, Actions (More toggle + C + X) */
-      display: flex;
-      flex-wrap: nowrap;
       gap: 3px;
-      margin: 4px 0;
-      align-items: center;
+      min-height: 40px;
     }
     
-    /* Compact mode: hide Type and Sportsbook column headers */
-    body.compact .rows-head > div:nth-child(2),
-    body.compact .rows-head > div:nth-child(3) {
-      display: none;
-    }
-    
-    /* Compact mode: hide Type and Sportsbook in main row until moved to secondary */
-    body.compact .row > .type-select,
-    body.compact .row > .sportsbook {
-      display: none;
-    }
-    
-    /* When moved to secondary, show them */
-    body.compact .row-secondary .type-select,
-    body.compact .row-secondary .sportsbook {
-      display: block;
-    }
-    
-    /* Compact mode: secondary row for Type and Sportsbook */
-    body.compact .row-secondary {
-      display: none;
-      width: 100%;
-      gap: 4px;
-      margin-top: 4px;
-      padding-top: 4px;
-      border-top: 1px solid var(--grid);
-    }
-    
-    body.compact .row-secondary.expanded {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-    }
-    
-    /* When secondary is collapsed, hide fields from accessibility */
-    body.compact .row-secondary:not(.expanded) .type-select,
-    body.compact .row-secondary:not(.expanded) .sportsbook {
-      visibility: hidden;
-    }
-    
-    /* Compact mode: main line field sizing */
     body.compact .row > .side {
       width: 38px;
       flex: 0 0 38px;
@@ -167,8 +313,6 @@
     }
     
     body.compact .row > .row-actions {
-      flex: 0 0 auto;
-      display: flex;
       gap: 2px;
     }
     
@@ -179,50 +323,20 @@
       right: 1px;
     }
     
+    body.compact .more-toggle-btn,
     body.compact .clear-btn,
-    body.compact .delete-btn {
-      font-size: 10px;
-      padding: 0 5px;
-      height: 24px;
-      min-width: 24px;
-    }
-    
-    body.compact .more-toggle-btn {
-      font-size: 10px;
-      padding: 0 5px;
-      height: 24px;
-      min-width: 24px;
-      background: #20242f;
-      border: 1px solid #2a2e37;
-      color: #c7d0e0;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    
-    body.compact .more-toggle-btn:hover {
-      background: #2a2e37;
-    }
-    
-    body.compact .more-toggle-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-    
+    body.compact .delete-btn,
     body.compact .copy-row-btn {
-      width: 24px;
       height: 24px;
-      font-size: 11px;
       min-width: 24px;
-      padding: 0;
+      padding: 0 5px;
+      font-size: 10px;
     }
     
-    /* Secondary line field sizing */
     body.compact .row-secondary input,
     body.compact .row-secondary select {
       padding: 6px 7px;
       font-size: 13px;
-      width: 100%;
     }
     
     /* Ghost row special layout */
@@ -234,28 +348,36 @@
       margin: 8px 0;
     }
     .ghost-row input{ background:#0e1015; color:var(--accent); border-color:rgba(108,196,255,.2) }
+    
+    /* Ghost meta - hide when secondary fields would be hidden */
     .ghost-meta{ 
       font-size:11px; 
       color:var(--accent); 
-      opacity:.9; 
+      opacity:.7; 
       margin-top:6px;
       padding: 4px 8px;
-      background: rgba(108,196,255,.1);
+      background: rgba(108,196,255,.08);
       border-radius: 4px;
-      text-align: center;
+      text-align: right;
+      font-style: italic;
     }
     
-    /* Ghost row in compact mode: keep grid layout but hide Type and Sportsbook */
-    body.compact .ghost-row .row {
-      display: grid;
-      grid-template-columns: minmax(36px,42px) 0 0 minmax(68px,85px) minmax(74px,88px) minmax(74px,88px) minmax(66px,80px) auto;
-      gap: 4px;
-      align-items: center;
-    }
-    
-    body.compact .ghost-row .row .type-select,
-    body.compact .ghost-row .row .sportsbook {
+    /* Hide ghost meta text completely - guidance should be inline or non-blocking */
+    .ghost-meta {
       display: none;
+    }
+    
+    /* Ghost row uses standard row layout */
+    .ghost-row .row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      align-items: center;
+      margin: 0;
+    }
+    
+    body.compact .ghost-row .row {
+      gap: 3px;
     }
     
     /* Format toggle for ghost row */
