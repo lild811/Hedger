@@ -1,34 +1,51 @@
 # Hedger
-Sports Arbitrage Hedging Tool
 
-Fast Hedger v2.3+ with integrated ProphetX fee handling and optional Kalshi support.
+**Sports Arbitrage Hedging Tool** – Session Summary Edition
+
+Fast Hedger v2.4 with integrated ProphetX fee handling and optional Kalshi support.
+
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen)]() [![Version](https://img.shields.io/badge/version-2.4-blue)]()
+
+## Table of Contents
+
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Usage](#usage)
+- [ProphetX Fee System](#prophetx-fee-system)
+- [Kalshi Integration](#kalshi-integration)
+- [Testing](#testing)
+- [Technical Implementation](#technical-implementation)
+- [Version History](#version-history)
 
 ## Features
 
 - **Multi-format odds parsing**: American (±100+), Decimal (1.01+), Kalshi (0.01-0.99, 1-99c), Percent (1-99%), Fractional (e.g., 5/2)
-- **ProphetX fee handling**: Manual fee marker system via sportsbook field
-- **Kalshi integration**: Optional per-row Kalshi fee calculation with accurate settlement modeling
-- **Smart equalization**: Auto-calculate balanced hedges across multiple wagers
-- **Cover calculations**: Break-even scenarios for each side
-- **Unified analytics**: Real-time profit/loss analysis per outcome
+- **ProphetX fee handling**: Manual fee marker system via sportsbook field (`PX!` for 1% fee on winnings)
+- **Kalshi integration**: Optional per-row Kalshi fee calculation with accurate settlement modeling (1% open + 2% settle)
+- **Smart equalization**: Auto-calculate balanced hedges across multiple wagers with ghost row suggestions
+- **Cover calculations**: Break-even scenarios for each side (Cover A = 0, Cover B = 0)
+- **Unified analytics**: Real-time profit/loss analysis per outcome with effective odds and breakeven percentages
+- **Session summary**: Quick overview of total stake, net outcomes, exposure, books count, and hold percentage
+- **Row copying**: Duplicate existing wagers with a single click
+- **Undo/Redo**: Full history tracking with Ctrl+Z/Ctrl+Y support
+- **CSV Import/Export**: Save and load your wagers for later analysis
 
 ## ProphetX Fee System
 
-ProphetX fees are applied via the **sportsbook field marker system**:
+ProphetX fees are automatically applied using the **sportsbook field marker** system. Simply enter the marker in the sportsbook field when adding a wager.
 
 ### Fee Markers
 
-- **`PX!`** = 1% fee on **winnings only** (profit, not stake)
-  - Example: $100 profit → $99 net profit after fee
-  - Fee only applies to positive profits (no fee on losses)
-  - Case-insensitive: `px!`, `Px!`, `PX!` all work
+| Marker | Fee | Applied To | Example |
+|--------|-----|------------|---------|
+| **`PX!`** | 1% | Winnings only (profit, not stake) | $100 profit → $99 net profit |
+| `PX` or other | 0% | None | $100 profit → $100 net profit |
 
-- **`PX`** or any other value = 0% fee (standard payout)
-  - Example: $100 profit → $100 net profit
-  - Default behavior for all non-PX! sportsbooks
+**Note**: The marker is case-insensitive (`px!`, `Px!`, `PX!` all work)
 
-### Examples
+### Example Calculation
 
+**With ProphetX Fee (PX!):**
 ```
 Sportsbook: PX!
 Stake: $100
@@ -38,8 +55,9 @@ ProphetX Fee (1%): $2
 Net Profit: $198
 ```
 
+**Without Fee (PX or other):**
 ```
-Sportsbook: PX (or DraftKings, FanDuel, etc.)
+Sportsbook: DraftKings (or PX, FanDuel, etc.)
 Stake: $100
 Odds: +200
 Gross Profit: $200
@@ -56,27 +74,18 @@ Net Profit: $200
 
 ## Kalshi Integration
 
-Kalshi support is **optional** and enabled **per-row** via the Type dropdown. Default is **Normal** mode, which rejects Kalshi-specific formats to prevent accidental errors.
+Kalshi support is **optional** and enabled **per-row** via the Type dropdown. This prevents accidental entry of Kalshi-specific formats on traditional sportsbook wagers.
 
 ### Row Types
 
-1. **Normal** (default)
-   - Standard American/Decimal/Percent/Fractional odds
-   - Rejects Kalshi formats (cents notation, 0.xx prices, 1-99 integers)
-   - No Kalshi fees applied
-   - Best for traditional sportsbooks
+| Type | Use Case | Accepts Kalshi Formats | Fees Applied |
+|------|----------|------------------------|--------------|
+| **Normal** (default) | Traditional sportsbooks | ❌ No | None (unless PX!) |
+| **Kalshi YES** | Kalshi prediction markets (YES side) | ✅ Yes | 1% open + 2% settle |
+| **Kalshi NO** | Kalshi prediction markets (NO side) | ✅ Yes | 1% open + 2% settle |
+| **Custom** | Custom fee structure | ✅ Yes | User-defined % |
 
-2. **Kalshi YES**
-   - Accepts Kalshi-specific formats (1-99c, 0.01-0.99, 1-99 integers)
-   - Applies Kalshi fee structure: 1% open + 2% settle
-   - Uses Kalshi contract settlement model
-   - Bet wins if event happens (YES outcome)
-
-3. **Kalshi NO**
-   - Same as Kalshi YES but for NO side bets
-   - Accepts Kalshi formats
-   - Applies Kalshi fees
-   - Bet wins if event doesn't happen (NO outcome)
+**Default behavior**: New rows default to Normal type, which rejects Kalshi formats to prevent errors.
 
 ### Kalshi Fee Model
 
@@ -107,45 +116,63 @@ Effective Odds: Less favorable than nominal odds due to fees
 
 ### Kalshi Format Examples
 
-All of these are equivalent to 50c (even money):
-- `50c` or `50k` (cents notation)
-- `0.50` or `.50` or `.5` (price notation)
+Kalshi uses cents notation. All of these are equivalent to 50¢ (even money):
+
+- `50c` or `50k` (cents notation with suffix)
+- `0.50` or `.50` or `.5` (decimal price notation)
 - `50` (integer 1-99, interpreted as Kalshi cents)
 
-These formats are **only accepted** in Kalshi YES/NO rows.
-
-### Default Behavior
-
-- **New rows default to Normal type**
-- Kalshi formats will show error in Normal rows
-- Prevents accidental Kalshi entry in standard wagers
-- Explicit opt-in required via Type dropdown
+**Note**: These formats are only accepted in Kalshi YES/NO rows. Normal rows will reject them to prevent errors.
 
 ### When to Use Each Type
 
 **Use Normal for:**
-- Traditional sportsbooks (DraftKings, FanDuel, Bet365, etc.)
-- ProphetX bets
-- Any non-Kalshi market
+- DraftKings, FanDuel, Bet365, Caesars
+- ProphetX bets (use `PX!` marker)
+- Any traditional sportsbook
 
 **Use Kalshi YES/NO for:**
 - Kalshi prediction market contracts
-- When you need accurate Kalshi fee modeling
-- Binary outcome events on Kalshi platform
+- When you need accurate Kalshi fee modeling (1% open + 2% settle)
+- Binary outcome events on the Kalshi platform
 
 ## Usage
 
+### Quick Start
+
 1. **Add Wagers**: Click "+ Add Wager" or press Ctrl+Enter
 2. **Enter Details**:
-   - Side: 1 or 2 (or A/B)
-   - Type: Normal (default), Kalshi YES, or Kalshi NO
-   - Sportsbook: Enter `PX!` for 1% ProphetX fee, or leave blank/enter other name
-   - Odds: Any supported format (American, Decimal, Kalshi, etc.)
-   - Stake: Amount wagered
+   - **Side**: Enter `1` or `2` (also accepts A/B)
+   - **Type**: Choose row type:
+     - `Normal` (default) - for traditional sportsbooks
+     - `Kalshi YES` - for Kalshi prediction markets (YES side)
+     - `Kalshi NO` - for Kalshi prediction markets (NO side)
+     - `Custom...` - set your own open/win fee percentages
+   - **Sportsbook**: Enter book name
+     - Use `PX!` for ProphetX with 1% fee on winnings
+     - Any other value = 0% fee
+   - **Odds**: Enter in any supported format
+   - **Stake**: Amount you're wagering
+   - **Payout** (optional): Auto-calculated from odds, or enter manually to derive implied odds
 3. **Analyze**: View unified analytics showing net outcome for each side
 4. **Equalize**: Ghost row auto-suggests hedge to balance outcomes
+5. **Copy Rows**: Use the ⧉ button to duplicate any wager
 
-## Testing
+### Keyboard Shortcuts
+
+- **Ctrl+Enter** - Add new wager row
+- **Ctrl+Z** - Undo last change
+- **Ctrl+Y** - Redo
+- **Enter** - Navigate to next field (Side → Odds → Stake → Payout → Next row)
+- **1/2** - Quick side selection when focused on Side field
+
+## Getting Started
+
+### Installation
+
+No installation required! Open `index.html` in your web browser to start using Hedger.
+
+For development and testing:
 
 ```bash
 npm install
@@ -153,9 +180,30 @@ npm test        # Run unit tests
 npm run test:e2e  # Run end-to-end tests
 ```
 
+### First Steps
+
+1. Open `index.html` in a modern web browser (Chrome, Firefox, Safari, Edge)
+2. Add your first wager by clicking "+ Add Wager" or pressing Ctrl+Enter
+3. Fill in the wager details (side, odds, stake)
+4. Add more wagers to see real-time analytics and equalization suggestions
+5. Use the ghost row (blue border) to quickly add a balancing wager
+
+## Testing
+
+Run the test suite to verify functionality:
+
+```bash
+npm install       # Install dependencies
+npm test          # Run unit tests with Vitest
+npm run test:e2e  # Run end-to-end browser tests with Playwright
+npm run ci        # Run all tests (CI pipeline)
+```
+
 ## Technical Implementation
 
-### ProphetX Fee Function
+### Key Functions
+
+#### ProphetX Fee Function
 
 ```javascript
 function applyProphetXFee(profit, sportsbook) {
@@ -184,6 +232,19 @@ function kalshiLedger(stake, price, fOpen=0.01, fSettle=0.02) {
 
 ## Version History
 
-- **v2.3+**: Integrated ProphetX fee markers and Kalshi per-row support
+- **v2.4** (2024): Session Summary Edition
+  - Added session summary strip with total stake, net outcomes, exposure, books, and hold %
+  - Added row copy functionality (⧉ button)
+  - Enhanced tooltips with formulas for equalize and cover calculations
+  - Improved mobile/compact mode responsiveness
+  - Better effective odds and breakeven probability displays
+- **v2.3**: Integrated ProphetX fee markers and Kalshi per-row support
+  - Per-row type selection (Normal, Kalshi YES/NO, Custom)
+  - ProphetX fee handling via `PX!` sportsbook marker
+  - Kalshi fee calculation with accurate settlement modeling
 - **v2.2**: Unified analytics edition
+  - Combined position analysis with totals
+  - Real-time profit/loss per outcome
 - **v2.1**: Cover & equalize features
+  - Ghost row equalization suggestions
+  - Break-even cover calculations
