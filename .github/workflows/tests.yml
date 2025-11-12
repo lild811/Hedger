@@ -21,24 +21,26 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Get Playwright Test version
-        id: playwright-version
-        run: |
-          node -e 'const v=require("@playwright/test/package.json").version; const fs=require("fs"); fs.appendFileSync(process.env.GITHUB_OUTPUT, "version="+v+"\n");'
-
       - name: Install deps (clean & fast)
         run: npm ci
+
+      - name: Get Playwright version
+        id: pwver
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-pw-${{ steps.pwver.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-pw-
 
       - name: Install Playwright (Chromium only)
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
-      - name: Run CI test script
+      - name: Run CI tests
         env:
           CI: true
         run: npm run ci
