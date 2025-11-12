@@ -69,6 +69,14 @@
     .rows-head{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px}
     .row{grid-template-columns:minmax(44px,56px) minmax(60px,75px) minmax(80px,100px) minmax(70px,90px) minmax(84px,110px) minmax(110px,1fr) minmax(80px,110px) 72px;margin:4px 0}
     
+    /* Desktop mode: hide More toggle and secondary row (Type/Sportsbook inline) */
+    .more-toggle-btn {
+      display: none;
+    }
+    .row-secondary {
+      display: none;
+    }
+    
     /* Compact Mode - optimized for ~430px width */
     /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
     /* Type and Sportsbook move to collapsible secondary line */
@@ -99,6 +107,11 @@
       display: none;
     }
     
+    /* Compact mode: show More toggle button */
+    body.compact .more-toggle-btn {
+      display: inline-flex;
+    }
+    
     /* When moved to secondary, show them */
     body.compact .row-secondary .type-select,
     body.compact .row-secondary .sportsbook {
@@ -118,12 +131,6 @@
     body.compact .row-secondary.expanded {
       display: grid;
       grid-template-columns: 1fr 1fr;
-    }
-    
-    /* When secondary is collapsed, hide fields from accessibility */
-    body.compact .row-secondary:not(.expanded) .type-select,
-    body.compact .row-secondary:not(.expanded) .sportsbook {
-      visibility: hidden;
     }
     
     /* Compact mode: main line field sizing */
@@ -235,14 +242,7 @@
     }
     .ghost-row input{ background:#0e1015; color:var(--accent); border-color:rgba(108,196,255,.2) }
     .ghost-meta{ 
-      font-size:11px; 
-      color:var(--accent); 
-      opacity:.9; 
-      margin-top:6px;
-      padding: 4px 8px;
-      background: rgba(108,196,255,.1);
-      border-radius: 4px;
-      text-align: center;
+      display: none !important;
     }
     
     /* Ghost row in compact mode: keep grid layout but hide Type and Sportsbook */
@@ -428,7 +428,6 @@
     @media (max-width: 899px){
       .wrap{grid-template-columns:1fr}
       .rows-head, .row{grid-template-columns:minmax(36px,48px) minmax(64px,90px) minmax(74px,110px) minmax(74px,110px) minmax(74px,110px) 64px}
-      .ghost-meta{ font-size:10px; }
       .helper-text{ font-size:10px; padding:6px; }
       .clear-btn,.delete-btn{font-size:10px;padding:0 6px;height:24px}
       
