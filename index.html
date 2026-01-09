@@ -28,13 +28,15 @@
     .kpi-cols{display:flex;flex-wrap:wrap;gap:8px}
     .kpi-cols .kcard{flex:1 1 140px;min-width:140px}
     
-    /* Maker Decision Engine output styling */
+    /* Maker Decision Engine output */
     .maker-output{margin-top:12px;padding:10px;background:#101319;border:1px solid var(--grid);border-radius:8px}
     .maker-output h4{font-size:12px;margin:0 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
     .maker-threshold{padding:8px;margin:6px 0;border-radius:6px;background:rgba(108,196,255,0.03);border:1px solid rgba(108,196,255,0.1)}
     .maker-threshold.ok{border-color:rgba(105,228,138,0.3);background:rgba(105,228,138,0.03)}
     .maker-threshold.capped{border-color:rgba(230,178,92,0.3);background:rgba(230,178,92,0.03)}
     .maker-threshold.invalid{border-color:rgba(255,125,125,0.2);background:rgba(255,125,125,0.03)}
+    .maker-threshold.satisfied{border-color:rgba(105,228,138,0.35);background:rgba(105,228,138,0.06)}
+    .maker-threshold.satisfied .maker-threshold-label{color:var(--good)}
     .maker-threshold-label{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px}
     .maker-odds{display:flex;gap:8px;align-items:center;margin-bottom:4px}
     .maker-odds .american{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -42,67 +44,22 @@
     .maker-outcomes{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px}
     .maker-outcomes span{color:var(--muted)}
     .maker-outcomes .val{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
-    .maker-outcomes .val.good{color:var(--good)}
-    .maker-outcomes .val.bad{color:var(--bad)}
-    
-    /* Danger Zone warning */
+    .maker-outcomes .val.good{color:var(--good)}.maker-outcomes .val.bad{color:var(--bad)}
     .danger-zone{margin-top:8px;padding:8px 10px;background:rgba(255,125,125,0.08);border:1px solid rgba(255,125,125,0.25);border-radius:6px;display:none}
     .danger-zone.show{display:block}
     .danger-zone-title{font-size:11px;font-weight:700;color:var(--bad);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
     .danger-zone-msg{font-size:11px;color:var(--muted);line-height:1.4}
-    
-    /* Maker input row */
     .maker-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
     .maker-inputs .field-row{margin-bottom:0}
-    
-    /* Apply buttons + cap reasons + satisfied state */
     .maker-actions{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:6px}
     .apply-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer}
     .apply-btn:disabled{opacity:0.5;cursor:not-allowed}
     .cap-reason{font-size:10px;color:var(--warn);font-weight:700}
-    .maker-threshold.satisfied{border-color:rgba(105,228,138,0.35);background:rgba(105,228,138,0.06)}
-    .maker-threshold.satisfied .maker-threshold-label{color:var(--good)}
     h1{font-size:16px;margin:0}
     .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:13px}
     .btn.secondary{background:#2a2e37}
     .card{background:var(--card);border:1px solid var(--grid);border-radius:10px;padding:10px;max-width:100%;box-sizing:border-box}
     .small{font-size:12px;color:var(--muted)}
-    .helper-text{font-size:11px;color:var(--muted);line-height:1.5;padding:8px;background:rgba(167,171,180,0.05);border-radius:6px;margin-top:8px}
-    .helper-text div{margin:2px 0}
-    .helper-text strong{color:#a7abb4;font-weight:600}
-    .helper-text-toggle{
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:6px 8px;
-      background:rgba(167,171,180,0.05);
-      border-radius:6px;
-      margin-top:8px;
-      font-size:11px;
-      color:var(--muted);
-      font-weight:600;
-    }
-    .helper-text-toggle:hover{
-      background:rgba(167,171,180,0.1);
-    }
-    .helper-text-content{
-      display:none;
-      padding:8px;
-      font-size:11px;
-      color:var(--muted);
-      line-height:1.5;
-    }
-    .helper-text-content.expanded{
-      display:block;
-    }
-    .helper-text-content div{
-      margin:2px 0;
-    }
-    .helper-text-content strong{
-      color:#a7abb4;
-      font-weight:600;
-    }
     .divider{height:1px;background:var(--grid);margin:6px 0}
 
     input,button,select{font:inherit;min-width:0;max-width:100%}
@@ -135,223 +92,41 @@
     .row-secondary { display:none; width:100%; gap:4px; margin-top:4px; padding-top:4px; border-top:1px solid var(--grid); }
     .row-secondary.expanded { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
     
-    /* Compact Mode - optimized for ~430px width */
-    /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
-    /* Type and Sportsbook move to collapsible secondary line */
-    body.compact .rows-head {
-      /* Header shows: Side, Odds, Stake, Payout, Profit, More */
-      grid-template-columns: minmax(0,40px) minmax(0,88px) minmax(0,92px) minmax(0,92px) minmax(0,84px) 46px;
-      gap: 3px;
-    }
-    
-    body.compact .row {
-      /* Main row: Side, Odds, Stake, Payout, Profit, Actions (More toggle + C + X) */
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 2px;
-      margin: 4px 0;
-      align-items: center;
-      max-width: 100%;
-      overflow: hidden;
-    }
-    
-    /* Compact mode: hide Type and Sportsbook column headers */
-    body.compact .rows-head > div:nth-child(2),
-    body.compact .rows-head > div:nth-child(3) {
-      display: none;
-    }
-    
-    /* Compact mode: hide Fee/Type/Sportsbook in main row (moved to secondary via JS) */
-    body.compact .row > .fee-cell,
-    body.compact .row > .type-select,
-    body.compact .row > .sportsbook {
-      display: none;
-    }
-    
-    /* Compact mode: show More toggle button */
-    body.compact .more-toggle-btn {
-      display: inline-flex;
-    }
-    
-    /* When moved to secondary, show them */
-    body.compact .row-secondary .type-select,
-    body.compact .row-secondary .sportsbook {
-      display: block;
-    }
-    
-    /* Compact mode: secondary row for Type and Sportsbook */
-    body.compact .row-secondary {
-      display: none;
-      width: 100%;
-      gap: 4px;
-      margin-top: 4px;
-      padding-top: 4px;
-      border-top: 1px solid var(--grid);
-    }
-    
-    body.compact .row-secondary.expanded {
-      display: grid;
-      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    }
-    
-    /* Compact mode: main line field sizing - optimized for 430px */
-    body.compact .row > .side {
-      width: 30px;
-      flex: 0 0 30px;
-      padding: 6px 2px;
-      font-size: 11px;
-    }
-
-    body.compact .row > .odds-wrapper {
-      width: 72px;
-      flex: 0 0 72px;
-    }
-
-    body.compact .row > .odds-wrapper .odds-input {
-      padding: 6px 3px;
-      padding-right: 19px !important;
-      font-size: 10px;
-    }
-
-    body.compact .row > .stake {
-      width: 76px;
-      flex: 0 0 76px;
-      padding: 6px 3px;
-      font-size: 10px;
-    }
-
-    body.compact .row > .payout {
-      width: 76px;
-      flex: 0 0 76px;
-      padding: 6px 3px;
-      font-size: 10px;
-    }
-
-    body.compact .row > .profit {
-      width: 72px;
-      flex: 0 0 72px;
-      padding: 6px 3px;
-      font-size: 10px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    body.compact .row > .row-actions {
-      flex: 0 0 auto;
-      display: flex;
-      gap: 2px;
-    }
-    
-    body.compact .sign-toggle {
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
-      right: 1px;
-    }
-    
-    body.compact .clear-btn,
-    body.compact .delete-btn {
-      font-size: 9px;
-      padding: 0 4px;
-      height: 22px;
-      min-width: 20px;
-    }
-    
-    body.compact .more-toggle-btn {
-      font-size: 9px;
-      padding: 0 4px;
-      height: 22px;
-      min-width: 20px;
-      background: #20242f;
-      border: 1px solid #2a2e37;
-      color: #c7d0e0;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    
-    body.compact .more-toggle-btn:hover {
-      background: #2a2e37;
-    }
-    
-    body.compact .more-toggle-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-    
-    body.compact .copy-row-btn {
-      width: 22px;
-      height: 22px;
-      font-size: 10px;
-      min-width: 20px;
-      padding: 0;
-    }
-    
-    /* Secondary line field sizing */
-    body.compact .row-secondary input,
-    body.compact .row-secondary select {
-      padding: 6px 7px;
-      font-size: 13px;
-      width: 100%;
-    }
-    
-    /* Ghost row special layout */
-    .ghost-row{ 
-      border:2px solid var(--accent); 
-      border-radius:8px; 
-      padding:8px; 
-      background:rgba(108,196,255,.03);
-      margin: 8px 0;
-    }
-    .ghost-row input{ background:#0e1015; color:var(--accent); border-color:rgba(108,196,255,.2) }
-    .ghost-meta{ 
-      display: none !important;
-    }
-    
-    /* Ghost row in compact mode: keep grid layout but hide Type and Sportsbook */
-    body.compact .ghost-row .row {
-      display: grid;
-      grid-template-columns: minmax(0,42px) 0 0 minmax(0,85px) minmax(0,88px) minmax(0,88px) minmax(0,80px) auto;
-      gap: 4px;
-      align-items: center;
-    }
-    
-    body.compact .ghost-row .row .type-select,
-    body.compact .ghost-row .row .sportsbook {
-      display: none;
-    }
+    /* Compact Mode - Base styles for narrow viewports */
+    body.compact .rows-head{grid-template-columns:minmax(0,40px) minmax(0,88px) minmax(0,92px) minmax(0,92px) minmax(0,84px) 46px;gap:3px}
+    body.compact .row{display:flex;flex-wrap:nowrap;gap:2px;margin:4px 0;align-items:center;max-width:100%;overflow:hidden}
+    body.compact .rows-head > div:nth-child(2),body.compact .rows-head > div:nth-child(3){display:none}
+    body.compact .row > .fee-cell,body.compact .row > .type-select,body.compact .row > .sportsbook{display:none}
+    body.compact .more-toggle-btn{display:inline-flex}
+    body.compact .row-secondary .type-select,body.compact .row-secondary .sportsbook{display:block}
+    body.compact .row-secondary{display:none;width:100%;gap:4px;margin-top:4px;padding-top:4px;border-top:1px solid var(--grid)}
+    body.compact .row-secondary.expanded{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+    body.compact .row > .side{width:30px;flex:0 0 30px;padding:6px 2px;font-size:11px}
+    body.compact .row > .odds-wrapper{width:72px;flex:0 0 72px}
+    body.compact .row > .odds-wrapper .odds-input{padding:6px 3px;padding-right:19px !important;font-size:10px}
+    body.compact .row > .stake{width:76px;flex:0 0 76px;padding:6px 3px;font-size:10px}
+    body.compact .row > .payout{width:76px;flex:0 0 76px;padding:6px 3px;font-size:10px}
+    body.compact .row > .profit{width:72px;flex:0 0 72px;padding:6px 3px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    body.compact .row > .row-actions{flex:0 0 auto;display:flex;gap:2px}
+    body.compact .sign-toggle{width:18px;height:18px;font-size:10px;right:1px}
+    body.compact .clear-btn,body.compact .delete-btn{font-size:9px;padding:0 4px;height:22px;min-width:20px}
+    body.compact .more-toggle-btn{font-size:9px;padding:0 4px;height:22px;min-width:20px;background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:5px;cursor:pointer}
+    body.compact .more-toggle-btn:hover{background:#2a2e37}
+    body.compact .more-toggle-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    body.compact .copy-row-btn{width:22px;height:22px;font-size:10px;min-width:20px;padding:0}
+    body.compact .row-secondary input,body.compact .row-secondary select{padding:6px 7px;font-size:13px;width:100%}
+    /* Ghost row */
+    .ghost-row{border:2px solid var(--accent);border-radius:8px;padding:8px;background:rgba(108,196,255,.03);margin:8px 0}
+    .ghost-row input{background:#0e1015;color:var(--accent);border-color:rgba(108,196,255,.2)}
+    body.compact .ghost-row .row{display:grid;grid-template-columns:minmax(0,42px) 0 0 minmax(0,85px) minmax(0,88px) minmax(0,88px) minmax(0,80px) auto;gap:4px;align-items:center}
+    body.compact .ghost-row .row .type-select,body.compact .ghost-row .row .sportsbook{display:none}
     
     /* Format toggle for ghost row */
-    .format-toggle{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:8px;
-      padding:4px;
-      background:rgba(108,196,255,.05);
-      border-radius:6px;
-    }
+    .format-toggle{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:4px;background:rgba(108,196,255,.05);border-radius:6px}
     .format-buttons{display:flex;gap:2px}
-    .format-btn{
-      background:#20242f;
-      border:1px solid #2a2e37;
-      color:#c7d0e0;
-      border-radius:4px;
-      padding:2px 6px;
-      font-size:10px;
-      cursor:pointer;
-    }
-    .format-btn.active{
-      background:#6cc4ff;
-      border-color:#6cc4ff;
-      color:#fff;
-    }
-    .format-readout{
-      font-size:10px;
-      color:#a7abb4;
-      opacity:0.8;
-    }
+    .format-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer}
+    .format-btn.active{background:#6cc4ff;border-color:#6cc4ff;color:#fff}
+    .format-readout{font-size:10px;color:#a7abb4;opacity:0.8}
     
     .commit{background:#6cc4ff;border:1px solid #6cc4ff;color:#fff;border-radius:8px;cursor:pointer;height:32px;font-weight:bold;font-size:16px}
     .clear-btn,.delete-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;height:28px;padding:0 8px;font-size:11px}
@@ -365,154 +140,36 @@
     .profit.neg{ color:var(--bad) }
 
     /* Odds field with sign toggle */
-    .odds-wrapper{
-      position:relative;
-      display:flex;
-      align-items:center;
-    }
-    .sign-toggle{
-      position:absolute;
-      right:2px;
-      top:50%;
-      transform:translateY(-50%);
-      width:20px;
-      height:20px;
-      border:1px solid #2a2e37;
-      border-radius:3px;
-      background:#20242f;
-      color:#c7d0e0;
-      cursor:pointer;
-      font-size:11px;
-      font-weight:bold;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      z-index:10;
-    }
-    .sign-toggle[data-sign="-"]{
-      background:#ff7d7d;
-      border-color:#ff7d7d;
-      color:#fff;
-    }
-    .odds-input{
-      padding-right:24px !important;
-    }
-    
-    /* Error message - properly positioned */
-    .error-text{
-      position:absolute;
-      top:calc(100% + 2px);
-      left:0;
-      right:24px; /* Account for smaller sign toggle */
-      font-size:10px;
-      color:var(--bad);
-      padding:3px 6px;
-      background:rgba(255,125,125,0.1);
-      border:1px solid rgba(255,125,125,0.2);
-      border-radius:4px;
-      display:none;
-      z-index:20;
-      white-space:normal;
-      line-height:1.3;
-    }
-    .error-text.show{
-      display:block;
-    }
-    
-    /* Ensure odds wrapper has enough space for error */
-    .odds-wrapper{
-      min-height:32px; /* Match input height */
-    }
-    
-    /* Adjust row spacing when error is shown */
-    .row:has(.error-text.show){
-      margin-bottom:24px;
-    }
-    
-    /* Ghost row error positioning */
-    .ghost-row .error-text{
-      position:absolute;
-      top:calc(100% + 2px);
-    }
+    .odds-wrapper{position:relative;display:flex;align-items:center;min-height:32px}
+    .sign-toggle{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:20px;height:20px;border:1px solid #2a2e37;border-radius:3px;background:#20242f;color:#c7d0e0;cursor:pointer;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10}
+    .sign-toggle[data-sign="-"]{background:#ff7d7d;border-color:#ff7d7d;color:#fff}
+    .odds-input{padding-right:24px !important}
+    .error-text{position:absolute;top:calc(100% + 2px);left:0;right:24px;font-size:10px;color:var(--bad);padding:3px 6px;background:rgba(255,125,125,0.1);border:1px solid rgba(255,125,125,0.2);border-radius:4px;display:none;z-index:20;white-space:normal;line-height:1.3}
+    .error-text.show{display:block}
+    .row:has(.error-text.show){margin-bottom:24px}
+    .ghost-row .error-text{position:absolute;top:calc(100% + 2px)}
 
-    /* Unified analytics section - clean two-column layout */
-    .analytics-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    }
-    .side-column{
-      background:#101319;
-      border:1px solid var(--grid);
-      border-radius:10px;
-      padding:10px;
-    }
-    .side-header{
-      font-size:13px;
-      color:var(--muted);
-      margin-bottom:8px;
-      padding-bottom:6px;
-      border-bottom:1px solid var(--grid);
-    }
-    .metric-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin:3px 0;
-      font-size:12px;
-    }
-    .metric-label{
-      color:var(--muted);
-      font-size:11px;
-    }
-    .metric-value{
-      font-variant-numeric:tabular-nums;
-      font-weight:500;
-      font-size:12px;
-    }
-    .metric-value.accent{
-      color:var(--accent);
-    }
-    .metric-value.good{
-      color:var(--good);
-    }
-    .metric-value.bad{
-      color:var(--bad);
-    }
-    .net-result{
-      margin-top:6px;
-      padding-top:6px;
-      border-top:1px solid var(--grid);
-    }
-    .net-value{
-      font-size:14px;
-      font-weight:bold;
-    }
+    /* Unified analytics section */
+    .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .side-column{background:#101319;border:1px solid var(--grid);border-radius:10px;padding:10px}
+    .side-header{font-size:13px;color:var(--muted);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--grid)}
+    .metric-row{display:flex;justify-content:space-between;align-items:center;margin:3px 0;font-size:12px}
+    .metric-label{color:var(--muted);font-size:11px}
+    .metric-value{font-variant-numeric:tabular-nums;font-weight:500;font-size:12px}
+    .metric-value.accent{color:var(--accent)}.metric-value.good{color:var(--good)}.metric-value.bad{color:var(--bad)}
+    .net-result{margin-top:6px;padding-top:6px;border-top:1px solid var(--grid)}
+    .net-value{font-size:14px;font-weight:bold}
 
     /* Tablet: 600–899px */
     @media (max-width: 899px){
       .wrap{grid-template-columns:minmax(0,1fr)}
-      .rows-head, .row{grid-template-columns:minmax(32px,42px) minmax(60px,80px) minmax(68px,90px) minmax(80px,105px) minmax(90px,140px) minmax(90px,140px) minmax(90px,140px) 60px}
-      .helper-text{ font-size:10px; padding:6px; }
+      .rows-head,.row{grid-template-columns:minmax(32px,42px) minmax(60px,80px) minmax(68px,90px) minmax(80px,105px) minmax(90px,140px) minmax(90px,140px) minmax(90px,140px) 60px}
       .clear-btn,.delete-btn{font-size:10px;padding:0 5px;height:22px;min-width:20px}
       .copy-row-btn{width:22px;height:22px;font-size:10px;min-width:20px;padding:0}
-
-      /* Even smaller sign toggle on narrow screens */
-      .sign-toggle{
-        width:18px;
-        height:18px;
-        font-size:10px;
-        right:1px;
-      }
-      .odds-input{
-        padding-right:20px !important;
-      }
-      .error-text{
-        right:20px; /* Adjust for smaller toggle */
-      }
+      .sign-toggle{width:18px;height:18px;font-size:10px;right:1px}
+      .odds-input{padding-right:20px !important}
+      .error-text{right:20px}
     }
-
-    /* Optimized for 390px width - removed duplicate breakpoint */
 
     /* Lines / scenarios */
     .field-row{display:grid;grid-template-columns:70px 1fr;gap:6px;align-items:center;margin:3px 0}
@@ -543,699 +200,88 @@
     /* Settings and controls */
     .settings-bar{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:6px;font-size:12px}
     .settings-bar > *{min-width:0}
-    .toggle-wrapper{display:flex;align-items:center;gap:6px}
     .tooltip{position:relative;cursor:help}
     .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:normal;max-width:250px;border-radius:4px;margin-bottom:4px;z-index:100}
     
-    /* Enhanced tooltips for preset buttons with formulas */
-    .preset-btn{position:relative}
-    .preset-btn::after{
-      content:attr(data-tooltip);
-      position:absolute;
-      bottom:calc(100% + 8px);
-      left:50%;
-      transform:translateX(-50%);
-      padding:8px 10px;
-      background:#1a1d24;
-      border:1px solid var(--accent);
-      color:var(--ink);
-      font-size:10px;
-      line-height:1.4;
-      white-space:pre-line;
-      border-radius:6px;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .2s;
-      z-index:200;
-      max-width:280px;
-      text-align:left;
-    }
-    .preset-btn:hover::after{
-      opacity:1;
-    }
     
-    /* Preset buttons - text labels instead of emojis */
-    .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin:8px 0}
-    .preset-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .15s}
-    .preset-btn:hover{background:#2a2e37;border-color:var(--accent)}
-    .preset-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    /* Session Summary Strip */
+    .session-summary{background:linear-gradient(135deg,#1a1d25 0%,#15171c 100%);border:1px solid var(--grid);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+    .summary-item{display:flex;flex-direction:column;gap:2px}
+    .summary-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
+    .summary-value{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+    .summary-value.good{color:var(--good)}.summary-value.bad{color:var(--bad)}.summary-value.accent{color:var(--accent)}
     
-    /* Session Summary Strip - v2.4 */
-    .session-summary{
-      background:linear-gradient(135deg,#1a1d25 0%,#15171c 100%);
-      border:1px solid var(--grid);
-      border-radius:10px;
-      padding:10px 14px;
-      margin-bottom:12px;
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-      gap:12px;
-    }
-    .summary-item{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .summary-label{
-      font-size:10px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      font-weight:500;
-    }
-    .summary-value{
-      font-size:16px;
-      font-weight:600;
-      font-variant-numeric:tabular-nums;
-    }
-    .summary-value.good{color:var(--good)}
-    .summary-value.bad{color:var(--bad)}
-    .summary-value.accent{color:var(--accent)}
+    /* Tooltip styles - unified */
+    .tooltip-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(167,171,180,0.2);color:var(--muted);font-size:10px;font-weight:bold;margin-left:4px;cursor:help;position:relative}
+    .tooltip-content{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1d25;border:1px solid var(--accent);border-radius:8px;padding:10px;min-width:280px;max-width:320px;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,0.4)}
+    .tooltip-icon:hover .tooltip-content{display:block}
+    .tooltip-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px}
+    .tooltip-formula{font-family:monospace;font-size:11px;background:rgba(108,196,255,0.08);padding:6px;border-radius:4px;margin:4px 0;color:var(--ink);line-height:1.4}
+    .tooltip-note{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3}
     
-    /* Enhanced tooltips with formulas - v2.4 */
-    .tooltip-icon{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:14px;
-      height:14px;
-      border-radius:50%;
-      background:rgba(167,171,180,0.2);
-      color:var(--muted);
-      font-size:10px;
-      font-weight:bold;
-      margin-left:4px;
-      cursor:help;
-      position:relative;
-    }
-    .tooltip-content{
-      display:none;
-      position:absolute;
-      bottom:calc(100% + 6px);
-      left:50%;
-      transform:translateX(-50%);
-      background:#1a1d25;
-      border:1px solid var(--accent);
-      border-radius:8px;
-      padding:10px;
-      min-width:280px;
-      max-width:320px;
-      z-index:1000;
-      box-shadow:0 4px 12px rgba(0,0,0,0.4);
-    }
-    .tooltip-icon:hover .tooltip-content{
-      display:block;
-    }
-    .tooltip-title{
-      font-size:12px;
-      font-weight:600;
-      color:var(--accent);
-      margin-bottom:6px;
-    }
-    .tooltip-formula{
-      font-family:monospace;
-      font-size:11px;
-      background:rgba(108,196,255,0.08);
-      padding:6px;
-      border-radius:4px;
-      margin:4px 0;
-      color:var(--ink);
-      line-height:1.4;
-    }
-    .tooltip-note{
-      font-size:10px;
-      color:var(--muted);
-      margin-top:4px;
-      line-height:1.3;
-    }
-    
-    /* Copy row button - v2.4 */
-    .copy-row-btn{
-      background:#20242f;
-      border:1px solid #2a2e37;
-      color:#c7d0e0;
-      border-radius:6px;
-      cursor:pointer;
-      width:32px;
-      height:32px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:14px;
-    }
-    .copy-row-btn:hover{
-      background:#2a2e37;
-      border-color:var(--accent);
-      color:var(--accent);
-    }
+    /* Copy row button */
+    .copy-row-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px}
+    .copy-row-btn:hover{background:#2a2e37;border-color:var(--accent);color:var(--accent)}
     /* Custom fee inputs */
-    .custom-fees{
-      grid-column: 1 / -1;
-      margin-top: 4px;
-      padding: 6px 8px;
-      background: rgba(167,171,180,0.05);
-      border-radius: 6px;
-      border: 1px solid var(--grid);
-    }
-    .custom-fee-inputs{
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      font-size: 11px;
-      color: var(--muted);
-    }
-    .custom-fee-inputs label{
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .custom-fee-inputs input{
-      width: 60px;
-      padding: 3px 5px;
-      font-size: 11px;
-      background: #0f1116;
-      color: var(--ink);
-      border: 1px solid var(--grid);
-      border-radius: 4px;
-    }
+    .custom-fees{grid-column:1/-1;margin-top:4px;padding:6px 8px;background:rgba(167,171,180,0.05);border-radius:6px;border:1px solid var(--grid)}
+    .custom-fee-inputs{display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted)}
+    .custom-fee-inputs label{display:flex;align-items:center;gap:4px}
+    .custom-fee-inputs input{width:60px;padding:3px 5px;font-size:11px;background:#0f1116;color:var(--ink);border:1px solid var(--grid);border-radius:4px}
     
-    /* Condensed Totals Card - Hidden by default, shown on mobile */
-    .condensed-totals{
-      display: none;
-    }
-    .condensed-totals-grid{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-    .condensed-metric{
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .condensed-label{
-      font-size: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 500;
-    }
-    .condensed-value{
-      font-size: 14px;
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-    .condensed-value.good{color:var(--good)}
-    .condensed-value.bad{color:var(--bad)}
-    .condensed-value.accent{color:var(--accent)}
+    /* Condensed Totals Card */
+    .condensed-totals{display:none}
+    .condensed-totals-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .condensed-metric{display:flex;flex-direction:column;gap:2px}
+    .condensed-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
+    .condensed-value{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+    .condensed-value.good{color:var(--good)}.condensed-value.bad{color:var(--bad)}.condensed-value.accent{color:var(--accent)}
     
-    /* Helper details native element styling */
-    #helperDetails summary{
-      cursor: pointer;
-      padding: 6px 8px;
-      background: rgba(167,171,180,0.05);
-      border-radius: 6px;
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: 600;
-      list-style: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #helperDetails summary::-webkit-details-marker{
-      display: none;
-    }
-    #helperDetails summary:hover{
-      background: rgba(167,171,180,0.1);
-    }
-    #helperDetails[open] .helper-toggle-indicator{
-      transform: rotate(180deg);
-    }
-    .helper-toggle-indicator{
-      transition: transform 0.2s;
-    }
+    /* Helper details */
+    #helperDetails summary{cursor:pointer;padding:6px 8px;background:rgba(167,171,180,0.05);border-radius:6px;font-size:11px;color:var(--muted);font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    #helperDetails summary::-webkit-details-marker{display:none}
+    #helperDetails summary:hover{background:rgba(167,171,180,0.1)}
+    #helperDetails[open] .helper-toggle-indicator{transform:rotate(180deg)}
+    .helper-toggle-indicator{transition:transform 0.2s}
     
-    /* Mobile/Compact Mode - Optimized for 390px viewport */
-    @media (max-width: 420px){
-      body.compact .wrap{
-        gap: 6px;
-        padding: 0 6px;
-        margin: 10px auto;
-        max-width: 100%;
-      }
-      body.compact .settings-bar{
-        padding: 5px 6px;
-        gap: 6px;
-        margin-bottom: 6px;
-        flex-wrap: wrap;
-      }
-      body.compact .card{
-        padding: 6px;
-        max-width: 100%;
-      }
-      body.compact header{
-        margin-bottom: 6px;
-        flex-wrap: wrap;
-        gap: 6px;
-      }
-      body.compact h1{
-        font-size: 16px;
-      }
-      body.compact .btn{
-        padding: 5px 8px;
-        font-size: 12px;
-      }
-      body.compact input[type="number"],
-      body.compact input[type="text"]{
-        height: 32px;
-        padding: 5px 6px;
-        font-size: 12px;
-        min-width: 0;
-      }
-      body.compact .row > .side,
-      body.compact .row > .odds-wrapper .odds-input,
-      body.compact .row > .stake,
-      body.compact .row > .payout,
-      body.compact .row > .profit{
-        height: 32px;
-        line-height: 1.4;
-      }
-      body.compact .more-toggle-btn,
-      body.compact .clear-btn,
-      body.compact .delete-btn,
-      body.compact .copy-row-btn{
-        width: 13px;
-        height: 26px;
-        min-width: 13px;
-        min-height: 26px;
-        padding: 0;
-        font-size: 9px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      /* Show condensed totals, hide session summary on mobile */
-      body.compact .condensed-totals{
-        display: block;
-      }
-      body.compact .session-summary{
-        display: none;
-      }
-      
-      /* Optimized layout for 390px width - exact space budget */
-      /* Total available: 390 - 12 (wrap padding) - 12 (card padding) = 366px */
-      /* Distribution: Side(28) + Odds(68) + Stake(72) + Payout(72) + Profit(62) + Actions(52) + Gaps(6x1=6) = 360px */
-      body.compact .row > .side{
-        width: 28px;
-        flex: 0 0 28px;
-        padding: 4px 2px;
-        font-size: 11px;
-        min-width: 0;
-      }
-      body.compact .row > .odds-wrapper{
-        width: 68px;
-        flex: 0 0 68px;
-        min-width: 0;
-      }
-      body.compact .row > .odds-wrapper .odds-input{
-        padding: 4px 17px 4px 3px;
-        font-size: 11px;
-        min-width: 0;
-      }
-      body.compact .row > .stake{
-        width: 72px;
-        flex: 0 0 72px;
-        padding: 4px 3px;
-        font-size: 11px;
-        min-width: 0;
-      }
-      body.compact .row > .payout{
-        width: 72px;
-        flex: 0 0 72px;
-        padding: 4px 3px;
-        font-size: 11px;
-        min-width: 0;
-      }
-      body.compact .row > .profit{
-        width: 62px;
-        flex: 0 0 62px;
-        padding: 4px 3px;
-        font-size: 11px;
-        min-width: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      body.compact .row-actions{
-        gap: 1px;
-        flex: 0 0 auto;
-      }
-      body.compact .row{
-        gap: 1px;
-        max-width: 100%;
-      }
-      body.compact .rows-head{
-        gap: 1px;
-      }
-      body.compact .sign-toggle {
-        width: 15px;
-        height: 15px;
-        font-size: 8px;
-        right: 1px;
-      }
-      /* Secondary row (Type/Sportsbook when expanded) */
-      body.compact .row-secondary {
-        gap: 2px;
-        margin-top: 2px;
-        padding-top: 2px;
-      }
-      body.compact .row-secondary input,
-      body.compact .row-secondary select {
-        padding: 4px 5px;
-        font-size: 11px;
-      }
-      /* Ghost row optimization for 390px */
-      body.compact .ghost-row {
-        padding: 6px;
-        margin: 6px 0;
-      }
-      body.compact .ghost-row .row {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 1px;
-        max-width: 100%;
-      }
-      body.compact .ghost-row .row > * {
-        min-width: 0;
-      }
-      body.compact .ghost-row .side {
-        width: 28px;
-        flex: 0 0 28px;
-        padding: 4px 2px;
-        font-size: 11px;
-      }
-      body.compact .ghost-row .odds-wrapper {
-        width: 68px;
-        flex: 0 0 68px;
-      }
-      body.compact .ghost-row .odds-input {
-        padding: 4px 17px 4px 3px;
-        font-size: 11px;
-      }
-      body.compact .ghost-row .stake {
-        width: 72px;
-        flex: 0 0 72px;
-        padding: 4px 3px;
-        font-size: 11px;
-      }
-      body.compact .ghost-row .payout {
-        width: 72px;
-        flex: 0 0 72px;
-        padding: 4px 3px;
-        font-size: 11px;
-      }
-      body.compact .ghost-row .profit {
-        width: 62px;
-        flex: 0 0 62px;
-        padding: 4px 3px;
-        font-size: 11px;
-      }
-      body.compact .ghost-row .commit,
-      body.compact .ghost-row .dismiss {
-        width: 24px;
-        height: 26px;
-        font-size: 11px;
-        min-width: 24px;
-      }
-      body.compact .format-toggle {
-        gap: 4px;
-        padding: 3px;
-        margin-bottom: 6px;
-      }
-      body.compact .format-btn {
-        padding: 2px 5px;
-        font-size: 9px;
-        min-width: 32px;
-      }
-      body.compact .format-readout {
-        font-size: 9px;
-      }
-    }
-
-    /* ========================================
-       360px BREAKPOINT - PRIMARY COMPACT TARGET
-       ========================================
-       Total Available: 336px (360 - 12 wrap - 12 card)
-
-       Field Allocations:
-       - Side:    24px
-       - Odds:    58px (includes 15px sign toggle overlay)
-       - Stake:   64px
-       - Payout:  64px
-       - Profit:  56px (ellipsis for overflow, tooltip shows full)
-       - Actions: 56px (4 buttons: More/Copy/Clear/Delete)
-       - Gaps:    7px (1px × 7 gaps)
-       TOTAL:     329px (7px safety margin)
-
-       Note: All cells use flex: 0 0 [width]px to prevent growth
-       Actions buttons: Visual 11px × 26px, Effective tap target expanded via padding
-    */
-    @media (max-width: 365px){
-      html {
-        overflow-x: hidden;
-      }
-
-      body.compact .wrap{
-        gap: 4px;
-        padding: 0 6px;
-        margin: 8px auto;
-        max-width: 100%;
-        overflow: hidden;
-      }
-
-      body.compact .card{
-        padding: 6px;
-        max-width: 100%;
-        overflow: hidden;
-      }
-
-      body.compact input[type="number"],
-      body.compact input[type="text"]{
-        height: 28px;
-        padding: 4px 4px;
-        font-size: 10px;
-        min-width: 0;
-      }
-
-      body.compact .row > .side,
-      body.compact .row > .odds-wrapper .odds-input,
-      body.compact .row > .stake,
-      body.compact .row > .payout,
-      body.compact .row > .profit{
-        height: 28px;
-        line-height: 1.3;
-      }
-
-      /* Primary row field sizing - optimized for 360px */
-      body.compact .row > .side{
-        width: 24px;
-        flex: 0 0 24px;
-        padding: 4px 2px;
-        font-size: 10px;
-        min-width: 0;
-      }
-
-      body.compact .row > .odds-wrapper{
-        width: 58px;
-        flex: 0 0 58px;
-        min-width: 0;
-      }
-
-      body.compact .row > .odds-wrapper .odds-input{
-        padding: 4px 15px 4px 2px;
-        font-size: 10px;
-        min-width: 0;
-      }
-
-      body.compact .row > .stake{
-        width: 64px;
-        flex: 0 0 64px;
-        padding: 4px 2px;
-        font-size: 10px;
-        min-width: 0;
-      }
-
-      body.compact .row > .payout{
-        width: 64px;
-        flex: 0 0 64px;
-        padding: 4px 2px;
-        font-size: 10px;
-        min-width: 0;
-      }
-
-      /* Profit cell: Fixed 56px width, ellipsis for overflow
-         Full precision preserved in title attribute for hover/long-press
-         At 10px font, typical betting profits ($XX.XX to $XXX.XX) display fully
-         Values > $999.99 may truncate but remain accessible via tooltip
-      */
-      body.compact .row > .profit{
-        width: 56px;
-        flex: 0 0 56px;
-        padding: 4px 2px;
-        font-size: 10px;
-        min-width: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      /* Actions buttons: Visual 11px × 26px, Effective tap target via padding
-         Strategy: Large padding creates tap target, negative margin prevents layout expansion
-         Meets WCAG 2.1 Level AA minimum target size (28px) via invisible hit area
-      */
-      body.compact .more-toggle-btn,
-      body.compact .clear-btn,
-      body.compact .delete-btn,
-      body.compact .copy-row-btn{
-        width: 11px;
-        height: 26px;
-        min-width: 11px;
-        min-height: 26px;
-        padding: 6px 8px;
-        margin: -6px -4px;
-        font-size: 9px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      body.compact .row-actions{
-        gap: 1px;
-        flex: 0 0 56px;
-      }
-
-      body.compact .row{
-        gap: 1px;
-        max-width: 100%;
-        overflow: hidden;
-      }
-
-      body.compact .rows-head{
-        gap: 1px;
-      }
-
-      body.compact .sign-toggle {
-        width: 14px;
-        height: 14px;
-        font-size: 8px;
-        right: 1px;
-      }
-
-      /* Secondary row (Type/Sportsbook when expanded) */
-      body.compact .row-secondary {
-        gap: 2px;
-        margin-top: 2px;
-        padding-top: 2px;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 150ms ease-out;
-      }
-
-      body.compact .row-secondary.expanded {
-        max-height: 60px;
-      }
-
-      body.compact .row-secondary input,
-      body.compact .row-secondary select {
-        padding: 4px 4px;
-        font-size: 10px;
-      }
-
-      /* Ghost row optimization for 360px */
-      body.compact .ghost-row {
-        padding: 6px;
-        margin: 6px 0;
-        max-width: 100%;
-        overflow: hidden;
-      }
-
-      body.compact .ghost-row .row {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 1px;
-        max-width: 100%;
-        overflow: hidden;
-      }
-
-      body.compact .ghost-row .row > * {
-        min-width: 0;
-      }
-
-      body.compact .ghost-row .side {
-        width: 24px;
-        flex: 0 0 24px;
-        padding: 4px 2px;
-        font-size: 10px;
-      }
-
-      body.compact .ghost-row .odds-wrapper {
-        width: 58px;
-        flex: 0 0 58px;
-      }
-
-      body.compact .ghost-row .odds-input {
-        padding: 4px 15px 4px 2px;
-        font-size: 10px;
-      }
-
-      body.compact .ghost-row .stake {
-        width: 64px;
-        flex: 0 0 64px;
-        padding: 4px 2px;
-        font-size: 10px;
-      }
-
-      body.compact .ghost-row .payout {
-        width: 64px;
-        flex: 0 0 64px;
-        padding: 4px 2px;
-        font-size: 10px;
-      }
-
-      body.compact .ghost-row .profit {
-        width: 56px;
-        flex: 0 0 56px;
-        padding: 4px 2px;
-        font-size: 10px;
-      }
-
-      body.compact .ghost-row .commit,
-      body.compact .ghost-row .dismiss {
-        width: 24px;
-        height: 26px;
-        font-size: 10px;
-        min-width: 24px;
-      }
-
-      body.compact .format-toggle {
-        gap: 2px;
-        padding: 3px;
-        margin-bottom: 4px;
-        flex-wrap: nowrap;
-        overflow: hidden;
-      }
-
-      body.compact .format-btn {
-        padding: 2px 4px;
-        font-size: 9px;
-        min-width: 30px;
-      }
-
-      body.compact .format-readout {
-        font-size: 9px;
-      }
+    /* Consolidated Compact Mode - Single @media (max-width: 480px) block */
+    @media (max-width: 480px){
+      body.compact .wrap{gap:6px;padding:0 6px;margin:10px auto;max-width:100%}
+      body.compact .settings-bar{padding:5px 6px;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+      body.compact .card{padding:6px;max-width:100%}
+      body.compact header{margin-bottom:6px;flex-wrap:wrap;gap:6px}
+      body.compact h1{font-size:16px}
+      body.compact .btn{padding:5px 8px;font-size:12px}
+      body.compact input[type="number"],body.compact input[type="text"]{height:32px;padding:5px 6px;font-size:12px;min-width:0}
+      body.compact .condensed-totals{display:block}
+      body.compact .session-summary{display:none}
+      /* Row field sizing - fluid for 360-480px */
+      body.compact .row > .side{width:28px;flex:0 0 28px;padding:4px 2px;font-size:11px;min-width:0}
+      body.compact .row > .odds-wrapper{width:68px;flex:0 0 68px;min-width:0}
+      body.compact .row > .odds-wrapper .odds-input{padding:4px 17px 4px 3px;font-size:11px;min-width:0}
+      body.compact .row > .stake{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px;min-width:0}
+      body.compact .row > .payout{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px;min-width:0}
+      body.compact .row > .profit{width:62px;flex:0 0 62px;padding:4px 3px;font-size:11px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      body.compact .row-actions{gap:1px;flex:0 0 auto}
+      body.compact .row{gap:1px;max-width:100%}
+      body.compact .rows-head{gap:1px}
+      body.compact .sign-toggle{width:15px;height:15px;font-size:8px;right:1px}
+      body.compact .more-toggle-btn,body.compact .clear-btn,body.compact .delete-btn,body.compact .copy-row-btn{width:13px;height:26px;min-width:13px;min-height:26px;padding:0;font-size:9px;display:inline-flex;align-items:center;justify-content:center}
+      body.compact .row-secondary{gap:2px;margin-top:2px;padding-top:2px}
+      body.compact .row-secondary input,body.compact .row-secondary select{padding:4px 5px;font-size:11px}
+      /* Ghost row */
+      body.compact .ghost-row{padding:6px;margin:6px 0}
+      body.compact .ghost-row .row{display:flex;flex-wrap:nowrap;gap:1px;max-width:100%}
+      body.compact .ghost-row .row > *{min-width:0}
+      body.compact .ghost-row .side{width:28px;flex:0 0 28px;padding:4px 2px;font-size:11px}
+      body.compact .ghost-row .odds-wrapper{width:68px;flex:0 0 68px}
+      body.compact .ghost-row .odds-input{padding:4px 17px 4px 3px;font-size:11px}
+      body.compact .ghost-row .stake{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px}
+      body.compact .ghost-row .payout{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px}
+      body.compact .ghost-row .profit{width:62px;flex:0 0 62px;padding:4px 3px;font-size:11px}
+      body.compact .ghost-row .commit,body.compact .ghost-row .dismiss{width:24px;height:26px;font-size:11px;min-width:24px}
+      body.compact .format-toggle{gap:4px;padding:3px;margin-bottom:6px}
+      body.compact .format-btn{padding:2px 5px;font-size:9px;min-width:32px}
+      body.compact .format-readout{font-size:9px}
     }
   </style>
 </head>
@@ -1952,20 +998,6 @@
       }
       
       return '';
-    }
-
-    // ProphetX fee calculation
-    // PX! = 1% fee on winnings
-    // PX = 0% fee (normal)
-    function applyProphetXFee(profit, sportsbook) {
-      if (!sportsbook) return profit;
-      const book = sportsbook.trim().toUpperCase();
-      if (book === 'PX!') {
-        // 1% fee on winnings (profit)
-        return profit > 0 ? profit * 0.99 : profit;
-      }
-      // PX or any other value = no fee
-      return profit;
     }
 
     // Profit per dollar calculation (base, before fees)
