@@ -13,6 +13,55 @@
     .wrap{max-width:1200px;margin:12px auto;padding:0 8px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;overflow:hidden}
     .wrap > *{min-width:0}
     header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    
+    /* Scrollable ledger wrapper */
+    .ledger-scroll{max-height:70vh;overflow-y:auto;overflow-x:hidden}
+    .ledger-scroll::-webkit-scrollbar{width:6px}
+    .ledger-scroll::-webkit-scrollbar-track{background:var(--card);border-radius:3px}
+    .ledger-scroll::-webkit-scrollbar-thumb{background:#3a3e47;border-radius:3px}
+    .ledger-scroll::-webkit-scrollbar-thumb:hover{background:#4a4e57}
+    
+    /* Sticky header for Add Wager */
+    .sticky-header{position:sticky;top:0;z-index:15;background:var(--bg);padding:8px 0;margin:-8px 0 8px 0}
+    
+    /* Flex-wrap for dashboard cards (Cover & Equalize) */
+    .kpi-cols{display:flex;flex-wrap:wrap;gap:8px}
+    .kpi-cols .kcard{flex:1 1 140px;min-width:140px}
+    
+    /* Maker Decision Engine output styling */
+    .maker-output{margin-top:12px;padding:10px;background:#101319;border:1px solid var(--grid);border-radius:8px}
+    .maker-output h4{font-size:12px;margin:0 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    .maker-threshold{padding:8px;margin:6px 0;border-radius:6px;background:rgba(108,196,255,0.03);border:1px solid rgba(108,196,255,0.1)}
+    .maker-threshold.ok{border-color:rgba(105,228,138,0.3);background:rgba(105,228,138,0.03)}
+    .maker-threshold.capped{border-color:rgba(230,178,92,0.3);background:rgba(230,178,92,0.03)}
+    .maker-threshold.invalid{border-color:rgba(255,125,125,0.2);background:rgba(255,125,125,0.03)}
+    .maker-threshold-label{font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px}
+    .maker-odds{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+    .maker-odds .american{font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+    .maker-odds .decimal{font-size:12px;color:var(--muted)}
+    .maker-outcomes{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px}
+    .maker-outcomes span{color:var(--muted)}
+    .maker-outcomes .val{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+    .maker-outcomes .val.good{color:var(--good)}
+    .maker-outcomes .val.bad{color:var(--bad)}
+    
+    /* Danger Zone warning */
+    .danger-zone{margin-top:8px;padding:8px 10px;background:rgba(255,125,125,0.08);border:1px solid rgba(255,125,125,0.25);border-radius:6px;display:none}
+    .danger-zone.show{display:block}
+    .danger-zone-title{font-size:11px;font-weight:700;color:var(--bad);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+    .danger-zone-msg{font-size:11px;color:var(--muted);line-height:1.4}
+    
+    /* Maker input row */
+    .maker-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+    .maker-inputs .field-row{margin-bottom:0}
+    
+    /* Apply buttons + cap reasons + satisfied state */
+    .maker-actions{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:6px}
+    .apply-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:7px;padding:4px 10px;font-size:11px;cursor:pointer}
+    .apply-btn:disabled{opacity:0.5;cursor:not-allowed}
+    .cap-reason{font-size:10px;color:var(--warn);font-weight:700}
+    .maker-threshold.satisfied{border-color:rgba(105,228,138,0.35);background:rgba(105,228,138,0.06)}
+    .maker-threshold.satisfied .maker-threshold-label{color:var(--good)}
     h1{font-size:16px;margin:0}
     .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:13px}
     .btn.secondary{background:#2a2e37}
@@ -64,21 +113,27 @@
     .warn{border-color:var(--warn)!important}
     .err{border-color:var(--bad)!important}
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
-    input[type=number]{ -moz-appearance:textfield }
+    input[type=number]{ appearance:textfield; -moz-appearance:textfield }
 
-    /* Wagers table - default desktop layout (8 columns: Side, Type, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
+    /* Wagers table - default desktop layout (8 columns: Side, Fee, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
     .rows-head, .row{display:grid;align-items:center;gap:6px}
     .rows-head{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,105px) minmax(0,150px) minmax(0,150px) minmax(0,150px) 72px}
     .row{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,105px) minmax(0,150px) minmax(0,150px) minmax(0,150px) 72px;margin:4px 0}
     .row > *, .rows-head > *, .row-secondary > *, .row-actions > *{min-width:0}
     
-    /* Desktop mode: hide More toggle and secondary row (Type/Sportsbook inline) */
-    .more-toggle-btn {
-      display: none;
-    }
-    .row-secondary {
-      display: none;
-    }
+    /* Wagers horizontal scroll (no clipping on narrow screens) */
+    .wagers-xscroll{overflow-x:auto;overflow-y:hidden}
+    .wagers-inner{min-width:900px}
+    
+    /* Fee column (row-level fee checkbox) */
+    .fee-cell{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 8px;border:1px solid var(--grid);border-radius:8px;background:#0f1116;color:var(--muted);font-weight:700;font-size:12px;white-space:nowrap}
+    .fee-checkbox{width:14px;height:14px}
+    .fee-badge{display:inline-flex;align-items:center;justify-content:center;padding:1px 6px;border-radius:999px;border:1px solid rgba(108,196,255,0.25);background:rgba(108,196,255,0.08);color:#d9e7ff;font-size:11px;line-height:1.2}
+    
+    /* Expanded row (Type moved into ⋯) */
+    .more-toggle-btn { display:inline-flex; }
+    .row-secondary { display:none; width:100%; gap:4px; margin-top:4px; padding-top:4px; border-top:1px solid var(--grid); }
+    .row-secondary.expanded { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
     
     /* Compact Mode - optimized for ~430px width */
     /* New approach: Side, Odds, Stake, Payout, Profit, Actions on main line */
@@ -106,7 +161,8 @@
       display: none;
     }
     
-    /* Compact mode: hide Type and Sportsbook in main row until moved to secondary */
+    /* Compact mode: hide Fee/Type/Sportsbook in main row (moved to secondary via JS) */
+    body.compact .row > .fee-cell,
     body.compact .row > .type-select,
     body.compact .row > .sportsbook {
       display: none;
@@ -1196,7 +1252,8 @@
         <input type="file" id="csvFileInput" accept=".csv" style="display:none">
       </div>
       
-      <header>
+      <!-- Sticky header for Add Wager -->
+      <header class="sticky-header">
         <h1>Wagers</h1>
         <div style="display:flex;gap:8px">
           <button class="btn" id="addRow">+ Add Wager (Ctrl+Enter)</button>
@@ -1206,18 +1263,24 @@
 
       <!-- Wagers Card - Moved above analytics for mobile-first -->
       <div class="card">
-        <div class="rows-head small">
-          <div>Side</div>
-          <div>Type</div>
-          <div>Sportsbook</div>
-          <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
-          <div>Stake</div>
-          <div>Payout</div>
-          <div>Profit</div>
-          <div></div>
+        <div class="wagers-xscroll">
+          <div class="wagers-inner">
+            <div class="rows-head small">
+              <div>Side</div>
+              <div>Fee</div>
+              <div>Sportsbook</div>
+              <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
+              <div>Stake</div>
+              <div>Payout</div>
+              <div>Profit</div>
+              <div></div>
+            </div>
+            <div class="ledger-scroll">
+              <div id="rows"></div>
+              <div id="ghostContainer"></div>
+            </div>
+          </div>
         </div>
-        <div id="rows"></div>
-        <div id="ghostContainer"></div>
         <div class="divider"></div>
         <details id="helperDetails">
           <summary style="cursor:pointer;padding:6px 8px;background:rgba(167,171,180,0.05);border-radius:6px;font-size:11px;color:var(--muted);font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center">
@@ -1346,81 +1409,127 @@
 
     <aside>
       <div class="card">
-        <h1 style="font-size:16px;margin:0 0 8px">Cover & Equalize</h1>
+        <h1 style="font-size:16px;margin:0 0 8px">Cover &amp; Equalize</h1>
         
-        <!-- Presets - Text labels with enhanced tooltips -->
-        <div class="preset-grid">
-          <button class="preset-btn" id="presetEqualize" data-tooltip="Equalize: Make net profit equal for both outcomes.
-
-Formula:
-Δ = (Profit_opposing + Stake_opposing - Profit_current - Stake_current) / decimal_odds
-
-Shows ghost row with computed stake to add.">
-            <div>Equalize
-              <span class="tooltip-icon">ⓘ
-                <div class="tooltip-content">
-                  <div class="tooltip-title">Equalize Formula</div>
-                  <div class="tooltip-formula">Δ = (netA − netB) / (1 + w<sub>side</sub>)</div>
-                  <div class="tooltip-note">Makes netA ≈ netB by adding wager to lower side</div>
-                  <div class="tooltip-note" style="margin-top:6px"><strong>Per-profile win factors:</strong></div>
-                  <div class="tooltip-formula" style="font-size:10px">
-                    Normal: w = (d − 1)<br>
-                    ProphetX: w = (d − 1) × 0.99<br>
-                    Kalshi (p): w = 0.98/p − 1.01
-                  </div>
-                </div>
-              </span>
-            </div>
-          </button>
-          <button class="preset-btn" id="presetCoverA" data-tooltip="Cover A = 0: Raise side A to break even if A wins; profit remains on side B.
-
-Formula:
-Stake_A = |Net_A| / profit_per_dollar
-where Net_A = Profit_A - Stake_B
-
-Adds real row when clicked.">
-            <div>Cover A
-              <span class="tooltip-icon">ⓘ
-                <div class="tooltip-content">
-                  <div class="tooltip-title">Cover A=0 Formula</div>
-                  <div class="tooltip-formula">Δ = −netA / w<sub>A</sub></div>
-                  <div class="tooltip-note">Bet on A so netA = 0 after fees</div>
-                  <div class="tooltip-note" style="margin-top:6px"><strong>Loss factor:</strong></div>
-                  <div class="tooltip-formula" style="font-size:10px">
-                    Normal/ProphetX: loss = 1.00<br>
-                    Kalshi (p): loss = 1.01
-                  </div>
-                </div>
-              </span>
-            </div>
-          </button>
-          <button class="preset-btn" id="presetCoverB" data-tooltip="Cover B = 0: Raise side B to break even if B wins; profit remains on side A.
-
-Formula:
-Stake_B = |Net_B| / profit_per_dollar
-where Net_B = Profit_B - Stake_A
-
-Adds real row when clicked.">
-            <div>Cover B
-              <span class="tooltip-icon">ⓘ
-                <div class="tooltip-content">
-                  <div class="tooltip-title">Cover B=0 Formula</div>
-                  <div class="tooltip-formula">Δ = −netB / w<sub>B</sub></div>
-                  <div class="tooltip-note">Bet on B so netB = 0 after fees</div>
-                  <div class="tooltip-note" style="margin-top:6px"><strong>Loss factor:</strong></div>
-                  <div class="tooltip-formula" style="font-size:10px">
-                    Normal/ProphetX: loss = 1.00<br>
-                    Kalshi (p): loss = 1.01
-                  </div>
-                </div>
-              </span>
-            </div>
-          </button>
+        <!-- Maker inputs: stake and floor -->
+        <div class="maker-inputs">
+          <div class="field-row">
+            <label class="small">Maker Stake (Δ)</label>
+            <input id="makerStake" type="number" step="1" min="0" placeholder="100" class="right compact" value="100">
+          </div>
+          <div class="field-row">
+            <label class="small">Floor (T)</label>
+            <input id="makerTarget" type="number" step="1" placeholder="0" class="right compact" value="0">
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <div class="field-row" style="flex:1">
+            <label class="small">Bet on Side</label>
+            <select id="makerSide" class="compact" style="width:100%;padding:6px 8px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink)">
+              <option value="auto">Auto (lower net)</option>
+              <option value="1">Side A</option>
+              <option value="2">Side B</option>
+            </select>
+          </div>
+          <div class="field-row" style="flex:1">
+            <label class="small">ProphetX Fee</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 0">
+              <input type="checkbox" id="makerPXFee" checked style="width:16px;height:16px">
+              <span class="small">1% on winnings</span>
+            </label>
+          </div>
         </div>
         
         <div class="divider"></div>
         
-        <div style="margin-bottom:12px">
+        <!-- Danger Zone Warning -->
+        <div class="danger-zone" id="dangerZone">
+          <div class="danger-zone-title">⚠ Danger Zone</div>
+          <div class="danger-zone-msg" id="dangerMsg">One or more thresholds cannot be achieved with current positions.</div>
+        </div>
+        
+        <!-- Maker Output (primary Cover & Equalize content) -->
+        <div class="maker-output" id="makerOutput">
+          <h4>Required Odds on Side <span id="makerOutputSide">B</span> for Δ = $<span id="makerOutputStake">100</span></h4>
+          
+          <!-- Cover Price -->
+          <div class="maker-threshold ok" id="thresholdCover">
+            <div class="maker-threshold-label">Cover Price (net=0 on maker side)</div>
+            <div class="maker-odds">
+              <span class="american" id="coverAmerican">-</span>
+              <span class="decimal" id="coverDecimal">(-.--)</span>
+            </div>
+            <div class="maker-outcomes">
+              <span>Net if A: <span class="val" id="coverNetA">$0.00</span></span>
+              <span>Net if B: <span class="val" id="coverNetB">$0.00</span></span>
+            </div>
+            <div class="maker-actions">
+              <button class="apply-btn" id="applyCover">Apply</button>
+              <span class="cap-reason" id="coverReason"></span>
+            </div>
+          </div>
+          
+          <!-- Equalizer Price -->
+          <div class="maker-threshold ok" id="thresholdEqualizer">
+            <div class="maker-threshold-label">Equalizer Price (netA = netB)</div>
+            <div class="maker-odds">
+              <span class="american" id="eqAmerican">-</span>
+              <span class="decimal" id="eqDecimal">(-.--)</span>
+            </div>
+            <div class="maker-outcomes">
+              <span>Net if A: <span class="val" id="eqNetA">$0.00</span></span>
+              <span>Net if B: <span class="val" id="eqNetB">$0.00</span></span>
+            </div>
+            <div class="maker-actions">
+              <button class="apply-btn" id="applyEqualizer">Apply</button>
+              <span class="cap-reason" id="eqReason"></span>
+            </div>
+          </div>
+          
+          <!-- Target Floor Price -->
+          <div class="maker-threshold ok" id="thresholdTarget">
+            <div class="maker-threshold-label">Floor (min net ≥ $<span id="targetLabel">0</span>)</div>
+            <div class="maker-odds">
+              <span class="american" id="targetAmerican">-</span>
+              <span class="decimal" id="targetDecimal">(-.--)</span>
+            </div>
+            <div class="maker-outcomes">
+              <span>Net if A: <span class="val" id="targetNetA">$0.00</span></span>
+              <span>Net if B: <span class="val" id="targetNetB">$0.00</span></span>
+            </div>
+            <div class="maker-cap-info" id="targetCapInfo" style="display:none;font-size:10px;color:var(--warn);margin-top:4px">
+              ⚠ Capped at max possible floor: <span id="maxFloor">$0.00</span>
+            </div>
+            <div class="maker-actions">
+              <button class="apply-btn" id="applyTarget">Apply</button>
+              <span class="cap-reason" id="targetReason"></span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <!-- Legacy (collapsed) -->
+        <details style="margin-top:8px">
+          <summary style="cursor:pointer;font-size:11px;color:var(--muted);font-weight:600">Legacy</summary>
+          <div class="kpi-cols" style="margin-top:8px">
+            <div class="kcard">
+              <h3>Cover A = 0</h3>
+              <div class="krow"><span class="small">Stake on A</span><div><strong class="val" id="beaStake">$0.00</strong> <button class="copy" data-copy="beaStake">⧉</button> <button class="add" id="a0Add">+</button></div></div>
+              <div class="krow"><span class="small">Net if B wins</span><strong class="val" id="beaNetB">$0.00</strong></div>
+            </div>
+            <div class="kcard">
+              <h3>Cover B = 0</h3>
+              <div class="krow"><span class="small">Stake on B</span><div><strong class="val" id="bebStake">$0.00</strong> <button class="copy" data-copy="bebStake">⧉</button> <button class="add" id="b0Add">+</button></div></div>
+              <div class="krow"><span class="small">Net if A wins</span><strong class="val" id="bebNetA">$0.00</strong></div>
+            </div>
+          </div>
+        </details>
+        
+        <div class="divider"></div>
+        
+        <div style="margin-top:8px">
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <div>
               <div class="field-row"><label class="small">Line A</label><input id="useA" type="text" placeholder="auto" class="right compact"></div>
@@ -1433,21 +1542,6 @@ Adds real row when clicked.">
           </div>
           <div class="hint">Auto from latest odds • type to override</div>
         </div>
-        
-        <div class="divider"></div>
-        
-        <div class="kpi-cols" style="margin-top:8px">
-          <div class="kcard">
-            <h3>Cover A = 0</h3>
-            <div class="krow"><span class="small">Stake on A</span><div><strong class="val" id="beaStake">$0.00</strong> <button class="copy" data-copy="beaStake">⧉</button> <button class="add" id="a0Add">+</button></div></div>
-            <div class="krow"><span class="small">Net if B wins</span><strong class="val" id="beaNetB">$0.00</strong></div>
-          </div>
-          <div class="kcard">
-            <h3>Cover B = 0</h3>
-            <div class="krow"><span class="small">Stake on B</span><div><strong class="val" id="bebStake">$0.00</strong> <button class="copy" data-copy="bebStake">⧉</button> <button class="add" id="b0Add">+</button></div></div>
-            <div class="krow"><span class="small">Net if A wins</span><strong class="val" id="bebNetA">$0.00</strong></div>
-          </div>
-        </div>
       </div>
     </aside>
   </div>
@@ -1455,11 +1549,10 @@ Adds real row when clicked.">
   <template id="rowT">
     <div class="row" data-row>
       <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
-      <select class="type-select" title="Row type: Normal uses standard odds, Kalshi uses Kalshi fees, Custom allows setting fees" aria-label="Row type">
-        <option value="normal">Normal</option>
-        <option value="kalshi">Kalshi</option>
-        <option value="custom">Custom...</option>
-      </select>
+      <label class="fee-cell" title="Row-level fee: 1% on profit only (winnings), not stake">
+        <input class="fee-checkbox" type="checkbox" aria-label="Apply 1% fee on profit for this row">
+        <span class="fee-badge">1%</span>
+      </label>
       <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)" aria-label="Sportsbook">
       <div class="odds-wrapper">
         <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off" aria-label="Odds">
@@ -1478,7 +1571,11 @@ Adds real row when clicked.">
       <div class="row-secondary" aria-hidden="true">
         <div>
           <label class="small" style="display:block;margin-bottom:2px;color:var(--muted)">Type</label>
-          <!-- Type select is actually at index 1 in the row, will be moved here via JS -->
+          <select class="type-select" title="Row type: Normal uses standard odds, Kalshi uses Kalshi fees, Custom allows setting fees" aria-label="Row type">
+            <option value="normal">Normal</option>
+            <option value="kalshi">Kalshi</option>
+            <option value="custom">Custom...</option>
+          </select>
         </div>
         <div>
           <label class="small" style="display:block;margin-bottom:2px;color:var(--muted)">Sportsbook</label>
@@ -1507,9 +1604,10 @@ Adds real row when clicked.">
       </div>
       <div class="row">
         <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
-        <select class="type-select" disabled aria-label="Row type">
-          <option value="normal">Normal</option>
-        </select>
+        <label class="fee-cell" title="Row-level fee: 1% on profit only (winnings), not stake">
+          <input class="fee-checkbox" type="checkbox" aria-label="Apply 1% fee on profit for this row">
+          <span class="fee-badge">1%</span>
+        </label>
         <input class="sportsbook compact" type="text" placeholder="Book" readonly aria-label="Sportsbook">
         <div class="odds-wrapper">
           <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off" aria-label="Odds">
@@ -1542,6 +1640,7 @@ Adds real row when clicked.">
     let historyStack = [];
     let historyIndex = -1;
     const maxHistory = 50;
+    let makerLast = null;
     
     // Core state
     const rowsEl = document.getElementById('rows');
@@ -1557,6 +1656,7 @@ Adds real row when clicked.">
     // Ghost state (stored separately)
     const ghostState = {
       mode: "equalize",
+      pinned: false,
       side: null,
       american: null,  // Canonical American odds
       isKalshi: false, // Kalshi format flag
@@ -1878,6 +1978,288 @@ Adds real row when clicked.">
     function money(x) {
       return '$' + (isFinite(x) ? Math.abs(x).toFixed(2) : '0.00');
     }
+    
+    // Signed money formatting
+    function moneyS(x) {
+      if (!isFinite(x)) return '$0.00';
+      return (x >= 0 ? '+' : '-') + '$' + Math.abs(x).toFixed(2);
+    }
+    
+    // Convert decimal odds to American odds
+    function decimalToAmerican(decimal) {
+      if (!isFinite(decimal) || decimal <= 1) return 0;
+      if (Math.abs(decimal - 2.0) < 0.000001) return 100; // Even money
+      if (decimal > 2) {
+        return Math.round((decimal - 1) * 100);
+      } else {
+        return Math.round(-100 / (decimal - 1));
+      }
+    }
+    
+    // =========================================================================
+    // Maker Decision Engine (ported from src/lib/logic.ts)
+    // =========================================================================
+    
+    function aggregatePositions(positions) {
+      let totalStakeA = 0, totalStakeB = 0, totalProfitA = 0, totalProfitB = 0;
+      for (const pos of positions) {
+        if (pos.side === 1) {
+          totalStakeA += pos.stake;
+          totalProfitA += pos.profit;
+        } else {
+          totalStakeB += pos.stake;
+          totalProfitB += pos.profit;
+        }
+      }
+      return { totalStakeA, totalStakeB, totalProfitA, totalProfitB };
+    }
+    
+    function makerNetOutcomes(agg, makerSide, makerStake, decimalOdds, prophetXFeeActive) {
+      const f = prophetXFeeActive ? 0.99 : 1.0;
+      const { totalStakeA, totalStakeB, totalProfitA, totalProfitB } = agg;
+      const makerLegWinnings = makerStake * (decimalOdds - 1) * f;
+      let netIfA, netIfB;
+      if (makerSide === 1) {
+        netIfA = totalProfitA + makerLegWinnings - totalStakeB;
+        netIfB = totalProfitB - (totalStakeA + makerStake);
+      } else {
+        netIfA = totalProfitA - (totalStakeB + makerStake);
+        netIfB = totalProfitB + makerLegWinnings - totalStakeA;
+      }
+      return { netIfA, netIfB };
+    }
+    
+    function safeDecToAmer(d) {
+      if (!isFinite(d) || d <= 1) return 0;
+      try { return decimalToAmerican(d); } catch { return 0; }
+    }
+    
+    function invalidThreshold(capReason) {
+      return { decimalOdds: 0, americanOdds: 0, netIfA: 0, netIfB: 0, minNet: 0, status: 'invalid', capReason };
+    }
+    
+    function cappedThreshold(d, netIfA, netIfB, maxPossibleFloor) {
+      return {
+        decimalOdds: d, americanOdds: safeDecToAmer(d), netIfA, netIfB,
+        minNet: Math.min(netIfA, netIfB), status: 'capped', capReason: 'other_outcome_caps_floor', maxPossibleFloor
+      };
+    }
+    
+    function solveCoverPrice(agg, makerSide, makerStake, f) {
+      const { totalStakeA, totalStakeB, totalProfitA, totalProfitB } = agg;
+      if (makerStake <= 0) return invalidThreshold('insufficient_stake');
+      let d;
+      if (makerSide === 1) {
+        d = 1 + (totalStakeB - totalProfitA) / (makerStake * f);
+      } else {
+        d = 1 + (totalStakeA - totalProfitB) / (makerStake * f);
+      }
+      if (!isFinite(d) || d <= 1) return invalidThreshold('nonpositive_odds');
+      const { netIfA, netIfB } = makerNetOutcomes(agg, makerSide, makerStake, d, f < 1);
+      return { decimalOdds: d, americanOdds: safeDecToAmer(d), netIfA, netIfB, minNet: Math.min(netIfA, netIfB), status: 'ok', capReason: null };
+    }
+    
+    function solveEqualizerPrice(agg, makerSide, makerStake, f) {
+      const { totalStakeA, totalStakeB, totalProfitA, totalProfitB } = agg;
+      if (makerStake <= 0) return invalidThreshold('insufficient_stake');
+      const diff = (totalProfitB - totalProfitA) + (totalStakeB - totalStakeA);
+      let d;
+      if (makerSide === 1) {
+        d = 1 + (diff - makerStake) / (makerStake * f);
+      } else {
+        d = 1 + (-diff - makerStake) / (makerStake * f);
+      }
+      if (!isFinite(d) || d <= 1) return invalidThreshold('nonpositive_odds');
+      const { netIfA, netIfB } = makerNetOutcomes(agg, makerSide, makerStake, d, f < 1);
+      return { decimalOdds: d, americanOdds: safeDecToAmer(d), netIfA, netIfB, minNet: Math.min(netIfA, netIfB), status: 'ok', capReason: null };
+    }
+    
+    function solveTargetFloorPrice(agg, makerSide, makerStake, targetProfit, f) {
+      const { totalStakeA, totalStakeB, totalProfitA, totalProfitB } = agg;
+      if (makerStake <= 0) return invalidThreshold('insufficient_stake');
+      let fixedSideNet, d;
+      if (makerSide === 1) {
+        fixedSideNet = totalProfitB - totalStakeA - makerStake;
+        if (targetProfit > fixedSideNet) {
+          d = 1 + (fixedSideNet + totalStakeB - totalProfitA) / (makerStake * f);
+          if (!isFinite(d) || d <= 1) return invalidThreshold('nonpositive_odds');
+          const { netIfA, netIfB } = makerNetOutcomes(agg, makerSide, makerStake, d, f < 1);
+          return cappedThreshold(d, netIfA, netIfB, fixedSideNet);
+        }
+        d = 1 + (targetProfit + totalStakeB - totalProfitA) / (makerStake * f);
+      } else {
+        fixedSideNet = totalProfitA - totalStakeB - makerStake;
+        if (targetProfit > fixedSideNet) {
+          d = 1 + (fixedSideNet + totalStakeA - totalProfitB) / (makerStake * f);
+          if (!isFinite(d) || d <= 1) return invalidThreshold('nonpositive_odds');
+          const { netIfA, netIfB } = makerNetOutcomes(agg, makerSide, makerStake, d, f < 1);
+          return cappedThreshold(d, netIfA, netIfB, fixedSideNet);
+        }
+        d = 1 + (targetProfit + totalStakeA - totalProfitB) / (makerStake * f);
+      }
+      if (!isFinite(d) || d <= 1) return invalidThreshold('nonpositive_odds');
+      const { netIfA, netIfB } = makerNetOutcomes(agg, makerSide, makerStake, d, f < 1);
+      return { decimalOdds: d, americanOdds: safeDecToAmer(d), netIfA, netIfB, minNet: Math.min(netIfA, netIfB), status: 'ok', capReason: null };
+    }
+    
+    function solveMakerPrices(positions, makerSide, makerStake, targetProfit, prophetXFeeActive) {
+      const f = prophetXFeeActive ? 0.99 : 1.0;
+      const agg = aggregatePositions(positions);
+      const hasPositions = positions.length > 0;
+      let coverPrice, equalizerPrice, targetFloorPrice;
+      if (!hasPositions) {
+        coverPrice = invalidThreshold('no_positions');
+        equalizerPrice = invalidThreshold('no_positions');
+        targetFloorPrice = invalidThreshold('no_positions');
+      } else {
+        coverPrice = solveCoverPrice(agg, makerSide, makerStake, f);
+        equalizerPrice = solveEqualizerPrice(agg, makerSide, makerStake, f);
+        targetFloorPrice = solveTargetFloorPrice(agg, makerSide, makerStake, targetProfit, f);
+      }
+      return { makerSide, makerStake, prophetXFeeActive, coverPrice, equalizerPrice, targetFloorPrice, targetProfit };
+    }
+    
+    // Update Cover & Equalize (Maker thresholds) UI
+    function updateMakerOutput(positions) {
+      const makerStakeInput = document.getElementById('makerStake');
+      const makerTargetInput = document.getElementById('makerTarget');
+      const makerSideSelect = document.getElementById('makerSide');
+      const makerPXFee = document.getElementById('makerPXFee');
+      
+      const makerStake = parseFloat(makerStakeInput.value) || 0;
+      const targetProfit = parseFloat(makerTargetInput.value) || 0;
+      const prophetXFeeActive = makerPXFee.checked;
+      
+      // Determine maker side
+      let makerSide = 2; // Default to B
+      if (makerSideSelect.value === '1') {
+        makerSide = 1;
+      } else if (makerSideSelect.value === '2') {
+        makerSide = 2;
+      } else {
+        // Auto: bet on the side with lower net
+        const agg = aggregatePositions(positions);
+        const netA = agg.totalProfitA - agg.totalStakeB;
+        const netB = agg.totalProfitB - agg.totalStakeA;
+        makerSide = netA > netB ? 2 : 1;
+      }
+      
+      // Solve for maker prices
+      const result = solveMakerPrices(positions, makerSide, makerStake, targetProfit, prophetXFeeActive);
+      makerLast = { result, makerSide, makerStake, targetProfit };
+      
+      // Current floor (pre-maker) for satisfied state
+      const aggNow = aggregatePositions(positions);
+      const netNowA = aggNow.totalProfitA - aggNow.totalStakeB;
+      const netNowB = aggNow.totalProfitB - aggNow.totalStakeA;
+      const minNetNow = Math.min(netNowA, netNowB);
+      
+      // Update header
+      document.getElementById('makerOutputSide').textContent = makerSide === 1 ? 'A' : 'B';
+      document.getElementById('makerOutputStake').textContent = makerStake.toFixed(0);
+      document.getElementById('targetLabel').textContent = targetProfit.toFixed(0);
+      
+      function capReasonText(r) {
+        if(!r) return '';
+        if(r === 'other_outcome_caps_floor') return 'Capped: other outcome caps floor';
+        if(r === 'nonpositive_odds') return 'Invalid: non-positive odds';
+        if(r === 'insufficient_stake') return 'Invalid: insufficient stake';
+        if(r === 'no_positions') return 'Invalid: no positions';
+        return String(r);
+      }
+      
+      // Helper to update threshold card
+      function updateThresholdCard(id, threshold, prefix, applyId, reasonId) {
+        const card = document.getElementById(id);
+        card.className = 'maker-threshold ' + threshold.status;
+        
+        const amerEl = document.getElementById(prefix + 'American');
+        const decEl = document.getElementById(prefix + 'Decimal');
+        const netAEl = document.getElementById(prefix + 'NetA');
+        const netBEl = document.getElementById(prefix + 'NetB');
+        const applyBtn = document.getElementById(applyId);
+        const reasonEl = document.getElementById(reasonId);
+        
+        if (threshold.status === 'ok' || threshold.status === 'capped') {
+          amerEl.textContent = formatFromAmerican(threshold.americanOdds, 'american') || '-';
+          decEl.textContent = '(' + threshold.decimalOdds.toFixed(3) + ')';
+          netAEl.textContent = moneyS(threshold.netIfA);
+          netBEl.textContent = moneyS(threshold.netIfB);
+          netAEl.className = 'val ' + (threshold.netIfA >= 0 ? 'good' : 'bad');
+          netBEl.className = 'val ' + (threshold.netIfB >= 0 ? 'good' : 'bad');
+          if(reasonEl) reasonEl.textContent = threshold.status === 'capped' ? capReasonText(threshold.capReason) : '';
+        } else {
+          amerEl.textContent = '-';
+          decEl.textContent = '(n/a)';
+          netAEl.textContent = '-';
+          netBEl.textContent = '-';
+          netAEl.className = 'val';
+          netBEl.className = 'val';
+          if(reasonEl) reasonEl.textContent = capReasonText(threshold.capReason);
+        }
+        
+        if(applyBtn) applyBtn.disabled = threshold.status !== 'ok';
+      }
+      
+      updateThresholdCard('thresholdCover', result.coverPrice, 'cover', 'applyCover', 'coverReason');
+      updateThresholdCard('thresholdEqualizer', result.equalizerPrice, 'eq', 'applyEqualizer', 'eqReason');
+      
+      // Floor satisfied state
+      const floorApplyBtn = document.getElementById('applyTarget');
+      const floorReasonEl = document.getElementById('targetReason');
+      const floorCard = document.getElementById('thresholdTarget');
+      
+      if(positions.length > 0 && isFinite(targetProfit) && minNetNow >= targetProfit) {
+        if(floorCard) floorCard.className = 'maker-threshold satisfied';
+        document.getElementById('targetAmerican').textContent = 'Floor Satisfied';
+        document.getElementById('targetDecimal').textContent = '(' + moneyS(minNetNow) + ' min)';
+        const netAEl = document.getElementById('targetNetA');
+        const netBEl = document.getElementById('targetNetB');
+        netAEl.textContent = moneyS(netNowA);
+        netBEl.textContent = moneyS(netNowB);
+        netAEl.className = 'val ' + (netNowA >= 0 ? 'good' : 'bad');
+        netBEl.className = 'val ' + (netNowB >= 0 ? 'good' : 'bad');
+        if(floorApplyBtn) floorApplyBtn.disabled = true;
+        if(floorReasonEl) floorReasonEl.textContent = 'Already satisfied';
+        // hide capped info
+        document.getElementById('targetCapInfo').style.display = 'none';
+      } else {
+        updateThresholdCard('thresholdTarget', result.targetFloorPrice, 'target', 'applyTarget', 'targetReason');
+      }
+      
+      // Update cap info for floor (only when not satisfied)
+      const capInfo = document.getElementById('targetCapInfo');
+      const maxFloor = document.getElementById('maxFloor');
+      const floorSatisfied = (positions.length > 0 && isFinite(targetProfit) && minNetNow >= targetProfit);
+      if (!floorSatisfied && result.targetFloorPrice.status === 'capped' && result.targetFloorPrice.maxPossibleFloor !== undefined) {
+        capInfo.style.display = 'block';
+        maxFloor.textContent = moneyS(result.targetFloorPrice.maxPossibleFloor);
+      } else {
+        capInfo.style.display = 'none';
+      }
+      
+      // Update danger zone
+      const dangerZone = document.getElementById('dangerZone');
+      const dangerMsg = document.getElementById('dangerMsg');
+      const hasInvalid = result.coverPrice.status === 'invalid' || 
+                         result.equalizerPrice.status === 'invalid' || 
+                         result.targetFloorPrice.status === 'invalid';
+      const hasCapped = result.coverPrice.status === 'capped' || 
+                        result.equalizerPrice.status === 'capped' || 
+                        result.targetFloorPrice.status === 'capped';
+      
+      if (positions.length === 0) {
+        dangerZone.classList.remove('show');
+      } else if (hasInvalid) {
+        dangerZone.classList.add('show');
+        dangerMsg.textContent = 'One or more thresholds cannot be achieved. Check your positions or increase maker stake.';
+      } else if (hasCapped) {
+        dangerZone.classList.add('show');
+        dangerMsg.textContent = 'Floor exceeds maximum achievable minimum net. The opposing outcome limits your upside.';
+      } else {
+        dangerZone.classList.remove('show');
+      }
+    }
 
     // Calculate effective/blended American odds for multiple bets on same side
     function calculateEffectiveOdds(totalStake, totalProfit) {
@@ -1920,6 +2302,8 @@ Adds real row when clicked.">
       const side = el.querySelector('.side');
       const typeSelect = el.querySelector('.type-select');
       const sportsbook = el.querySelector('.sportsbook');
+      const feeCell = el.querySelector('.fee-cell');
+      const feeCheckbox = el.querySelector('.fee-checkbox');
       const oddsInput = el.querySelector('.odds');
       const stake = el.querySelector('.stake');
       const payout = el.querySelector('.payout');
@@ -2154,6 +2538,13 @@ Adds real row when clicked.">
             customFeesDiv.style.display = typeSelect.value === 'custom' ? 'block' : 'none';
           }
           
+          // Fee checkbox only applies to normal/custom (profit fee on winnings). Disable for kalshi.
+          if(feeCheckbox) {
+            const disable = typeSelect.value === 'kalshi';
+            feeCheckbox.disabled = disable;
+            if(disable) feeCheckbox.checked = false;
+          }
+          
           // Re-validate odds with new type
           const signValue = signToggle ? signToggle.dataset.sign : "+";
           const error = getOddsError(oddsInput.value, signValue, typeSelect.value);
@@ -2216,11 +2607,13 @@ Adds real row when clicked.">
           // Move Type and Sportsbook into secondary container
           const typeContainer = rowSecondary.children[0];
           const sportsbookContainer = rowSecondary.children[1];
-          if(typeSelect && typeContainer && !typeContainer.querySelector('.type-select')) {
-            typeContainer.appendChild(typeSelect);
-          }
+          // Type select is already in secondary by template; keep it there.
           if(sportsbook && sportsbookContainer && !sportsbookContainer.querySelector('.sportsbook')) {
             sportsbookContainer.appendChild(sportsbook);
+          }
+          // Move fee control into the Type container for compact mode
+          if(feeCell && typeContainer && !typeContainer.querySelector('.fee-cell')) {
+            typeContainer.appendChild(feeCell);
           }
           
           // Set initial accessibility attributes
@@ -2252,9 +2645,17 @@ Adds real row when clicked.">
           }
         });
       }
+      
+      // Fee checkbox changes recalc (row-level fee multiplier)
+      if(feeCheckbox) {
+        feeCheckbox.addEventListener('change', () => {
+          recalcDebounced();
+          if(!isGhost) debouncedSave();
+        });
+      }
 
       // Store refs
-      el._refs = {side, typeSelect, sportsbook, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn, openFeePct, winFeePct};
+      el._refs = {side, typeSelect, sportsbook, feeCheckbox, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn, openFeePct, winFeePct};
     }
 
     // Add regular row
@@ -2307,6 +2708,8 @@ Adds real row when clicked.">
         currentGhost.remove();
         currentGhost = null;
         // Reset ghost state
+        ghostState.pinned = false;
+        ghostState.mode = "equalize";
         ghostState.american = null;
         ghostState.isKalshi = false;
         ghostState.stake = 0;
@@ -2343,7 +2746,10 @@ Adds real row when clicked.">
       if(ghostState.american !== null && ghostState.stake > 0) {
         const p = pPerDollar(ghostState.american);
         if(p !== null) {
-          const profit = ghostState.stake * p;
+          const feeCheckbox = rowEl.querySelector('.fee-checkbox');
+          const feeMult = feeCheckbox && feeCheckbox.checked ? 0.99 : 1.0;
+          const rawProfit = ghostState.stake * p;
+          const profit = rawProfit > 0 ? rawProfit * feeMult : rawProfit;
           profitEl.textContent = money(profit);
           profitEl.title = money(profit); // Add tooltip with full precision
           profitEl.classList.toggle('pos', profit >= 0);
@@ -2403,6 +2809,7 @@ Adds real row when clicked.">
     // Formula: Δ = (Profit_A + Stake_A - Profit_B - Stake_B) / d_new
     // This handles existing wagers at different odds correctly
     function recomputeGhostStake() {
+      if(ghostState.pinned) return;
       const rows = readRows();
       const sum = (side, field) => rows.filter(r => r.side === side).reduce((a, b) => a + (b[field] || 0), 0);
       
@@ -2482,6 +2889,14 @@ Adds real row when clicked.">
       
       newRow._refs.stake.value = ghostState.stake.toFixed(2);  // Use precise stake value
       
+      // Copy row-level fee checkbox state from ghost preview
+      try {
+        const ghostFee = currentGhost.querySelector('.fee-checkbox');
+        if(ghostFee && newRow._refs.feeCheckbox) {
+          newRow._refs.feeCheckbox.checked = ghostFee.checked;
+        }
+      } catch(e) {}
+      
       // Clear typing flag on ghost odds input
       const ghostOddsInput = currentGhost.querySelector('.odds');
       if(ghostOddsInput) {
@@ -2490,6 +2905,8 @@ Adds real row when clicked.">
       }
       
       // Reset ghost state
+      ghostState.pinned = false;
+      ghostState.mode = "equalize";
       ghostState.american = null;
       ghostState.isKalshi = false;
       ghostState.stake = 0;
@@ -2503,11 +2920,11 @@ Adds real row when clicked.">
     function readRows() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach((el, idx) => {
-        const {side, typeSelect, sportsbook, odds, stake, payout, profit, signToggle, openFeePct, winFeePct} = el._refs;
+        const {side, typeSelect, sportsbook, feeCheckbox, odds, stake, payout, profit, signToggle, openFeePct, winFeePct} = el._refs;
         const s = side.value === '2' ? 2 : 1;
         const signValue = signToggle ? signToggle.dataset.sign : "+";
-        const book = sportsbook ? sportsbook.value : '';
         const rowType = typeSelect ? typeSelect.value : 'normal';
+        const feeMult = feeCheckbox && feeCheckbox.checked ? 0.99 : 1.0;
         
         // Check if user manually entered odds
         const userEnteredOdds = odds.value.trim() !== '' && odds.style.opacity !== '0.7';
@@ -2524,6 +2941,7 @@ Adds real row when clicked.">
           const p = pPerDollar(od);
           if(p !== null) {
             const profitBeforeFees = st * p;
+            const profitAfterRowFee = profitBeforeFees > 0 ? r2(profitBeforeFees * feeMult) : profitBeforeFees;
             
             // Determine which fee adapter to use based on row type
             let feeResult;
@@ -2544,20 +2962,12 @@ Adds real row when clicked.">
               const openPct = openFeePct && openFeePct.value ? Number(openFeePct.value) / 100 : 0;
               const winPct = winFeePct && winFeePct.value ? Number(winFeePct.value) / 100 : 0;
               const openFee = r2(st * openPct);
-              const winFee = profitBeforeFees > 0 ? r2(profitBeforeFees * winPct) : 0;
-              pf = r2(profitBeforeFees - openFee - winFee);
+              const winFee = profitAfterRowFee > 0 ? r2(profitAfterRowFee * winPct) : 0;
+              pf = r2(profitAfterRowFee - openFee - winFee);
               pay = r2(st + pf);
             } else {
-              // Normal or ProphetX
-              // Check for ProphetX fee (PX! marker in sportsbook field)
-              if(book && book.trim().toUpperCase() === 'PX!' && profitBeforeFees > 0) {
-                // 1% fee on winnings
-                const winFee = r2(profitBeforeFees * 0.01);
-                pf = r2(profitBeforeFees - winFee);
-              } else {
-                // No fees
-                pf = profitBeforeFees;
-              }
+              // Normal rows: optional 1% fee on profit (manual checkbox)
+              pf = profitAfterRowFee;
               pay = r2(st + pf);
             }
           }
@@ -2806,7 +3216,11 @@ Adds real row when clicked.">
         (hasPositionA && hasPositionB && Math.abs(netA - netB) > 0.01)  // Stakes on both with imbalance
       );
       
-      if(needsGhost) {
+      // Pinned ghost preview (Apply) must not be overwritten by auto equalize
+      if(ghostState.pinned) {
+        if(!currentGhost) createGhostRow();
+        updateGhostDisplay();
+      } else if(needsGhost) {
         const ghostCreated = !currentGhost;
         if(ghostCreated) {
           createGhostRow();
@@ -2856,7 +3270,7 @@ Adds real row when clicked.">
         }
         // If user has input, ghostState.american is already set from the input handler
         
-        // Always recompute stake
+        // Always recompute stake (auto equalize only)
         recomputeGhostStake();
         updateGhostDisplay();
       } else {
@@ -2866,6 +3280,15 @@ Adds real row when clicked.">
       // Store state for cover buttons
       state.a0 = {stake: coverAStake, odds: lineA};
       state.b0 = {stake: coverBStake, odds: lineB};
+      
+      // Update Maker Decision Engine
+      // Convert rows to Position format for the engine
+      const makerPositions = rows.filter(r => r.side && r.stake > 0 && r.profit !== undefined).map(r => ({
+        side: r.side,
+        stake: r.stake,
+        profit: r.profit
+      }));
+      updateMakerOutput(makerPositions);
     }
 
     const recalcDebounced = debounce(recalc, 20);
@@ -2935,16 +3358,49 @@ Adds real row when clicked.">
     ['labelA', 'labelB'].forEach(id => {
       document.getElementById(id).addEventListener('input', recalcDebounced);
     });
+    
+    // Handle Cover & Equalize inputs
+    ['makerStake', 'makerTarget'].forEach(id => {
+      document.getElementById(id).addEventListener('input', recalcDebounced);
+    });
+    document.getElementById('makerSide').addEventListener('change', recalcDebounced);
+    document.getElementById('makerPXFee').addEventListener('change', recalcDebounced);
+    
+    // Apply buttons: fill pinned ghost preview (side, odds, stake Δ). Do NOT auto-toggle fee checkbox.
+    function applyThreshold(kind) {
+      if(!makerLast || !makerLast.result) return;
+      const { result, makerSide, makerStake } = makerLast;
+      const t = kind === 'cover' ? result.coverPrice : (kind === 'equalizer' ? result.equalizerPrice : result.targetFloorPrice);
+      if(!t || t.status !== 'ok') return;
+      
+      if(!currentGhost) createGhostRow();
+      ghostState.pinned = true;
+      ghostState.mode = "maker";
+      ghostState.side = makerSide;
+      ghostState.american = t.americanOdds;
+      ghostState.isKalshi = false;
+      ghostState.stake = makerStake;
+      ghostState.targetTotal = 0;
+      
+      const oddsInput = currentGhost.querySelector('.odds');
+      if(oddsInput) oddsInput.dataset.userTyping = 'false';
+      updateGhostDisplay();
+    }
+    
+    document.getElementById('applyCover').addEventListener('click', () => applyThreshold('cover'));
+    document.getElementById('applyEqualizer').addEventListener('click', () => applyThreshold('equalizer'));
+    document.getElementById('applyTarget').addEventListener('click', () => applyThreshold('target'));
 
     // Undo/Redo functionality
     function saveCurrentState() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, odds, stake, payout, openFeePct, winFeePct} = el._refs;
+        const {side, typeSelect, sportsbook, feeCheckbox, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         rows.push({
           side: side.value,
           type: typeSelect ? typeSelect.value : 'normal',
           sportsbook: sportsbook ? sportsbook.value : '',
+          fee1pct: feeCheckbox ? !!feeCheckbox.checked : false,
           odds: odds.value,
           stake: stake.value,
           payout: payout.value,
@@ -3005,6 +3461,7 @@ Adds real row when clicked.">
           }
         }
         if(r._refs.sportsbook) r._refs.sportsbook.value = rowData.sportsbook || '';
+        if(r._refs.feeCheckbox) r._refs.feeCheckbox.checked = !!rowData.fee1pct;
         r._refs.odds.value = rowData.odds;
         r._refs.stake.value = rowData.stake;
         r._refs.payout.value = rowData.payout;
@@ -3045,12 +3502,13 @@ Adds real row when clicked.">
       const timestamp = new Date().toISOString();
       
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, odds, stake, payout, openFeePct, winFeePct} = el._refs;
+        const {side, typeSelect, sportsbook, feeCheckbox, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         if(side.value) {
           rows.push({
             side: side.value,
             type: typeSelect ? typeSelect.value : 'normal',
             sportsbook: sportsbook ? sportsbook.value : '',
+            fee1pct: feeCheckbox ? !!feeCheckbox.checked : false,
             oddsType: 'american',
             oddsValue: odds.value,
             stake: stake.value,
@@ -3061,7 +3519,7 @@ Adds real row when clicked.">
         }
       });
       
-      const headers = ['side', 'type', 'sportsbook', 'oddsType', 'oddsValue', 'stake', 'payout', 'openFeePct', 'winFeePct'];
+      const headers = ['side', 'type', 'sportsbook', 'fee1pct', 'oddsType', 'oddsValue', 'stake', 'payout', 'openFeePct', 'winFeePct'];
       const csvRows = [headers.join(',')];
       rows.forEach(row => {
         const values = headers.map(h => `"${row[h] || ''}"`);
@@ -3100,6 +3558,8 @@ Adds real row when clicked.">
           // Parse header
           const headerLine = lines[0];
           const headers = headerLine.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+          const cleanHeaders = headers.map(h => h.replace(/^"|"$/g, '').trim());
+          const hasFee1pct = cleanHeaders.includes('fee1pct');
           
           // Skip header line and import data
           for(let i = 1; i < lines.length; i++) {
@@ -3118,11 +3578,23 @@ Adds real row when clicked.">
                 }
               }
               if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
-              r._refs.odds.value = clean[4]; // oddsValue
-              r._refs.stake.value = clean[5];
-              if(clean[6]) r._refs.payout.value = clean[6];
-              if(r._refs.openFeePct && clean[7]) r._refs.openFeePct.value = clean[7];
-              if(r._refs.winFeePct && clean[8]) r._refs.winFeePct.value = clean[8];
+              
+              const idxFee = hasFee1pct ? 3 : -1;
+              // Export format with fee1pct: side,type,sportsbook,fee1pct,oddsType,oddsValue,stake,payout,openFeePct,winFeePct
+              const idxOddsValue = hasFee1pct ? 5 : 4;
+              const idxStake = hasFee1pct ? 6 : 5;
+              const idxPayout = hasFee1pct ? 7 : 6;
+              const idxOpen = hasFee1pct ? 8 : 7;
+              const idxWin = hasFee1pct ? 9 : 8;
+              
+              if(r._refs.feeCheckbox && idxFee !== -1 && clean[idxFee] !== undefined) {
+                r._refs.feeCheckbox.checked = String(clean[idxFee]).toLowerCase() === 'true' || String(clean[idxFee]) === '1';
+              }
+              r._refs.odds.value = clean[idxOddsValue]; // oddsValue
+              r._refs.stake.value = clean[idxStake];
+              if(clean[idxPayout]) r._refs.payout.value = clean[idxPayout];
+              if(r._refs.openFeePct && clean[idxOpen]) r._refs.openFeePct.value = clean[idxOpen];
+              if(r._refs.winFeePct && clean[idxWin]) r._refs.winFeePct.value = clean[idxWin];
             }
           }
           
@@ -3135,36 +3607,6 @@ Adds real row when clicked.">
       };
       reader.readAsText(file);
       e.target.value = ''; // Reset file input
-    });
-
-    // Preset buttons
-    document.getElementById('presetEqualize').addEventListener('click', () => {
-      // Trigger ghost row to show equalization
-      recalc();
-    });
-
-    document.getElementById('presetCoverA').addEventListener('click', () => {
-      // Add Cover A = 0 wager
-      if(state.a0.stake > 0 && state.a0.odds) {
-        const r = addRow();
-        r._refs.side.value = '1';
-        r._refs.odds.value = formatFromAmerican(state.a0.odds, 'american');
-        r._refs.stake.value = state.a0.stake.toFixed(2);
-        recalc();
-        saveCurrentState();
-      }
-    });
-
-    document.getElementById('presetCoverB').addEventListener('click', () => {
-      // Add Cover B = 0 wager
-      if(state.b0.stake > 0 && state.b0.odds) {
-        const r = addRow();
-        r._refs.side.value = '2';
-        r._refs.odds.value = formatFromAmerican(state.b0.odds, 'american');
-        r._refs.stake.value = state.b0.stake.toFixed(2);
-        recalc();
-        saveCurrentState();
-      }
     });
 
     // Ctrl+Enter to add row, Ctrl+Z for undo, Ctrl+Y for redo
