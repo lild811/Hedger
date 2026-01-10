@@ -3,23 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fast Hedger v2.4 – Session Summary Edition</title>
+  <title>Fast Hedger v2.5 – One-Mode Edition</title>
   <style>
+    /* ===================================================================
+       FAST HEDGER v2.5 – One-Mode Architecture (360–540px optimized)
+       All styles are global. No compact mode toggles.
+       =================================================================== */
     :root{ --bg:#0b0c10; --card:#15171c; --ink:#e8e9ed; --muted:#a7abb4; --accent:#6cc4ff; --good:#69e48a; --bad:#ff7d7d; --warn:#e6b25c; --grid:#23252b; --fade:0.6; }
     html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;width:100%;max-width:100vw;overflow-x:hidden}
     *{box-sizing:border-box}
     *,*::before,*::after{box-sizing:border-box}
 
-    .wrap{max-width:1200px;margin:12px auto;padding:0 8px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:10px;overflow:hidden}
+    /* LAYOUT LOCK: Single column, max 540px, centered */
+    .wrap{max-width:540px;margin:10px auto;padding:0 6px;display:block;overflow:hidden}
     .wrap > *{min-width:0}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:6px}
     
     /* Scrollable ledger wrapper */
     .ledger-scroll{max-height:70vh;overflow-y:auto;overflow-x:hidden}
-    .ledger-scroll::-webkit-scrollbar{width:6px}
-    .ledger-scroll::-webkit-scrollbar-track{background:var(--card);border-radius:3px}
-    .ledger-scroll::-webkit-scrollbar-thumb{background:#3a3e47;border-radius:3px}
-    .ledger-scroll::-webkit-scrollbar-thumb:hover{background:#4a4e57}
+    
+    /* Hide scrollbars while maintaining scroll functionality */
+    .card, .wrap, .ledger-scroll{
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+    .card::-webkit-scrollbar, .wrap::-webkit-scrollbar, .ledger-scroll::-webkit-scrollbar{
+      display: none; /* Chrome, Safari, Opera */
+    }
     
     /* Sticky header for Add Wager */
     .sticky-header{position:sticky;top:0;z-index:15;background:var(--bg);padding:8px 0;margin:-8px 0 8px 0}
@@ -56,15 +66,15 @@
     .apply-btn:disabled{opacity:0.5;cursor:not-allowed}
     .cap-reason{font-size:10px;color:var(--warn);font-weight:700}
     h1{font-size:16px;margin:0}
-    .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:6px 10px;border-radius:7px;cursor:pointer;font-size:13px}
+    .btn{background:linear-gradient(180deg,#2a6cff,#1e56d9);border:0;color:#fff;padding:5px 8px;border-radius:7px;cursor:pointer;font-size:12px}
     .btn.secondary{background:#2a2e37}
-    .card{background:var(--card);border:1px solid var(--grid);border-radius:10px;padding:10px;max-width:100%;box-sizing:border-box}
+    .card{background:var(--card);border:1px solid var(--grid);border-radius:10px;padding:6px;max-width:100%;box-sizing:border-box}
     .small{font-size:12px;color:var(--muted)}
     .divider{height:1px;background:var(--grid);margin:6px 0}
 
     input,button,select{font:inherit;min-width:0;max-width:100%}
-    input[type="number"],input[type="text"]{width:100%;padding:7px 5px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease;max-width:100%;min-width:0}
-    input[type="text"].compact{padding:4px 6px;font-size:13px}
+    input[type="number"],input[type="text"]{width:100%;height:32px;padding:5px 6px;border-radius:8px;border:1px solid var(--grid);background:#0f1116;color:var(--ink);outline:none;transition:border-color .15s ease;max-width:100%;min-width:0;font-size:12px}
+    input.compact,select.compact{height:28px;padding:4px 6px;font-size:11px}
     input::placeholder{color:#667085}
     input.right{ text-align:right; font-variant-numeric:tabular-nums; }
     .warn{border-color:var(--warn)!important}
@@ -72,79 +82,104 @@
     input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
     input[type=number]{ appearance:textfield; -moz-appearance:textfield }
 
-    /* Wagers table - default desktop layout (8 columns: Side, Fee, Sportsbook, Odds, Stake, Payout, Profit, Actions) */
-    .rows-head, .row{display:grid;align-items:center;gap:6px}
-    .rows-head{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,105px) minmax(0,150px) minmax(0,150px) minmax(0,150px) 72px}
-    .row{grid-template-columns:minmax(0,56px) minmax(0,75px) minmax(0,100px) minmax(0,105px) minmax(0,150px) minmax(0,150px) minmax(0,150px) 72px;margin:4px 0}
-    .row > *, .rows-head > *, .row-secondary > *, .row-actions > *{min-width:0}
+    /* Wagers table header - grid aligned to row columns */
+    .rows-head{
+      display:grid;
+      grid-template-columns:28px 54px 70px 74px 74px 66px 28px auto;
+      align-items:center;
+      gap:2px;
+      font-size:11px;
+      color:var(--muted);
+      padding:4px 0;
+    }
+    .rows-head > .hdr-side{text-align:center}
+    .rows-head > .hdr-line{text-align:left}
+    .rows-head > .hdr-odds{text-align:center}
+    .rows-head > .hdr-stake{text-align:right}
+    .rows-head > .hdr-payout{text-align:right}
+    .rows-head > .hdr-profit{text-align:right}
+    .rows-head > .hdr-fee{text-align:center}
+    .rows-head > .hdr-actions{text-align:left}
     
-    /* Wagers horizontal scroll (no clipping on narrow screens) */
-    .wagers-xscroll{overflow-x:auto;overflow-y:hidden}
-    .wagers-inner{min-width:900px}
+    /* Wagers - no horizontal scroll needed for narrow optimized layout */
+    .wagers-xscroll{overflow-x:hidden;overflow-y:hidden}
+    .wagers-inner{min-width:0}
     
-    /* Fee column (row-level fee checkbox) */
-    .fee-cell{display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 8px;border:1px solid var(--grid);border-radius:8px;background:#0f1116;color:var(--muted);font-weight:700;font-size:12px;white-space:nowrap}
-    .fee-checkbox{width:14px;height:14px}
-    .fee-badge{display:inline-flex;align-items:center;justify-content:center;padding:1px 6px;border-radius:999px;border:1px solid rgba(108,196,255,0.25);background:rgba(108,196,255,0.08);color:#d9e7ff;font-size:11px;line-height:1.2}
+    /* Legacy fee-cell and fee-checkbox hidden (legacy) */
+    .fee-cell{display:none !important}
+    .fee-checkbox{display:none}
+    .fee-badge{display:none}
     
-    /* Expanded row (Type moved into ⋯) */
-    .more-toggle-btn { display:inline-flex; }
-    .row-secondary { display:none; width:100%; gap:4px; margin-top:4px; padding-top:4px; border-top:1px solid var(--grid); }
-    .row-secondary.expanded { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+    /* Fee Pill Button - ALWAYS visible (the only fee interface) */
+    .fee-pill{min-width:28px;height:20px;padding:2px 4px;border-radius:12px;border:1px solid var(--grid);background:#1a1d24;color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;transition:all 0.15s ease;display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px}
+    .fee-pill:hover{border-color:#3a3e47;background:#22262f}
+    .fee-pill[data-fee="none"]{color:#667085;border-color:var(--grid);background:#1a1d24}
+    .fee-pill[data-fee="px1"]{color:#6cc4ff;border-color:rgba(108,196,255,0.4);background:rgba(108,196,255,0.12)}
+    .fee-pill[data-fee="km"]{color:#69e48a;border-color:rgba(105,228,138,0.4);background:rgba(105,228,138,0.12)}
+    .fee-pill[data-fee="kt"]{color:#e6b25c;border-color:rgba(230,178,92,0.4);background:rgba(230,178,92,0.12)}
+    .fee-pill[data-fee="c"]{color:#c792ea;border-color:rgba(199,146,234,0.4);background:rgba(199,146,234,0.12)}
     
-    /* Compact Mode - Base styles for narrow viewports */
-    body.compact .rows-head{grid-template-columns:minmax(0,40px) minmax(0,88px) minmax(0,92px) minmax(0,92px) minmax(0,84px) 46px;gap:3px}
-    body.compact .row{display:flex;flex-wrap:nowrap;gap:2px;margin:4px 0;align-items:center;max-width:100%;overflow:hidden}
-    body.compact .rows-head > div:nth-child(2),body.compact .rows-head > div:nth-child(3){display:none}
-    body.compact .row > .fee-cell,body.compact .row > .type-select,body.compact .row > .sportsbook{display:none}
-    body.compact .more-toggle-btn{display:inline-flex}
-    body.compact .row-secondary .type-select,body.compact .row-secondary .sportsbook{display:block}
-    body.compact .row-secondary{display:none;width:100%;gap:4px;margin-top:4px;padding-top:4px;border-top:1px solid var(--grid)}
-    body.compact .row-secondary.expanded{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
-    body.compact .row > .side{width:30px;flex:0 0 30px;padding:6px 2px;font-size:11px}
-    body.compact .row > .odds-wrapper{width:72px;flex:0 0 72px}
-    body.compact .row > .odds-wrapper .odds-input{padding:6px 3px;padding-right:19px !important;font-size:10px}
-    body.compact .row > .stake{width:76px;flex:0 0 76px;padding:6px 3px;font-size:10px}
-    body.compact .row > .payout{width:76px;flex:0 0 76px;padding:6px 3px;font-size:10px}
-    body.compact .row > .profit{width:72px;flex:0 0 72px;padding:6px 3px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    body.compact .row > .row-actions{flex:0 0 auto;display:flex;gap:2px}
-    body.compact .sign-toggle{width:18px;height:18px;font-size:10px;right:1px}
-    body.compact .clear-btn,body.compact .delete-btn{font-size:9px;padding:0 4px;height:22px;min-width:20px}
-    body.compact .more-toggle-btn{font-size:9px;padding:0 4px;height:22px;min-width:20px;background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:5px;cursor:pointer}
-    body.compact .more-toggle-btn:hover{background:#2a2e37}
-    body.compact .more-toggle-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
-    body.compact .copy-row-btn{width:22px;height:22px;font-size:10px;min-width:20px;padding:0}
-    body.compact .row-secondary input,body.compact .row-secondary select{padding:6px 7px;font-size:13px;width:100%}
+    /* Row layout - flex, optimized for 360-540px with inline Bet/Line column */
+    .row{display:flex;flex-wrap:nowrap;gap:2px;margin:4px 0;align-items:center;max-width:100%;overflow:hidden}
+    .row > *{min-width:0}
+    /* Hide legacy fee-cell and type-select - keep sportsbook visible as "Line" */
+    .row > .fee-cell,.row > .type-select{display:none}
+    
+    /* Row field sizing - optimized for 360-540px */
+    .row > .side{width:28px;flex:0 0 28px;padding:4px 2px;font-size:11px;min-width:0}
+    .row > .sportsbook{width:54px;flex:0 0 54px;padding:4px 3px;font-size:10px;min-width:0}
+    .row > .odds-wrapper{width:70px;flex:0 0 70px;min-width:0}
+    .row > .odds-wrapper .odds-input{padding:4px 17px 4px 3px;font-size:11px;min-width:0}
+    .row > .stake{width:74px;flex:0 0 74px;padding:4px 3px;font-size:11px;min-width:0}
+    .row > .payout{width:74px;flex:0 0 74px;padding:4px 3px;font-size:11px;min-width:0}
+    .row > .profit{width:66px;flex:0 0 66px;padding:4px 3px;font-size:11px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .row > .row-actions{flex:0 0 auto;display:flex;gap:1px}
+    
+    /* More toggle button - REMOVED (no longer using row-secondary expansion) */
+    .more-toggle-btn{display:none !important}
+    .row-secondary{display:none !important}
+    
     /* Ghost row */
-    .ghost-row{border:2px solid var(--accent);border-radius:8px;padding:8px;background:rgba(108,196,255,.03);margin:8px 0}
+    .ghost-row{border:2px solid var(--accent);border-radius:8px;padding:6px;background:rgba(108,196,255,.03);margin:6px 0}
     .ghost-row input{background:#0e1015;color:var(--accent);border-color:rgba(108,196,255,.2)}
-    body.compact .ghost-row .row{display:grid;grid-template-columns:minmax(0,42px) 0 0 minmax(0,85px) minmax(0,88px) minmax(0,88px) minmax(0,80px) auto;gap:4px;align-items:center}
-    body.compact .ghost-row .row .type-select,body.compact .ghost-row .row .sportsbook{display:none}
+    .ghost-row .row{display:flex;flex-wrap:nowrap;gap:1px;max-width:100%}
+    .ghost-row .row > *{min-width:0}
+    .ghost-row .row .type-select{display:none}
+    .ghost-row .side{width:28px;flex:0 0 28px;padding:4px 2px;font-size:11px}
+    .ghost-row .sportsbook{width:54px;flex:0 0 54px;padding:4px 3px;font-size:10px}
+    .ghost-row .odds-wrapper{width:70px;flex:0 0 70px}
+    .ghost-row .odds-input{padding:4px 17px 4px 3px;font-size:11px}
+    .ghost-row .stake{width:74px;flex:0 0 74px;padding:4px 3px;font-size:11px}
+    .ghost-row .payout{width:74px;flex:0 0 74px;padding:4px 3px;font-size:11px}
+    .ghost-row .profit{width:66px;flex:0 0 66px;padding:4px 3px;font-size:11px}
+    .ghost-row .commit,.ghost-row .dismiss{width:24px;height:26px;font-size:11px;min-width:24px}
     
     /* Format toggle for ghost row */
-    .format-toggle{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:4px;background:rgba(108,196,255,.05);border-radius:6px}
+    .format-toggle{display:flex;align-items:center;gap:4px;margin-bottom:6px;padding:3px;background:rgba(108,196,255,.05);border-radius:6px}
     .format-buttons{display:flex;gap:2px}
-    .format-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer}
+    .format-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:4px;padding:2px 5px;font-size:9px;cursor:pointer;min-width:32px}
     .format-btn.active{background:#6cc4ff;border-color:#6cc4ff;color:#fff}
-    .format-readout{font-size:10px;color:#a7abb4;opacity:0.8}
+    .format-readout{font-size:9px;color:#a7abb4;opacity:0.8}
     
     .commit{background:#6cc4ff;border:1px solid #6cc4ff;color:#fff;border-radius:8px;cursor:pointer;height:32px;font-weight:bold;font-size:16px}
-    .clear-btn,.delete-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;height:28px;padding:0 8px;font-size:11px}
+    .clear-btn,.delete-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;height:26px;padding:0;font-size:9px;width:13px;min-width:13px;display:inline-flex;align-items:center;justify-content:center}
     .delete-btn{background:#ff7d7d;border-color:#ff7d7d;color:#fff}
     .delete-btn:hover{background:#ff6060}
     .clear-btn:hover{background:#2a2e37}
-    .row-actions{display:flex;gap:3px;justify-content:center;align-items:center}
+    .row-actions{display:flex;gap:1px;justify-content:center;align-items:center}
+    .copy-row-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;width:13px;height:26px;min-width:13px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;padding:0}
+    .copy-row-btn:hover{background:#2a2e37;border-color:var(--accent);color:var(--accent)}
 
-    .profit{ text-align:right; font-variant-numeric:tabular-nums; padding:7px 9px; border:1px solid var(--grid); border-radius:8px; background:#0f1116 }
-    .profit.pos{ color:var(--good) }
-    .profit.neg{ color:var(--bad) }
+    .profit{text-align:right;font-variant-numeric:tabular-nums;padding:4px 3px;border:1px solid var(--grid);border-radius:8px;background:#0f1116}
+    .profit.pos{color:var(--good)}
+    .profit.neg{color:var(--bad)}
 
     /* Odds field with sign toggle */
     .odds-wrapper{position:relative;display:flex;align-items:center;min-height:32px}
-    .sign-toggle{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:20px;height:20px;border:1px solid #2a2e37;border-radius:3px;background:#20242f;color:#c7d0e0;cursor:pointer;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10}
+    .sign-toggle{position:absolute;right:1px;top:50%;transform:translateY(-50%);width:15px;height:15px;border:1px solid #2a2e37;border-radius:3px;background:#20242f;color:#c7d0e0;cursor:pointer;font-size:8px;font-weight:bold;display:flex;align-items:center;justify-content:center;z-index:10}
     .sign-toggle[data-sign="-"]{background:#ff7d7d;border-color:#ff7d7d;color:#fff}
-    .odds-input{padding-right:24px !important}
-    .error-text{position:absolute;top:calc(100% + 2px);left:0;right:24px;font-size:10px;color:var(--bad);padding:3px 6px;background:rgba(255,125,125,0.1);border:1px solid rgba(255,125,125,0.2);border-radius:4px;display:none;z-index:20;white-space:normal;line-height:1.3}
+    .odds-input{padding-right:17px !important}
+    .error-text{position:absolute;top:calc(100% + 2px);left:0;right:17px;font-size:10px;color:var(--bad);padding:3px 6px;background:rgba(255,125,125,0.1);border:1px solid rgba(255,125,125,0.2);border-radius:4px;display:none;z-index:20;white-space:normal;line-height:1.3}
     .error-text.show{display:block}
     .row:has(.error-text.show){margin-bottom:24px}
     .ghost-row .error-text{position:absolute;top:calc(100% + 2px)}
@@ -160,17 +195,6 @@
     .net-result{margin-top:6px;padding-top:6px;border-top:1px solid var(--grid)}
     .net-value{font-size:14px;font-weight:bold}
 
-    /* Tablet: 600–899px */
-    @media (max-width: 899px){
-      .wrap{grid-template-columns:minmax(0,1fr)}
-      .rows-head,.row{grid-template-columns:minmax(32px,42px) minmax(60px,80px) minmax(68px,90px) minmax(80px,105px) minmax(90px,140px) minmax(90px,140px) minmax(90px,140px) 60px}
-      .clear-btn,.delete-btn{font-size:10px;padding:0 5px;height:22px;min-width:20px}
-      .copy-row-btn{width:22px;height:22px;font-size:10px;min-width:20px;padding:0}
-      .sign-toggle{width:18px;height:18px;font-size:10px;right:1px}
-      .odds-input{padding-right:20px !important}
-      .error-text{right:20px}
-    }
-
     /* Lines / scenarios */
     .field-row{display:grid;grid-template-columns:70px 1fr;gap:6px;align-items:center;margin:3px 0}
     .field-row label{color:var(--muted);font-size:11px}
@@ -182,7 +206,7 @@
     .kcard h3{margin:0 0 4px;font-size:12px;color:var(--muted)}
     .krow{display:flex;justify-content:space-between;align-items:center;margin:2px 0;font-size:12px}
     .val{font-variant-numeric:tabular-nums}
-    .copy,.add{ width:22px; height:22px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:5px; background:#20242f; border:1px solid #2a2e37; color:#c7d0e0; cursor:pointer; font-size:11px; line-height:1 }
+    .copy,.add{width:22px;height:22px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;cursor:pointer;font-size:11px;line-height:1}
     
     /* Type selector for per-row Kalshi/Normal */
     .type-select{
@@ -198,14 +222,13 @@
     .type-select option{background:#0f1116;color:var(--ink)}
     
     /* Settings and controls */
-    .settings-bar{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:6px;font-size:12px}
+    .settings-bar{display:flex;align-items:center;gap:6px;padding:5px 6px;background:var(--card);border:1px solid var(--grid);border-radius:8px;margin-bottom:6px;font-size:12px;flex-wrap:wrap}
     .settings-bar > *{min-width:0}
     .tooltip{position:relative;cursor:help}
     .tooltip:hover::after{content:attr(data-tooltip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);padding:6px 8px;background:#000;color:#fff;font-size:11px;white-space:normal;max-width:250px;border-radius:4px;margin-bottom:4px;z-index:100}
     
-    
-    /* Session Summary Strip */
-    .session-summary{background:linear-gradient(135deg,#1a1d25 0%,#15171c 100%);border:1px solid var(--grid);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+    /* Session Summary Strip - HIDDEN (use condensed totals) */
+    .session-summary{display:none}
     .summary-item{display:flex;flex-direction:column;gap:2px}
     .summary-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
     .summary-value{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
@@ -219,17 +242,14 @@
     .tooltip-formula{font-family:monospace;font-size:11px;background:rgba(108,196,255,0.08);padding:6px;border-radius:4px;margin:4px 0;color:var(--ink);line-height:1.4}
     .tooltip-note{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3}
     
-    /* Copy row button */
-    .copy-row-btn{background:#20242f;border:1px solid #2a2e37;color:#c7d0e0;border-radius:6px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px}
-    .copy-row-btn:hover{background:#2a2e37;border-color:var(--accent);color:var(--accent)}
     /* Custom fee inputs */
     .custom-fees{grid-column:1/-1;margin-top:4px;padding:6px 8px;background:rgba(167,171,180,0.05);border-radius:6px;border:1px solid var(--grid)}
     .custom-fee-inputs{display:flex;gap:12px;align-items:center;font-size:11px;color:var(--muted)}
     .custom-fee-inputs label{display:flex;align-items:center;gap:4px}
     .custom-fee-inputs input{width:60px;padding:3px 5px;font-size:11px;background:#0f1116;color:var(--ink);border:1px solid var(--grid);border-radius:4px}
     
-    /* Condensed Totals Card */
-    .condensed-totals{display:none}
+    /* Condensed Totals Card - ALWAYS visible */
+    .condensed-totals{display:block}
     .condensed-totals-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
     .condensed-metric{display:flex;flex-direction:column;gap:2px}
     .condensed-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
@@ -243,45 +263,29 @@
     #helperDetails[open] .helper-toggle-indicator{transform:rotate(180deg)}
     .helper-toggle-indicator{transition:transform 0.2s}
     
-    /* Consolidated Compact Mode - Single @media (max-width: 480px) block */
-    @media (max-width: 480px){
-      body.compact .wrap{gap:6px;padding:0 6px;margin:10px auto;max-width:100%}
-      body.compact .settings-bar{padding:5px 6px;gap:6px;margin-bottom:6px;flex-wrap:wrap}
-      body.compact .card{padding:6px;max-width:100%}
-      body.compact header{margin-bottom:6px;flex-wrap:wrap;gap:6px}
-      body.compact h1{font-size:16px}
-      body.compact .btn{padding:5px 8px;font-size:12px}
-      body.compact input[type="number"],body.compact input[type="text"]{height:32px;padding:5px 6px;font-size:12px;min-width:0}
-      body.compact .condensed-totals{display:block}
-      body.compact .session-summary{display:none}
-      /* Row field sizing - fluid for 360-480px */
-      body.compact .row > .side{width:28px;flex:0 0 28px;padding:4px 2px;font-size:11px;min-width:0}
-      body.compact .row > .odds-wrapper{width:68px;flex:0 0 68px;min-width:0}
-      body.compact .row > .odds-wrapper .odds-input{padding:4px 17px 4px 3px;font-size:11px;min-width:0}
-      body.compact .row > .stake{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px;min-width:0}
-      body.compact .row > .payout{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px;min-width:0}
-      body.compact .row > .profit{width:62px;flex:0 0 62px;padding:4px 3px;font-size:11px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      body.compact .row-actions{gap:1px;flex:0 0 auto}
-      body.compact .row{gap:1px;max-width:100%}
-      body.compact .rows-head{gap:1px}
-      body.compact .sign-toggle{width:15px;height:15px;font-size:8px;right:1px}
-      body.compact .more-toggle-btn,body.compact .clear-btn,body.compact .delete-btn,body.compact .copy-row-btn{width:13px;height:26px;min-width:13px;min-height:26px;padding:0;font-size:9px;display:inline-flex;align-items:center;justify-content:center}
-      body.compact .row-secondary{gap:2px;margin-top:2px;padding-top:2px}
-      body.compact .row-secondary input,body.compact .row-secondary select{padding:4px 5px;font-size:11px}
-      /* Ghost row */
-      body.compact .ghost-row{padding:6px;margin:6px 0}
-      body.compact .ghost-row .row{display:flex;flex-wrap:nowrap;gap:1px;max-width:100%}
-      body.compact .ghost-row .row > *{min-width:0}
-      body.compact .ghost-row .side{width:28px;flex:0 0 28px;padding:4px 2px;font-size:11px}
-      body.compact .ghost-row .odds-wrapper{width:68px;flex:0 0 68px}
-      body.compact .ghost-row .odds-input{padding:4px 17px 4px 3px;font-size:11px}
-      body.compact .ghost-row .stake{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px}
-      body.compact .ghost-row .payout{width:72px;flex:0 0 72px;padding:4px 3px;font-size:11px}
-      body.compact .ghost-row .profit{width:62px;flex:0 0 62px;padding:4px 3px;font-size:11px}
-      body.compact .ghost-row .commit,body.compact .ghost-row .dismiss{width:24px;height:26px;font-size:11px;min-width:24px}
-      body.compact .format-toggle{gap:4px;padding:3px;margin-bottom:6px}
-      body.compact .format-btn{padding:2px 5px;font-size:9px;min-width:32px}
-      body.compact .format-readout{font-size:9px}
+    /* Fine-tuning for narrowest screens (360px) */
+    @media (max-width: 400px){
+      .wrap{padding:0 4px}
+      .row > .side{width:26px;flex:0 0 26px}
+      .row > .sportsbook{width:50px;flex:0 0 50px}
+      .row > .odds-wrapper{width:66px;flex:0 0 66px}
+      .row > .stake{width:70px;flex:0 0 70px}
+      .row > .payout{width:70px;flex:0 0 70px}
+      .row > .profit{width:60px;flex:0 0 60px}
+      .fee-pill{min-width:26px;flex:0 0 26px}
+      .rows-head > .hdr-side{width:26px;flex:0 0 26px}
+      .rows-head > .hdr-line{width:50px;flex:0 0 50px}
+      .rows-head > .hdr-odds{width:66px;flex:0 0 66px}
+      .rows-head > .hdr-stake{width:70px;flex:0 0 70px}
+      .rows-head > .hdr-payout{width:70px;flex:0 0 70px}
+      .rows-head > .hdr-profit{width:60px;flex:0 0 60px}
+      .rows-head > .hdr-fee{width:26px;flex:0 0 26px}
+      .ghost-row .side{width:26px;flex:0 0 26px}
+      .ghost-row .sportsbook{width:50px;flex:0 0 50px}
+      .ghost-row .odds-wrapper{width:66px;flex:0 0 66px}
+      .ghost-row .stake{width:70px;flex:0 0 70px}
+      .ghost-row .payout{width:70px;flex:0 0 70px}
+      .ghost-row .profit{width:60px;flex:0 0 60px}
     }
   </style>
 </head>
@@ -312,14 +316,14 @@
         <div class="wagers-xscroll">
           <div class="wagers-inner">
             <div class="rows-head small">
-              <div>Side</div>
-              <div>Fee</div>
-              <div>Sportsbook</div>
-              <div class="tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
-              <div>Stake</div>
-              <div>Payout</div>
-              <div>Profit</div>
-              <div></div>
+              <div class="hdr-side">Side</div>
+              <div class="hdr-line">Line</div>
+              <div class="hdr-odds tooltip" data-tooltip="American odds can include decimals, e.g., +104.3.">Odds</div>
+              <div class="hdr-stake">Stake</div>
+              <div class="hdr-payout">Payout</div>
+              <div class="hdr-profit">Profit</div>
+              <div class="hdr-fee">Fee</div>
+              <div class="hdr-actions"></div>
             </div>
             <div class="ledger-scroll">
               <div id="rows"></div>
@@ -595,11 +599,7 @@
   <template id="rowT">
     <div class="row" data-row>
       <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
-      <label class="fee-cell" title="Row-level fee: 1% on profit only (winnings), not stake">
-        <input class="fee-checkbox" type="checkbox" aria-label="Apply 1% fee on profit for this row">
-        <span class="fee-badge">1%</span>
-      </label>
-      <input class="sportsbook compact" type="text" placeholder="Book" title="Sportsbook (PX! = 1% fee, PX = 0%)" aria-label="Sportsbook">
+      <input class="sportsbook compact" type="text" placeholder="Line" title="Sportsbook or line name" aria-label="Bet/Line">
       <div class="odds-wrapper">
         <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off" aria-label="Odds">
         <button class="sign-toggle" data-sign="+" aria-label="Toggle odds sign">+</button>
@@ -608,26 +608,21 @@
       <input class="stake right" type="number" step="0.01" placeholder="0.00" aria-label="Stake amount">
       <input class="payout right" type="number" step="0.01" placeholder="auto" aria-label="Payout amount">
       <div class="profit" aria-label="Profit">$0.00</div>
+      <button class="fee-pill" data-fee="none" title="Cycle fee type: — / PX1 / KM / KT / C" aria-label="Fee type toggle">—</button>
       <div class="row-actions">
-        <button class="more-toggle-btn" title="Show/hide additional fields (Type, Sportsbook)" aria-label="Show more fields" aria-expanded="false">⋯</button>
         <button class="copy-row-btn" title="Copy row" aria-label="Copy row">⧉</button>
         <button class="clear-btn" title="Clear stake (keep book/odds)" aria-label="Clear stake">C</button>
         <button class="delete-btn" title="Delete row" aria-label="Delete row">×</button>
       </div>
-      <div class="row-secondary" aria-hidden="true">
-        <div>
-          <label class="small" style="display:block;margin-bottom:2px;color:var(--muted)">Type</label>
-          <select class="type-select" title="Row type: Normal uses standard odds, Kalshi uses Kalshi fees, Custom allows setting fees" aria-label="Row type">
-            <option value="normal">Normal</option>
-            <option value="kalshi">Kalshi</option>
-            <option value="custom">Custom...</option>
-          </select>
-        </div>
-        <div>
-          <label class="small" style="display:block;margin-bottom:2px;color:var(--muted)">Sportsbook</label>
-          <!-- Sportsbook input is actually at index 2 in the row, will be moved here via JS -->
-        </div>
-      </div>
+      <label class="fee-cell" title="Row-level fee: 1% on profit only (winnings), not stake" style="display:none">
+        <input class="fee-checkbox" type="checkbox" aria-label="Apply 1% fee on profit for this row">
+        <span class="fee-badge">1%</span>
+      </label>
+      <select class="type-select" title="Row type: Normal uses standard odds, Kalshi uses Kalshi fees" aria-label="Row type" style="display:none">
+        <option value="normal">Normal</option>
+        <option value="kalshi">Kalshi</option>
+        <option value="custom">Custom...</option>
+      </select>
       <div class="custom-fees" style="display:none;">
         <div class="custom-fee-inputs">
           <label>Open %: <input class="open-fee-pct" type="number" step="0.01" min="0" max="100" placeholder="0.00" title="Fee % on stake at open"></label>
@@ -650,11 +645,7 @@
       </div>
       <div class="row">
         <input class="side right" type="text" inputmode="numeric" maxlength="1" placeholder="1/2" aria-label="Side (1 or 2)">
-        <label class="fee-cell" title="Row-level fee: 1% on profit only (winnings), not stake">
-          <input class="fee-checkbox" type="checkbox" aria-label="Apply 1% fee on profit for this row">
-          <span class="fee-badge">1%</span>
-        </label>
-        <input class="sportsbook compact" type="text" placeholder="Book" readonly aria-label="Sportsbook">
+        <input class="sportsbook compact" type="text" placeholder="Line" readonly aria-label="Bet/Line">
         <div class="odds-wrapper">
           <input class="odds odds-input right" type="text" inputmode="decimal" placeholder="" autocomplete="off" aria-label="Odds">
           <button class="sign-toggle" data-sign="+" aria-label="Toggle odds sign">+</button>
@@ -663,25 +654,31 @@
         <input class="stake right" type="number" step="0.01" placeholder="0.00" readonly aria-label="Stake amount">
         <input class="payout right" type="number" step="0.01" placeholder="auto" readonly aria-label="Payout amount">
         <div class="profit" aria-label="Profit">$0.00</div>
+        <button class="fee-pill" data-fee="none" title="Cycle fee type: — / PX1 / KM / KT / C" aria-label="Fee type toggle">—</button>
         <div style="display:flex;gap:2px">
           <button class="commit" title="Commit to wagers" aria-label="Commit wager">✓</button>
           <button class="dismiss" title="Dismiss" aria-label="Dismiss" style="width:18px;height:18px;padding:0;background:#ff7d7d;border:1px solid#ff7d7d;color:#fff;border-radius:4px;cursor:pointer;font-size:10px">✕</button>
         </div>
+        <label class="fee-cell" title="Row-level fee: 1% on profit only (winnings), not stake" style="display:none">
+          <input class="fee-checkbox" type="checkbox" aria-label="Apply 1% fee on profit for this row">
+          <span class="fee-badge">1%</span>
+        </label>
+        <select class="type-select" style="display:none">
+          <option value="normal">Normal</option>
+        </select>
       </div>
       <div class="ghost-meta"></div>
     </div>
   </template>
 
   <script>
-  // Apply compact mode from localStorage BEFORE everything else
   (function(){
-    const uiMode = localStorage.getItem('uiMode');
-    if (uiMode === 'compact') {
-      document.body.classList.add('compact');
-    }
-  })();
-  
-  (function(){
+    // Build marker for cache-busting verification
+    console.log("build", "v2.5.2", Date.now());
+    
+    // Debug instrumentation flag
+    const DEBUG = false;
+    
     // Application state (removed kalshiMode - now per-row)
     let historyStack = [];
     let historyIndex = -1;
@@ -1016,7 +1013,79 @@
       if (!isFinite(x)) return '$0.00';
       return (x >= 0 ? '+' : '-') + '$' + Math.abs(x).toFixed(2);
     }
+
+    // Fee Pill cycle toggle: — (none) → PX1 (blue) → KM (green) → KT (orange) → C (purple)
+    // Universal Fee Pill: dataset.feeMode is the SINGLE source of truth
+    const FEE_MODES = {
+      none: { label: '—', openPct: 0, winPct: 0, isKalshi: false },
+      px1:  { label: 'PX1', openPct: 0, winPct: 1, isKalshi: false },  // ProphetX: 1% on winnings
+      km:   { label: 'KM', openPct: 1, winPct: 2, isKalshi: true },    // Kalshi Maker: 1% open + 2% settle
+      kt:   { label: 'KT', openPct: 1, winPct: 2, isKalshi: true },    // Kalshi Taker: 1% open + 2% settle
+      c:    { label: 'C', openPct: 0, winPct: 0, isKalshi: false }     // Custom (placeholder)
+    };
+    const FEE_MODE_ORDER = ['none', 'px1', 'km', 'kt', 'c'];
     
+    function cycleFee(btn) {
+      if (DEBUG) console.log('[cycleFee] clicked, current fee:', btn.dataset.fee);
+      
+      const current = btn.dataset.fee || 'none';
+      const idx = FEE_MODE_ORDER.indexOf(current);
+      const nextKey = FEE_MODE_ORDER[(idx + 1) % FEE_MODE_ORDER.length];
+      const next = FEE_MODES[nextKey];
+      
+      // Update button state
+      btn.dataset.fee = nextKey;
+      btn.textContent = next.label;
+      
+      if (DEBUG) console.log('[cycleFee] new fee:', nextKey, next.label);
+      
+      // Try to find [data-row] (normal rows)
+      let row = btn.closest('[data-row]');
+      if (DEBUG) console.log('[cycleFee] found [data-row]:', !!row);
+      
+      if (!row) {
+        // Ghost row: check if we're in .ghost-row
+        const ghostRow = btn.closest('.ghost-row');
+        if (ghostRow) {
+          if (DEBUG) console.log('[cycleFee] in ghost row, updating ghost display');
+          // Update ghost display immediately
+          if (typeof updateGhostDisplay === 'function') {
+            updateGhostDisplay();
+          }
+          return;
+        } else {
+          if (DEBUG) console.log('[cycleFee] ERROR: no [data-row] and no .ghost-row found');
+          return;
+        }
+      }
+      
+      // Normal row: sync and recalc
+      row.dataset.feeMode = nextKey;
+      
+      if (DEBUG) console.log('[cycleFee] synced row.dataset.feeMode, triggering recalc');
+      if (typeof recalcDebounced === 'function') recalcDebounced();
+      if (typeof debouncedSave === 'function') debouncedSave();
+    }
+    
+    // Helper to get fee config from mode key
+    function getFeeConfig(feeMode) {
+      return FEE_MODES[feeMode] || FEE_MODES.none;
+    }
+    
+    // Helper: Convert feeMode key to Pill label for CSV export
+    function feeModeToLabel(feeMode) {
+      const config = FEE_MODES[feeMode];
+      return config ? config.label : '—';
+    }
+    
+    // Helper: Convert Pill label to feeMode key for CSV import
+    function labelToFeeMode(label) {
+      const trimmed = (label || '').trim();
+      // Map label back to internal key
+      const labelMap = { '—': 'none', 'PX1': 'px1', 'KM': 'km', 'KT': 'kt', 'C': 'c' };
+      return labelMap[trimmed] || 'none';
+    }
+
     // Convert decimal odds to American odds
     function decimalToAmerican(decimal) {
       if (!isFinite(decimal) || decimal <= 1) return 0;
@@ -1334,8 +1403,9 @@
       const side = el.querySelector('.side');
       const typeSelect = el.querySelector('.type-select');
       const sportsbook = el.querySelector('.sportsbook');
-      const feeCell = el.querySelector('.fee-cell');
-      const feeCheckbox = el.querySelector('.fee-checkbox');
+      const feePill = el.querySelector('.fee-pill');  // Universal Fee Pill
+      const feeCell = el.querySelector('.fee-cell');  // Legacy (hidden)
+      const feeCheckbox = el.querySelector('.fee-checkbox');  // Legacy (hidden)
       const oddsInput = el.querySelector('.odds');
       const stake = el.querySelector('.stake');
       const payout = el.querySelector('.payout');
@@ -1351,6 +1421,11 @@
       const openFeePct = el.querySelector('.open-fee-pct');
       const winFeePct = el.querySelector('.win-fee-pct');
       const rowEl = el; // Store reference to row element
+      
+      // Initialize row.dataset.feeMode from fee-pill if not set
+      if (!el.dataset.feeMode && feePill) {
+        el.dataset.feeMode = feePill.dataset.fee || 'none';
+      }
 
       // Sign toggle interaction
       if(signToggle) {
@@ -1517,7 +1592,7 @@
         });
       }
       
-      // Copy row button - v2.4
+      // Copy row button - v2.5
       if(copyBtn && !isGhost) {
         copyBtn.addEventListener('click', () => {
           // Create a new row with the same values
@@ -1528,6 +1603,7 @@
           const newSide = newRowEl.querySelector('.side');
           const newTypeSelect = newRowEl.querySelector('.type-select');
           const newSportsbook = newRowEl.querySelector('.sportsbook');
+          const newFeePill = newRowEl.querySelector('.fee-pill');
           const newOdds = newRowEl.querySelector('.odds');
           const newStake = newRowEl.querySelector('.stake');
           const newPayout = newRowEl.querySelector('.payout');
@@ -1540,6 +1616,14 @@
           if(stake && newStake) newStake.value = stake.value;
           if(payout && newPayout) newPayout.value = payout.value;
           if(signToggle && newSignToggle) newSignToggle.dataset.sign = signToggle.dataset.sign;
+          
+          // Copy Universal Fee Pill state
+          const srcFeeMode = el.dataset.feeMode || (feePill ? feePill.dataset.fee : 'none') || 'none';
+          newRowEl.dataset.feeMode = srcFeeMode;
+          if(newFeePill) {
+            newFeePill.dataset.fee = srcFeeMode;
+            newFeePill.textContent = getFeeConfig(srcFeeMode).label;
+          }
           
           recalc();
           saveCurrentState();
@@ -1629,54 +1713,7 @@
         });
       }
       
-      // More toggle button (compact mode only)
-      const moreToggleBtn = el.querySelector('.more-toggle-btn');
-      const rowSecondary = el.querySelector('.row-secondary');
-      if(moreToggleBtn && rowSecondary && !isGhost) {
-        // Setup initial compact mode state
-        const isCompact = document.body.classList.contains('compact');
-        if(isCompact) {
-          // Move Type and Sportsbook into secondary container
-          const typeContainer = rowSecondary.children[0];
-          const sportsbookContainer = rowSecondary.children[1];
-          // Type select is already in secondary by template; keep it there.
-          if(sportsbook && sportsbookContainer && !sportsbookContainer.querySelector('.sportsbook')) {
-            sportsbookContainer.appendChild(sportsbook);
-          }
-          // Move fee control into the Type container for compact mode
-          if(feeCell && typeContainer && !typeContainer.querySelector('.fee-cell')) {
-            typeContainer.appendChild(feeCell);
-          }
-          
-          // Set initial accessibility attributes
-          typeSelect.setAttribute('tabindex', '-1');
-          typeSelect.setAttribute('aria-hidden', 'true');
-          sportsbook.setAttribute('tabindex', '-1');
-          sportsbook.setAttribute('aria-hidden', 'true');
-        }
-        
-        moreToggleBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const isExpanded = rowSecondary.classList.toggle('expanded');
-          moreToggleBtn.classList.toggle('active', isExpanded);
-          moreToggleBtn.setAttribute('aria-expanded', isExpanded);
-          moreToggleBtn.setAttribute('aria-label', isExpanded ? 'Hide additional fields' : 'Show more fields');
-          rowSecondary.setAttribute('aria-hidden', !isExpanded);
-          
-          // Update accessibility
-          if(isExpanded) {
-            typeSelect.removeAttribute('tabindex');
-            typeSelect.removeAttribute('aria-hidden');
-            sportsbook.removeAttribute('tabindex');
-            sportsbook.removeAttribute('aria-hidden');
-          } else {
-            typeSelect.setAttribute('tabindex', '-1');
-            typeSelect.setAttribute('aria-hidden', 'true');
-            sportsbook.setAttribute('tabindex', '-1');
-            sportsbook.setAttribute('aria-hidden', 'true');
-          }
-        });
-      }
+      // Row-secondary expand UX removed - all fields now inline
       
       // Fee checkbox changes recalc (row-level fee multiplier)
       if(feeCheckbox) {
@@ -1686,8 +1723,8 @@
         });
       }
 
-      // Store refs
-      el._refs = {side, typeSelect, sportsbook, feeCheckbox, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn, openFeePct, winFeePct};
+      // Store refs (feePill is the Universal Fee interface)
+      el._refs = {side, typeSelect, sportsbook, feePill, feeCheckbox, odds: oddsInput, stake, payout, profit, signToggle, clearBtn, deleteBtn, openFeePct, winFeePct};
     }
 
     // Add regular row
@@ -1703,6 +1740,7 @@
     let currentGhost = null;
 
     function createGhostRow() {
+      if (DEBUG) console.log('[createGhostRow] called, currentGhost exists:', !!currentGhost);
       if(currentGhost) return currentGhost;
       
       const el = ghostT.content.cloneNode(true).firstElementChild;
@@ -1731,6 +1769,9 @@
       }
       
       ghostContainer.appendChild(el);
+      if (DEBUG) {
+        console.log('[createGhostRow] appended, ghostContainer.children.length:', ghostContainer.children.length);
+      }
       updateGhostDisplay();
       return el;
     }
@@ -1774,14 +1815,33 @@
       // Update stake (keep internal precision, round only for display)
       stakeInput.value = ghostState.stake > 0 ? ghostState.stake.toFixed(2) : '';
       
-      // Calculate and show profit for ghost row
+      // Calculate and show profit for ghost row using Universal Fee Pill
       if(ghostState.american !== null && ghostState.stake > 0) {
         const p = pPerDollar(ghostState.american);
         if(p !== null) {
-          const feeCheckbox = rowEl.querySelector('.fee-checkbox');
-          const feeMult = feeCheckbox && feeCheckbox.checked ? 0.99 : 1.0;
+          // Get fee mode from ghost row's fee-pill
+          const ghostFeePill = rowEl.querySelector('.fee-pill');
+          const feeMode = ghostFeePill ? ghostFeePill.dataset.fee || 'none' : 'none';
+          const feeConfig = getFeeConfig(feeMode);
+          
           const rawProfit = ghostState.stake * p;
-          const profit = rawProfit > 0 ? rawProfit * feeMult : rawProfit;
+          let profit = rawProfit;
+          
+          // Apply fee based on mode
+          if(feeMode === 'px1') {
+            // PX1: 1% on winnings
+            profit = rawProfit > 0 ? rawProfit * 0.99 : rawProfit;
+          } else if(feeConfig.isKalshi) {
+            // KM/KT: Kalshi fees (1% open + 2% settle)
+            const price = ghostState.american >= 100 ? 100/(ghostState.american+100) : Math.abs(ghostState.american)/(Math.abs(ghostState.american)+100);
+            const N = Math.floor(ghostState.stake / price);
+            const cost = r2(N * price);
+            const openFee = r2(cost * 0.01);
+            const settleFee = r2(N * 0.02);
+            profit = r2(N - settleFee - cost - openFee);
+          }
+          // 'none' and 'c' have no fees applied
+          
           profitEl.textContent = money(profit);
           profitEl.title = money(profit); // Add tooltip with full precision
           profitEl.classList.toggle('pos', profit >= 0);
@@ -1921,11 +1981,19 @@
       
       newRow._refs.stake.value = ghostState.stake.toFixed(2);  // Use precise stake value
       
-      // Copy row-level fee checkbox state from ghost preview
+      // GHOST ROW SYNC: Copy fee-pill state from ghost to new row
       try {
-        const ghostFee = currentGhost.querySelector('.fee-checkbox');
-        if(ghostFee && newRow._refs.feeCheckbox) {
-          newRow._refs.feeCheckbox.checked = ghostFee.checked;
+        const ghostFeePill = currentGhost.querySelector('.fee-pill');
+        if(ghostFeePill && newRow._refs.feePill) {
+          const feeMode = ghostFeePill.dataset.fee || 'none';
+          const feeConfig = getFeeConfig(feeMode);
+          
+          // Sync fee-pill button state
+          newRow._refs.feePill.dataset.fee = feeMode;
+          newRow._refs.feePill.textContent = feeConfig.label;
+          
+          // Sync row.dataset.feeMode (single source of truth)
+          newRow.dataset.feeMode = feeMode;
         }
       } catch(e) {}
       
@@ -1952,15 +2020,25 @@
     function readRows() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach((el, idx) => {
-        const {side, typeSelect, sportsbook, feeCheckbox, odds, stake, payout, profit, signToggle, openFeePct, winFeePct} = el._refs;
+        // DEFENSIVE: Check if el._refs exists before using it
+        if (!el._refs) {
+          if (DEBUG) {
+            console.log('[readRows] ERROR: row', idx, 'missing _refs, el.outerHTML:', el.outerHTML.slice(0, 150));
+          }
+          return; // Skip this row, don't throw
+        }
+        
+        const {side, typeSelect, sportsbook, odds, stake, payout, profit, signToggle, feePill} = el._refs;
         const s = side.value === '2' ? 2 : 1;
         const signValue = signToggle ? signToggle.dataset.sign : "+";
-        const rowType = typeSelect ? typeSelect.value : 'normal';
-        const feeMult = feeCheckbox && feeCheckbox.checked ? 0.99 : 1.0;
+        
+        // UNIVERSAL FEE PILL: Read fee mode from row.dataset.feeMode (single source of truth)
+        const feeMode = el.dataset.feeMode || (feePill ? feePill.dataset.fee : 'none') || 'none';
+        const feeConfig = getFeeConfig(feeMode);
         
         // Check if user manually entered odds
         const userEnteredOdds = odds.value.trim() !== '' && odds.style.opacity !== '0.7';
-        const {american: od, isKalshi} = userEnteredOdds ? parseOddsWithKalshi(odds.value, signValue) : {american: null, isKalshi: false};
+        const {american: od, isKalshi: parsedAsKalshi} = userEnteredOdds ? parseOddsWithKalshi(odds.value, signValue) : {american: null, isKalshi: false};
         
         const st = stake.value !== '' ? Number(stake.value) : 0;
         const po = payout.value !== '' ? Number(payout.value) : null;
@@ -1969,37 +2047,35 @@
         let effectiveOdds = od; // Store the effective odds (either entered or calculated)
         
         if(od !== null && st > 0) {
-          // Odds and stake entered - calculate profit using unified fee adapters
+          // Odds and stake entered - calculate profit using Universal Fee Pill
           const p = pPerDollar(od);
           if(p !== null) {
             const profitBeforeFees = st * p;
-            const profitAfterRowFee = profitBeforeFees > 0 ? r2(profitBeforeFees * feeMult) : profitBeforeFees;
             
-            // Determine which fee adapter to use based on row type
-            let feeResult;
-            
-            if(rowType === 'kalshi' && isKalshi) {
-              // Kalshi contract (using YES contract logic)
+            // Apply fee based on feeMode (Universal Fee Pill)
+            if(feeConfig.isKalshi && (feeMode === 'km' || feeMode === 'kt')) {
+              // Kalshi Maker/Taker: 1% open fee + 2% settle fee on contracts
               const price = od >= 100 ? 100/(od+100) : Math.abs(od)/(Math.abs(od)+100);
-              // Use inline Kalshi calculation (matching the unified adapter)
               const N = Math.floor(st / price);
               const cost = r2(N * price);
-              const openFee = r2(cost * 0.01);
-              const settleFee = r2(N * 0.02);
+              const openFee = r2(cost * 0.01);      // 1% on cost
+              const settleFee = r2(N * 0.02);       // 2% on gross payout ($1 per contract)
               const netPayout = r2(N - settleFee);
               pf = r2(netPayout - (cost + openFee));
               pay = netPayout;
-            } else if(rowType === 'custom') {
-              // Custom fees
-              const openPct = openFeePct && openFeePct.value ? Number(openFeePct.value) / 100 : 0;
-              const winPct = winFeePct && winFeePct.value ? Number(winFeePct.value) / 100 : 0;
-              const openFee = r2(st * openPct);
-              const winFee = profitAfterRowFee > 0 ? r2(profitAfterRowFee * winPct) : 0;
-              pf = r2(profitAfterRowFee - openFee - winFee);
+            } else if(feeMode === 'px1') {
+              // ProphetX: 1% fee on winnings only
+              const winFee = profitBeforeFees > 0 ? r2(profitBeforeFees * 0.01) : 0;
+              pf = r2(profitBeforeFees - winFee);
+              pay = r2(st + pf);
+            } else if(feeMode === 'c') {
+              // Custom: placeholder for future custom fee logic
+              // For now, treat as no fees (user can expand for custom inputs)
+              pf = r2(profitBeforeFees);
               pay = r2(st + pf);
             } else {
-              // Normal rows: optional 1% fee on profit (manual checkbox)
-              pf = profitAfterRowFee;
+              // None: no fees applied
+              pf = r2(profitBeforeFees);
               pay = r2(st + pf);
             }
           }
@@ -2063,7 +2139,7 @@
           stake: st, 
           profit: pf, 
           payout: pay, 
-          isKalshi
+          isKalshi: parsedAsKalshi
         });
       });
       return rows;
@@ -2137,6 +2213,7 @@
     // Main recalc function
     function recalc() {
       const rows = readRows();
+      if (DEBUG) console.log('[recalc] rows count:', rows.length);
       const sum = (side, field) => rows.filter(r => r.side === side).reduce((a, b) => a + (b[field] || 0), 0);
       
       const stakeA = sum(1, 'stake');
@@ -2400,12 +2477,20 @@
     
     // Apply buttons: fill pinned ghost preview (side, odds, stake Δ). Do NOT auto-toggle fee checkbox.
     function applyThreshold(kind) {
+      if (DEBUG) {
+        console.log('[applyThreshold] clicked:', kind, 'makerLast:', !!makerLast);
+      }
+      
       if(!makerLast || !makerLast.result) return;
       const { result, makerSide, makerStake } = makerLast;
       const t = kind === 'cover' ? result.coverPrice : (kind === 'equalizer' ? result.equalizerPrice : result.targetFloorPrice);
       if(!t || t.status !== 'ok') return;
       
       if(!currentGhost) createGhostRow();
+      
+      if (DEBUG) {
+        console.log('[applyThreshold]', kind, 'status:', t.status, 'creating ghost, side:', makerSide, 'stake:', makerStake);
+      }
       ghostState.pinned = true;
       ghostState.mode = "maker";
       ghostState.side = makerSide;
@@ -2427,12 +2512,14 @@
     function saveCurrentState() {
       const rows = [];
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, feeCheckbox, odds, stake, payout, openFeePct, winFeePct} = el._refs;
+        const {side, typeSelect, sportsbook, feePill, odds, stake, payout, openFeePct, winFeePct} = el._refs;
+        // Use dataset.feeMode as single source of truth
+        const feeMode = el.dataset.feeMode || (feePill ? feePill.dataset.fee : 'none') || 'none';
         rows.push({
           side: side.value,
           type: typeSelect ? typeSelect.value : 'normal',
           sportsbook: sportsbook ? sportsbook.value : '',
-          fee1pct: feeCheckbox ? !!feeCheckbox.checked : false,
+          feeMode: feeMode,  // Universal Fee Pill state
           odds: odds.value,
           stake: stake.value,
           payout: payout.value,
@@ -2493,7 +2580,13 @@
           }
         }
         if(r._refs.sportsbook) r._refs.sportsbook.value = rowData.sportsbook || '';
-        if(r._refs.feeCheckbox) r._refs.feeCheckbox.checked = !!rowData.fee1pct;
+        // Restore Universal Fee Pill state
+        const feeMode = rowData.feeMode || (rowData.fee1pct ? 'px1' : 'none');  // Backward compat
+        r.dataset.feeMode = feeMode;
+        if(r._refs.feePill) {
+          r._refs.feePill.dataset.fee = feeMode;
+          r._refs.feePill.textContent = getFeeConfig(feeMode).label;
+        }
         r._refs.odds.value = rowData.odds;
         r._refs.stake.value = rowData.stake;
         r._refs.payout.value = rowData.payout;
@@ -2534,13 +2627,15 @@
       const timestamp = new Date().toISOString();
       
       rowsEl.querySelectorAll('[data-row]').forEach(el => {
-        const {side, typeSelect, sportsbook, feeCheckbox, odds, stake, payout, openFeePct, winFeePct} = el._refs;
+        const {side, typeSelect, sportsbook, feePill, odds, stake, payout, openFeePct, winFeePct} = el._refs;
         if(side.value) {
+          // Use dataset.feeMode as single source of truth
+          const feeMode = el.dataset.feeMode || (feePill ? feePill.dataset.fee : 'none') || 'none';
           rows.push({
             side: side.value,
             type: typeSelect ? typeSelect.value : 'normal',
             sportsbook: sportsbook ? sportsbook.value : '',
-            fee1pct: feeCheckbox ? !!feeCheckbox.checked : false,
+            Fee: feeModeToLabel(feeMode),  // Export as Pill abbreviation (—, PX1, KM, KT, C)
             oddsType: 'american',
             oddsValue: odds.value,
             stake: stake.value,
@@ -2551,7 +2646,7 @@
         }
       });
       
-      const headers = ['side', 'type', 'sportsbook', 'fee1pct', 'oddsType', 'oddsValue', 'stake', 'payout', 'openFeePct', 'winFeePct'];
+      const headers = ['side', 'type', 'sportsbook', 'Fee', 'oddsType', 'oddsValue', 'stake', 'payout', 'openFeePct', 'winFeePct'];
       const csvRows = [headers.join(',')];
       rows.forEach(row => {
         const values = headers.map(h => `"${row[h] || ''}"`);
@@ -2591,7 +2686,9 @@
           const headerLine = lines[0];
           const headers = headerLine.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
           const cleanHeaders = headers.map(h => h.replace(/^"|"$/g, '').trim());
-          const hasFee1pct = cleanHeaders.includes('fee1pct');
+          const hasFeeColumn = cleanHeaders.includes('Fee');       // New format: Pill abbreviations
+          const hasFeeMode = cleanHeaders.includes('feeMode');     // Legacy format: internal keys
+          const hasFee1pct = cleanHeaders.includes('fee1pct');     // Backward compat
           
           // Skip header line and import data
           for(let i = 1; i < lines.length; i++) {
@@ -2611,16 +2708,33 @@
               }
               if(r._refs.sportsbook) r._refs.sportsbook.value = clean[2];
               
-              const idxFee = hasFee1pct ? 3 : -1;
-              // Export format with fee1pct: side,type,sportsbook,fee1pct,oddsType,oddsValue,stake,payout,openFeePct,winFeePct
-              const idxOddsValue = hasFee1pct ? 5 : 4;
-              const idxStake = hasFee1pct ? 6 : 5;
-              const idxPayout = hasFee1pct ? 7 : 6;
-              const idxOpen = hasFee1pct ? 8 : 7;
-              const idxWin = hasFee1pct ? 9 : 8;
+              // Export format: side,type,sportsbook,Fee,oddsType,oddsValue,stake,payout,openFeePct,winFeePct
+              const hasFeeData = hasFeeColumn || hasFeeMode || hasFee1pct;
+              const idxFee = hasFeeData ? 3 : -1;
+              const idxOddsValue = hasFeeData ? 5 : 4;
+              const idxStake = hasFeeData ? 6 : 5;
+              const idxPayout = hasFeeData ? 7 : 6;
+              const idxOpen = hasFeeData ? 8 : 7;
+              const idxWin = hasFeeData ? 9 : 8;
               
-              if(r._refs.feeCheckbox && idxFee !== -1 && clean[idxFee] !== undefined) {
-                r._refs.feeCheckbox.checked = String(clean[idxFee]).toLowerCase() === 'true' || String(clean[idxFee]) === '1';
+              // Import Universal Fee Pill state
+              if(idxFee !== -1 && clean[idxFee] !== undefined) {
+                let feeMode = 'none';
+                if(hasFeeColumn) {
+                  // New format: Fee column contains Pill abbreviations (—, PX1, KM, KT, C)
+                  feeMode = labelToFeeMode(clean[idxFee]);
+                } else if(hasFeeMode) {
+                  // Legacy format: feeMode is a key like 'none', 'px1', 'km', 'kt', 'c'
+                  feeMode = FEE_MODE_ORDER.includes(clean[idxFee]) ? clean[idxFee] : 'none';
+                } else if(hasFee1pct) {
+                  // Backward compat: fee1pct = true maps to 'px1'
+                  feeMode = (String(clean[idxFee]).toLowerCase() === 'true' || String(clean[idxFee]) === '1') ? 'px1' : 'none';
+                }
+                r.dataset.feeMode = feeMode;
+                if(r._refs.feePill) {
+                  r._refs.feePill.dataset.fee = feeMode;
+                  r._refs.feePill.textContent = getFeeConfig(feeMode).label;
+                }
               }
               r._refs.odds.value = clean[idxOddsValue]; // oddsValue
               r._refs.stake.value = clean[idxStake];
@@ -2681,6 +2795,16 @@
       recalc();
       saveCurrentState();
     }
+    
+    // Event delegation for fee pill clicks (replaces inline onclick handlers)
+    document.addEventListener("click", (e) => {
+      const pill = e.target.closest(".fee-pill");
+      if (!pill) return;
+      
+      if (DEBUG) console.log('[fee pill click] detected on pill:', pill.dataset.fee);
+      
+      cycleFee(pill);
+    });
   })();
   </script>
 </body>
